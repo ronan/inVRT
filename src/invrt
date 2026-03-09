@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# DEPRECATED: See the vibe coded in src/cli.js for the new CLI implementation. 
+# This file is still here for reference.
+
 
 INVRT_DIRECTORY=$INIT_CWD"/invrt"
 echo "📁 INVRT_DIRECTORY: $INVRT_DIRECTORY"

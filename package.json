@@ -8,8 +8,9 @@
   },
   "scripts": {
     "test": "node 'src/run.js'",
-    "crawl": "src/invrt crawl",
-    "reference": "src/invrt reference",
+    "init": "node src/cli.js init",
+    "crawl": "node src/cli.js crawl",
+    "reference": "node src/cli.js reference",
     "install-deps": "sudo npx playwright install-deps &&npx playwright install",
     "log-cwd": "echo The package root is $PWD and the initial working directory is $INIT_CWD"
 

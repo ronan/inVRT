@@ -1,0 +1,4 @@
+# Add urls to this file to exclude them from testing. Regex patterns are supported. For example:
+
+/do-not-crawl-this-url
+/do-not-crawl-this-directory/.*

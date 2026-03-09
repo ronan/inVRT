@@ -1,0 +1,55 @@
+{
+  "testSuite": "BackstopJS",
+  "tests": [
+    {
+      "pair": {
+        "reference": "../../test/invrt/data/default/desktop/bitmaps/reference/1146586639__0_document_0_desktop.png",
+        "referenceLog": "../../test/invrt/data/default/desktop/bitmaps/reference/1146586639__0_document_0_desktop.log.json",
+        "test": "../../test/invrt/data/default/desktop/bitmaps/test/20260309-004233/1146586639__0_document_0_desktop.png",
+        "testLog": "../../test/invrt/data/default/desktop/bitmaps/test/20260309-004233/1146586639__0_document_0_desktop.log.json",
+        "selector": "document",
+        "fileName": "1146586639__0_document_0_desktop.png",
+        "label": "",
+        "requireSameDimensions": true,
+        "misMatchThreshold": 0.5,
+        "url": "https://vrt-postdocs-idp-bd.pantheonsite.io",
+        "expect": 0,
+        "viewportLabel": "desktop",
+        "diff": {
+          "isSameDimensions": true,
+          "dimensionDifference": {
+            "width": 0,
+            "height": 0
+          },
+          "misMatchPercentage": "0.00"
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "pair": {
+        "reference": "../../test/invrt/data/default/desktop/bitmaps/reference/1146586639__0_document_1_mobile.png",
+        "referenceLog": "../../test/invrt/data/default/desktop/bitmaps/reference/1146586639__0_document_1_mobile.log.json",
+        "test": "../../test/invrt/data/default/desktop/bitmaps/test/20260309-004233/1146586639__0_document_1_mobile.png",
+        "testLog": "../../test/invrt/data/default/desktop/bitmaps/test/20260309-004233/1146586639__0_document_1_mobile.log.json",
+        "selector": "document",
+        "fileName": "1146586639__0_document_1_mobile.png",
+        "label": "",
+        "requireSameDimensions": true,
+        "misMatchThreshold": 0.5,
+        "url": "https://vrt-postdocs-idp-bd.pantheonsite.io",
+        "expect": 0,
+        "viewportLabel": "mobile",
+        "diff": {
+          "isSameDimensions": true,
+          "dimensionDifference": {
+            "width": 0,
+            "height": 0
+          },
+          "misMatchPercentage": "0.00"
+        }
+      },
+      "status": "pass"
+    }
+  ]
+}

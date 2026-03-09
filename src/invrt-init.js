@@ -1,0 +1,93 @@
+import fs from 'fs';
+import path from 'path';
+
+const invrtDirectory = path.join(process.env.INIT_CWD || process.cwd(), 'invrt');
+
+// Create directories
+const dirs = [
+  'data/bitmaps',
+  'data/reports',
+  'data/logs',
+  'data/clones',
+  'profiles',
+  'scripts'
+];
+
+dirs.forEach(dir => {
+  const fullPath = path.join(invrtDirectory, dir);
+  fs.mkdirSync(fullPath, { recursive: true });
+});
+
+console.log("Created data directories for images, report, logs, clones, profiles, and scripts.");
+
+// Create config.yaml
+const configContent = `
+# InVRT Configuration File
+# This file is used to store configuration settings for InVRT.
+# You can customize the settings below as needed.
+
+project:
+  name: My InVRT Project
+  url: http://example.com
+  description: A description of your project.
+
+settings:
+  max_crawl_depth: 3
+  max_pages: 100
+  max_concurrent_requests: 5
+  user_agent: InVRT/1.0
+
+environments:
+  local:
+    name: Local
+    url: http://localhost
+
+  dev:
+    name: Development
+    url: https://dev.example.com
+    credentials:
+
+  prod:
+    name: Production
+    url: https://prod.example.com
+
+profiles:
+  default:
+    name: Default Profile
+    description: A default profile for testing.
+
+  admin:
+    name: Admin Profile
+    description: A profile with admin privileges.
+    auth:
+      username: admin
+      password: password123
+
+viewports:
+  default:
+    name: Default Viewport
+    description: A desktop sized viewport for testing.
+    width: 1920
+    height: 1080
+
+  mobile:
+    name: Mobile Viewport
+    description: A viewport for mobile testing.
+    width: 375
+    height: 667
+
+`;
+
+fs.writeFileSync(path.join(invrtDirectory, 'config.yaml'), configContent.trim());
+console.log("Initialized InVRT configuration file at ./invrt/config.yaml");
+
+// Create exclude_urls.txt
+const excludeContent = `# Add urls to this file to exclude them from testing. Regex patterns are supported. For example:
+
+/do-not-crawl-this-url
+/do-not-crawl-this-directory/.*
+
+`;
+
+fs.writeFileSync(path.join(invrtDirectory, 'data', 'exclude_urls.txt'), excludeContent.trim());
+console.log("Initialized exclude URLs file at ./invrt/data/exclude_urls.txt");
