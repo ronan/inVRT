@@ -1,6 +1,6 @@
 const profile = process.env.INVRT_PROFILE || 'default';
 const device = process.env.INVRT_DEVICE || 'desktop';
-const invrt_dir = process.env.INIT_CWD + '/invrt';
+const invrt_dir = process.env.INIT_CWD + '/.invrt';
 const data_dir = invrt_dir + '/data/' + profile + '/' + device;
 
 const config = {
@@ -52,7 +52,7 @@ try {
   const base_url = project_config.project.url;
 
   fs
-    .readFileSync(invrt_dir + "/data/crawled_urls.txt", 'utf-8')
+    .readFileSync(invrt_dir + "/crawled_urls.txt", 'utf-8')
     .split(/\n/)
     .forEach((url) => {
                 config.scenarios.push(

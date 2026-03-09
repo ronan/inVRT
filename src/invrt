@@ -1,11 +1,14 @@
 #!/bin/bash
 
-
-INVRT_DIRECTORY=$INIT_CWD"/invrt"
+INVRT_DIRECTORY=$INIT_CWD"/.invrt"
 echo "📁 INVRT_DIRECTORY: $INVRT_DIRECTORY"
 
 # Read the config for the current project
 CONFIG_FILE="$INVRT_DIRECTORY/config.yaml"
+if [ ! -f "$CONFIG_FILE" ] && [ $1 != "init" ]; then
+    echo "❌ Configuration file not found at $CONFIG_FILE. Please run 'invrt init' to initialize the project."
+    exit 1
+fi
 INVRT_URL=$(yq e '.project.url' $CONFIG_FILE);
 INVRT_DEPTH_TO_CRAWL=$(yq e '.settings.max_crawl_depth' $CONFIG_FILE);
 INVRT_MAX_PAGES=$(yq e '.settings.max_pages' $CONFIG_FILE);
@@ -18,11 +21,8 @@ INVRT_CRAWL_ERROR_LOG_DIR="$INVRT_DIRECTORY/data/logs/crawl_error.log"
 INVRT_PROFILE='default';
 INVRT_DEVICE='desktop';
 
-INVRT_DIRECTORY=$PWD."/invrt"
-
-
-
 scripts="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 case "$1" in
     "init")
         source "$scripts/invrt-init.sh"

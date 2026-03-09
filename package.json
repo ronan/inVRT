@@ -9,10 +9,9 @@
   "scripts": {
     "test": "node 'src/run.js'",
     "crawl": "src/invrt crawl",
+    "init": "src/invrt init",
     "reference": "src/invrt reference",
-    "install-deps": "sudo npx playwright install-deps &&npx playwright install",
-    "log-cwd": "echo The package root is $PWD and the initial working directory is $INIT_CWD"
-
+    "install-deps": "sudo npx playwright install-deps && npx playwright install"
   },
   "repository": {
     "type": "git",

@@ -2,10 +2,10 @@
 
 echo "🕸️ Crawling $INVRT_URL to depth $INVRT_DEPTH_TO_CRAWL"
 
-cd ./invrt/data/clones
+cd $INVRT_DIRECTORY/data/clones
 
 wget \
-      --level=$DEPTH_TO_CRAWL \
+      --level=$INVRT_DEPTH_TO_CRAWL \
       --spider \
       --recursive \
       --force-html \
@@ -19,6 +19,6 @@ wget \
       | awk "/--/{gsub(\"$INVRT_URL\", \"\", \$3); print \$3}" \
       | sort \
       | uniq \
-      > ./invrt/data/crawled_urls.txt
+      > $INVRT_DIRECTORY/crawled_urls.txt
 
-echo "Crawling completed. Results saved to ./invrt/data/crawled_urls.txt"
+echo "Crawling completed. Results saved to $INVRT_DIRECTORY/crawled_urls.txt"
