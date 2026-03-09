@@ -101,9 +101,12 @@ if (profileSettings) {
     }
 }
 
-const INVRT_CRAWL_OUTPUT_DIR = path.join(INVRT_DIRECTORY, 'data', 'crawled_urls.txt');
-const INVRT_CRAWL_LOG_DIR = path.join(INVRT_DIRECTORY, 'data', 'logs', 'crawl.log');
-const INVRT_CRAWL_ERROR_LOG_DIR = path.join(INVRT_DIRECTORY, 'data', 'logs', 'crawl_error.log');
+
+const INVRT_DATA_DIR = path.join(INVRT_DIRECTORY, 'data', INVRT_PROFILE, INVRT_DEVICE);
+
+const INVRT_CRAWL_OUTPUT_DIR = path.join(INVRT_DATA_DIR, 'crawled_urls.txt');
+const INVRT_CRAWL_LOG_DIR = path.join(INVRT_DATA_DIR, 'logs', 'crawl.log');
+const INVRT_CRAWL_ERROR_LOG_DIR = path.join(INVRT_DATA_DIR, 'logs', 'crawl_error.log');
 
 
 
@@ -114,6 +117,7 @@ const scriptsDir = __dirname;
 const env = {
     ...process.env,
     INVRT_DIRECTORY,
+    INVRT_DATA_DIR,
     INVRT_URL,
     INVRT_DEPTH_TO_CRAWL,
     INVRT_MAX_PAGES,

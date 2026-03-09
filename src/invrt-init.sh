@@ -10,8 +10,8 @@ fi
 mkdir -p $INVRT_DIRECTORY
 echo "Created invrt directory at $INVRT_DIRECTORY"
 cd $INVRT_DIRECTORY
-mkdir -p data/bitmaps data/reports data/logs data/clones scripts
-echo "Created data directories for images, report, logs, clones, profiles, and scripts."
+mkdir -p data scripts
+echo "Created data directories for genrated data, and user scripts."
 
 echo "
 # InVRT Configuration File

@@ -3,7 +3,8 @@
 
 echo "🕸️ Crawling $INVRT_URL with profile $INVRT_PROFILE to depth $INVRT_DEPTH_TO_CRAWL max $INVRT_MAX_PAGES"
 
-cd $INVRT_DIRECTORY/data/clones
+mkdir -p $INVRT_DATA_DIR/clones $INVRT_DATA_DIR/logs
+cd $INVRT_DATA_DIR/clones
 
 wget \
       --level=$INVRT_DEPTH_TO_CRAWL \
@@ -20,6 +21,6 @@ wget \
       | awk "/--/{gsub(\"$INVRT_URL\", \"\", \$3); print \$3}" \
       | sort \
       | uniq \
-      > $INVRT_DIRECTORY/crawled_urls.txt
+      > $INVRT_DATA_DIR/crawled_urls.txt
 
-echo "Crawling completed. Results saved to $INVRT_DIRECTORY/crawled_urls.txt"
+echo "Crawling completed. Results saved to $INVRT_DATA_DIR/crawled_urls.txt"

@@ -1,7 +1,13 @@
+const yaml = require('js-yaml');
+const fs = require('fs');
+const backstop = require('backstopjs');
+const path = require('path');
+
+
 const profile = process.env.INVRT_PROFILE || 'default';
 const device = process.env.INVRT_DEVICE || 'desktop';
 const invrt_dir = process.env.INIT_CWD + '/.invrt';
-const data_dir = invrt_dir + '/data/' + profile + '/' + device;
+const data_dir = process.env.INVRT_DATA_DIR || (invrt_dir + '/data/' + profile + '/' + device);
 
 // Get auth credentials from environment
 const username = process.env.INVRT_USERNAME || '';
@@ -12,9 +18,18 @@ console.log(`🎯 Using profile: ${profile}, device: ${device}`);
 if (username) {
     console.log(`👤 Using username: ${username}`);
 }
-if (cookie) {
-    console.log(`🍪 Using cookie: ${cookie}`);
-}
+
+// if (cookie) {
+//   console.log(`🍪 Using cookie: ${cookie}`);
+//   const content = JSON.stringify({ cookie });
+//   fs.writeFile(data_dir + 'cookies.json', content, (err) => {
+//   if (err) {
+//     console.error(err);
+//     return;
+//   }
+//   console.log('Cookue file written successfully');
+// });
+// }
 console.log(`📂 Data directory: ${data_dir}`);
 
 const config = {
@@ -41,6 +56,7 @@ const config = {
   "report": ["browser","json"],
   "engine": "playwright",
   // "onReadyScript": "onReady.js",
+  "onBeforeScript": "onBefore.js",
   "engineOptions": {
     "browser": "chromium"
   },
@@ -57,9 +73,7 @@ const config = {
 }
 
 try {
-  const yaml = require('js-yaml');
-  const fs = require('fs');
-  const backstop = require('backstopjs');
+
 
   const project_config = yaml.load(fs.readFileSync(invrt_dir + '/config.yaml', 'utf8'));
   
@@ -92,18 +106,20 @@ try {
     }
   }
 
+  var cookiePath = path.join(data_dir, 'cookies.json');
   fs
-    .readFileSync(invrt_dir + "/crawled_urls.txt", 'utf-8')
+    .readFileSync(data_dir + "/crawled_urls.txt", 'utf-8')
     .split(/\n/)
     .forEach((url) => {
                 config.scenarios.push(
                   {
                     "label":          url,
                     "url":            `${base_url}${url}`,
+                    "cookiePath":     cookiePath
                   }
                 );
               });
-  
+
   const op = process.argv[2] || 'test';
   backstop(op, {config: config}).then(() => {
       console.log('Test complete')
