@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execFile } = require('child_process');
+const { spawn } = require('child_process');
 const yaml = require('js-yaml');
 
 // Get the INVRT_DIRECTORY
@@ -11,6 +11,33 @@ console.log('📁 INVRT_DIRECTORY:', INVRT_DIRECTORY);
 
 // Get the command from arguments
 const command = process.argv[2];
+
+// Parse optional arguments for profile and device
+let INVRT_PROFILE = 'default';
+let INVRT_DEVICE = 'desktop';
+
+for (let i = 3; i < process.argv.length; i++) {
+    const arg = process.argv[i];
+    if (arg.startsWith('--profile=')) {
+        INVRT_PROFILE = arg.split('=')[1];
+    } else if (arg.startsWith('-p=')) {
+        INVRT_PROFILE = arg.split('=')[1];
+    } else if (arg === '--profile' && i + 1 < process.argv.length) {
+        INVRT_PROFILE = process.argv[++i];
+    } else if (arg === '-p' && i + 1 < process.argv.length) {
+        INVRT_PROFILE = process.argv[++i];
+    } else if (arg.startsWith('--device=')) {
+        INVRT_DEVICE = arg.split('=')[1];
+    } else if (arg.startsWith('-d=')) {
+        INVRT_DEVICE = arg.split('=')[1];
+    } else if (arg === '--device' && i + 1 < process.argv.length) {
+        INVRT_DEVICE = process.argv[++i];
+    } else if (arg === '-d' && i + 1 < process.argv.length) {
+        INVRT_DEVICE = process.argv[++i];
+    }
+}
+
+console.log(`📋 Profile: ${INVRT_PROFILE}, Device: ${INVRT_DEVICE}`);
 
 // Read the config for the current project
 const CONFIG_FILE = path.join(INVRT_DIRECTORY, 'config.yaml');
@@ -32,17 +59,53 @@ if (fs.existsSync(CONFIG_FILE)) {
 }
 
 // Extract config values with safe navigation
-const INVRT_URL = config.project?.url || '';
-const INVRT_DEPTH_TO_CRAWL = config.settings?.max_crawl_depth || '';
-const INVRT_MAX_PAGES = config.settings?.max_pages || '';
-const INVRT_USER_AGENT = config.settings?.user_agent || '';
-const INVRT_MAX_CONCURRENT_REQUESTS = config.settings?.max_concurrent_requests || '';
+let INVRT_URL = config.project?.url || '';
+let INVRT_DEPTH_TO_CRAWL = config.settings?.max_crawl_depth || '';
+let INVRT_MAX_PAGES = config.settings?.max_pages || '';
+let INVRT_USER_AGENT = config.settings?.user_agent || '';
+let INVRT_MAX_CONCURRENT_REQUESTS = config.settings?.max_concurrent_requests || '';
+let INVRT_USERNAME = '';
+let INVRT_PASSWORD = '';
+let INVRT_COOKIE = '';
+
+// Load profile-specific settings and override defaults
+const profileSettings = config.profiles?.[INVRT_PROFILE];
+if (profileSettings) {
+    console.log(`⚙️  Loading profile settings for '${INVRT_PROFILE}'`);
+    
+    // Override with profile-specific settings if they exist
+    if (profileSettings.url) {
+        INVRT_URL = profileSettings.url;
+    }
+    if (profileSettings.max_crawl_depth !== undefined) {
+        INVRT_DEPTH_TO_CRAWL = profileSettings.max_crawl_depth;
+    }
+    if (profileSettings.max_pages !== undefined) {
+        INVRT_MAX_PAGES = profileSettings.max_pages;
+    }
+    if (profileSettings.user_agent) {
+        INVRT_USER_AGENT = profileSettings.user_agent;
+    }
+    if (profileSettings.max_concurrent_requests !== undefined) {
+        INVRT_MAX_CONCURRENT_REQUESTS = profileSettings.max_concurrent_requests;
+    }
+    // Load auth credentials if provided in profile
+    if (profileSettings.auth?.username) {
+        INVRT_USERNAME = profileSettings.auth.username;
+    }
+    if (profileSettings.auth?.password) {
+        INVRT_PASSWORD = profileSettings.auth.password;
+    }
+    if (profileSettings.auth?.cookie) {
+        INVRT_COOKIE = profileSettings.auth.cookie;
+    }
+}
+
 const INVRT_CRAWL_OUTPUT_DIR = path.join(INVRT_DIRECTORY, 'data', 'crawled_urls.txt');
 const INVRT_CRAWL_LOG_DIR = path.join(INVRT_DIRECTORY, 'data', 'logs', 'crawl.log');
 const INVRT_CRAWL_ERROR_LOG_DIR = path.join(INVRT_DIRECTORY, 'data', 'logs', 'crawl_error.log');
 
-const INVRT_PROFILE = 'default';
-const INVRT_DEVICE = 'desktop';
+
 
 // Get the scripts directory
 const scriptsDir = __dirname;
@@ -61,6 +124,9 @@ const env = {
     INVRT_CRAWL_ERROR_LOG_DIR,
     INVRT_PROFILE,
     INVRT_DEVICE,
+    INVRT_USERNAME,
+    INVRT_PASSWORD,
+    INVRT_COOKIE,
 };
 
 // Map commands to bash scripts
@@ -71,8 +137,58 @@ const scriptMap = {
     'test': 'invrt-test.sh',
 };
 
-if (!command || !scriptMap[command]) {
-    console.error('Invalid command. Usage: invrt {init|crawl|reference|test}');
+// Show help
+function showHelp() {
+    console.log(`
+📖 inVRT CLI - Visual Regression Testing Tool
+
+Usage: invrt <command> [options]
+
+Commands:
+  init       Initialize a new inVRT project in the current directory
+  crawl      Crawl the website and generate screenshots
+  reference  Create reference screenshots for comparison
+  test       Run visual regression tests
+  help       Show this help message
+
+Options:
+  --profile, -p <name>  Set the device profile (default: default)
+  --device, -d <name>   Set the device type (default: desktop)
+  --help, -h           Show this help message
+
+Examples (with npm):
+  # Initialize a new project
+  $ npm run init
+
+  # Crawl a website for desktop (note the -- before options)
+  $ npm run crawl -- --profile=default --device=desktop
+
+  # Crawl a website for mobile
+  $ npm run crawl -- -p mobile -d mobile
+
+  # Create reference screenshots for testing
+  $ npm run reference -- --profile=default
+
+Examples (running directly):
+  # Run with specific profile and device
+  $ node src/invrt.js crawl --profile=sponsor --device=mobile
+
+  # Short form options
+  $ node src/invrt.js crawl -p sponsor -d mobile
+
+Note: When using npm scripts, use -- before options to pass them through
+`);
+    process.exit(0);
+}
+
+// Check for help command or show help if no command
+if (!command || command === 'help' || command === '--help' || command === '-h') {
+    showHelp();
+}
+
+// Check for invalid commands
+if (!scriptMap[command]) {
+    console.error(`❌ Invalid command: "${command}". Use "invrt help" for usage information.`);
     process.exit(1);
 }
 
@@ -84,9 +200,13 @@ if (!fs.existsSync(scriptPath)) {
     process.exit(1);
 }
 
-execFile('bash', [scriptPath], { env, stdio: 'inherit' }, (error, stdout, stderr) => {
-    if (error) {
-        process.exit(error.code || 1);
-    }
-    process.exit(0);
+const proc = spawn('bash', [scriptPath], { env, stdio: 'inherit' });
+
+proc.on('exit', (code) => {
+    process.exit(code || 0);
+});
+
+proc.on('error', (error) => {
+    console.error('❌ Error executing script:', error.message);
+    process.exit(1);
 });

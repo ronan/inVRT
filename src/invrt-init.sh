@@ -37,7 +37,6 @@ environments:
   dev:
     name: Development
     url: https://dev.example.com
-    credentials:
 
   prod:
     name: Production
@@ -52,6 +51,7 @@ profiles:
     name: Admin Profile
     description: A profile with admin privileges.
     auth:
+      cookie: sessionid
       username: admin
       password: password123
 
@@ -69,11 +69,6 @@ viewports:
     height: 667
 
 " > config.yaml
-echo "Initialized InVRT configuration file at ./invrt/config.yaml"
+echo "Initialized InVRT configuration file at $INVRT_DIRECTORY/config.yaml"
 
-echo "# Add urls to this file to exclude them from testing. Regex patterns are supported. For example:
-
-/do-not-crawl-this-url
-/do-not-crawl-this-directory/.*
-
-" > ./exclude_urls.txt
+echo "/user/logout,/files/*" > ./exclude_urls.txt

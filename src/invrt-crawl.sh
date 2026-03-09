@@ -1,17 +1,18 @@
 #!/bin/bash
 
-echo "🕸️ Crawling $INVRT_URL to depth $INVRT_DEPTH_TO_CRAWL"
+
+echo "🕸️ Crawling $INVRT_URL with profile $INVRT_PROFILE to depth $INVRT_DEPTH_TO_CRAWL max $INVRT_MAX_PAGES"
 
 cd $INVRT_DIRECTORY/data/clones
 
 wget \
       --level=$INVRT_DEPTH_TO_CRAWL \
-      --spider \
       --recursive \
       --force-html \
       --max-redirect=2 \
       --user-agent=invrt/crawler \
-      --exclude-directories=/sites/default/files \
+      --header="Cookie: $INVRT_COOKIE" \
+      --exclude-directories=/files/*,/user/logout \
       --execute robots=off \
       $INVRT_URL 2>&1 | tee -a $INVRT_CRAWL_LOG_DIR \
       | grep -B 3 "\[text/html\]" \

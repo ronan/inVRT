@@ -3,6 +3,20 @@ const device = process.env.INVRT_DEVICE || 'desktop';
 const invrt_dir = process.env.INIT_CWD + '/.invrt';
 const data_dir = invrt_dir + '/data/' + profile + '/' + device;
 
+// Get auth credentials from environment
+const username = process.env.INVRT_USERNAME || '';
+const password = process.env.INVRT_PASSWORD || '';
+const cookie = process.env.INVRT_COOKIE || '';
+
+console.log(`🎯 Using profile: ${profile}, device: ${device}`);
+if (username) {
+    console.log(`👤 Using username: ${username}`);
+}
+if (cookie) {
+    console.log(`🍪 Using cookie: ${cookie}`);
+}
+console.log(`📂 Data directory: ${data_dir}`);
+
 const config = {
   "viewports": [
     {
@@ -48,8 +62,35 @@ try {
   const backstop = require('backstopjs');
 
   const project_config = yaml.load(fs.readFileSync(invrt_dir + '/config.yaml', 'utf8'));
-  // const config = {...default_config, ...project_config};
-  const base_url = project_config.project.url;
+  
+  // Get base URL from project config
+  let base_url = project_config.project.url;
+  
+  // Load profile-specific settings and override defaults
+  const profileSettings = project_config.profiles?.[profile];
+  if (profileSettings) {
+    console.log(`⚙️  Loading profile settings for '${profile}'`);
+    
+    // Override URL if profile specifies one
+    if (profileSettings.url) {
+      base_url = profileSettings.url;
+      console.log(`🔗 Using profile-specific URL: ${base_url}`);
+    }
+    
+    // Merge profile-specific config settings into backstop config
+    if (profileSettings.misMatchThreshold !== undefined) {
+      config.misMatchThreshold = profileSettings.misMatchThreshold;
+    }
+    if (profileSettings.asyncCaptureLimit !== undefined) {
+      config.asyncCaptureLimit = profileSettings.asyncCaptureLimit;
+    }
+    if (profileSettings.asyncCompareLimit !== undefined) {
+      config.asyncCompareLimit = profileSettings.asyncCompareLimit;
+    }
+    if (profileSettings.engineOptions) {
+      config.engineOptions = { ...config.engineOptions, ...profileSettings.engineOptions };
+    }
+  }
 
   fs
     .readFileSync(invrt_dir + "/crawled_urls.txt", 'utf-8')
