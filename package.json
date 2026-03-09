@@ -8,9 +8,10 @@
   },
   "scripts": {
     "test": "node 'src/run.js'",
-    "crawl": "src/invrt crawl",
-    "init": "src/invrt init",
-    "reference": "src/invrt reference",
+    "crawl": "node src/invrt.js crawl",
+    "init": "node src/invrt.js init",
+    "reference": "node src/invrt.js reference",
+    "self-test": "node src/cli.test.js",
     "install-deps": "sudo npx playwright install-deps && npx playwright install"
   },
   "repository": {
