@@ -31,6 +31,7 @@
   "homepage": "https://github.com/ronan/inVRT#readme",
   "dependencies": {
     "backstopjs": "^6.3.25",
-    "js-yaml": "^4.1.1"
+    "js-yaml": "^4.1.1",
+    "playwright": "^1.58.2"
   }
 }

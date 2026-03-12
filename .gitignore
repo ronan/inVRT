@@ -1,4 +1,6 @@
 node_modules
 test/*
+test
+scratch
 .DS_Store
 tmp-test-cli

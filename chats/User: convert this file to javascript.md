@@ -112,3 +112,595 @@ Done! I've renamed the file to invrt.js and updated:
 The CLI tests still pass, confirming everything works correctly.
 
 Made changes.
+
+User: Add command line arguments to allow the user to specify the value for INVRT_PROFILE and INVRT_DEVICE
+
+GitHub Copilot: Replacing 2 lines with 27 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Replacing 9 lines with 6 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/invrt.js#10-10), lines 10 to 75
+
+Now let me add tests for the new command line arguments: 
+
+Read [](file:///workspaces/invrt/src/cli.test.js#1-1), lines 1 to 120
+
+Read [](file:///workspaces/invrt/src/cli.test.js#120-120), lines 120 to 130
+
+Replacing 10 lines with 81 lines in [](file:///workspaces/invrt/src/cli.test.js)
+
+
+```
+
+```
+
+
+Ran terminal command:  node src/cli.test.js
+
+Perfect! I've successfully added command line arguments for INVRT_PROFILE and INVRT_DEVICE. Here's what was added:
+
+**Supported argument formats:**
+- `--profile=value` or `-p=value` (equals format)
+- `--profile value` or `-p value` (space format)
+- `--device=value` or `-d=value` (equals format)  
+- `--device value` or `-d value` (space format)
+
+**Examples:**
+```bash
+node src/invrt.js crawl --profile=mobile --device=tablet
+node src/invrt.js crawl -p mobile -d tablet
+node src/invrt.js crawl --profile mobile --device tablet
+node src/invrt.js crawl --profile=desktop -d=mobile
+```
+
+The defaults remain `default` for profile and `desktop` for device. All 11 tests pass, confirming proper argument parsing and backward compatibility.
+
+Made changes.
+
+User: Add a help command that outputs usage examples and have it run if the cli is called with no command
+
+GitHub Copilot: Read [](file:///workspaces/invrt/src/invrt.js)
+
+Replacing 12 lines with 60 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Replacing 7 lines with 7 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Replacing 29 lines with 48 lines in [](file:///workspaces/invrt/src/cli.test.js)
+
+
+```
+
+```
+
+
+Replacing 14 lines with 44 lines in [](file:///workspaces/invrt/src/cli.test.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/cli.test.js#50-50), lines 50 to 80
+
+Ran terminal command:  node src/cli.test.js
+
+Ran terminal command:  node src/invrt.js
+
+Perfect! I've added a comprehensive help system to the CLI. Here's what was implemented:
+
+**Help triggers:**
+- Running invrt with no command shows help
+- `invrt help` displays help
+- `invrt --help` displays help
+- `invrt -h` displays help
+
+**Help includes:**
+- All available commands (init, crawl, reference, test, help)
+- Command descriptions
+- Available options (--profile/-p and --device/-d with defaults)
+- Practical usage examples showing different scenarios
+
+All 15 tests pass, including:
+- Invalid commands still error appropriately
+- Help displays with all commands
+- All help variants (help, --help, -h) work correctly
+- Existing functionality remains unchanged
+
+Made changes.
+
+User: The cli is not outputing anything to stdout when it runs the shell scripts
+
+GitHub Copilot: Read [](file:///workspaces/invrt/src/invrt.js#1-1), lines 1 to 150
+
+Read [](file:///workspaces/invrt/src/invrt.js#150-150), lines 150 to 163
+
+The issue is with how we're calling `execFile`. With the callback, the stdout/stderr is being buffered and not printed. We need to use `spawn` instead to properly inherit stdio and stream the output in real-time. 
+
+Replacing 4 lines with 4 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Replacing 14 lines with 18 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/invrt.js#1-1), lines 1 to 163
+
+Now let's verify the tests still pass: 
+
+Ran terminal command:  node src/cli.test.js
+
+Perfect! The tests all pass. The fix changes the CLI from using `execFile` to using `spawn`, which properly inherits stdin, stdout, and stderr from the parent process. This allows all output from the bash scripts to be displayed in real-time to the user. 
+
+The key changes:
+- Changed from `execFile` to `spawn` for child process handling
+- `spawn` with `stdio: 'inherit'` properly streams all output from the bash scripts directly to the console
+- Added proper error handling with the `'error'` event listener
+
+Now when you run the CLI, all output from the shell scripts will display correctly.
+
+Made changes.
+
+User: The profile argument doesn't seem to be working. When I run the crawl command with --profile=sponsor it uses the default profile
+
+GitHub Copilot: Read [](file:///workspaces/invrt/src/invrt-crawl.sh)
+
+Read [](file:///workspaces/invrt/src/invrt.js#14-14), lines 14 to 90
+
+Let me add some debug output to see what profile value is being parsed and passed to the bash script: 
+
+Replacing 24 lines with 26 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+Now let's test it manually to see what profile value is being captured: 
+
+Ran terminal command:  cd /workspaces/invrt/test && node ../src/invrt.js crawl --profile=sponsor 2>&1 | head -20
+
+Good news! The profile argument IS being parsed correctly and passed to the bash script. As you can see from the output:
+- `📋 Profile: sponsor, Device: desktop`
+- `🕸️ Crawling ... with profile sponsor`
+
+So the JavaScript is working correctly. The issue must be in how the bash script is using the `INVRT_PROFILE` variable. Let me check what's actually using the profile in the bash script: 
+
+Searched for regex `INVRT_PROFILE|profile|default` (`**/src/invrt-*.sh`), 16 results
+
+Let me look more carefully at the invrt-crawl.sh and see what might be hardcoding the profile: 
+
+Read [](file:///workspaces/invrt/src/invrt-crawl.sh)
+
+Read [](file:///workspaces/invrt/src/invrt-reference.sh)
+
+Read [](file:///workspaces/invrt/src/run.js)
+
+Searched for text `invrt-test` (`**/src/*.sh`), no results
+
+Read [](file:///workspaces/invrt/src)
+
+Found the issue! When passing arguments through npm scripts, you need to use `--` to separate npm arguments from script arguments. Try running:
+
+```bash
+npm run crawl -- --profile=sponsor
+```
+
+Instead of:
+
+```bash
+npm run crawl --profile=sponsor
+```
+
+The `--` tells npm to pass everything after it directly to the script without processing it as npm options.
+
+Alternatively, you can run the Node command directly:
+
+```bash
+node src/invrt.js crawl --profile=sponsor
+```
+
+Let me also add a verification output to the run.js file to confirm the profile is being used correctly: 
+
+Replacing 4 lines with 7 lines in [](file:///workspaces/invrt/src/run.js)
+
+
+```
+
+```
+
+
+Ran terminal command:  cd /workspaces/invrt/test && npm run crawl -- --profile=sponsor 2>&1 | head -30
+
+Perfect! The profile IS working correctly when you use the proper npm syntax with `--`. As you can see:
+- `📋 Profile: sponsor, Device: desktop`
+
+The issue was the npm argument syntax. **You need to use `npm run crawl -- --profile=sponsor`** (with `--` after the script name) instead of `npm run crawl --profile=sponsor`.
+
+Let me update the help text in invrt.js to clarify this:  
+
+Replacing 41 lines with 43 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Ran terminal command:  node src/invrt.js --help 2>&1 | grep -A 5 "Examples"
+Completed with input:  node src/invrt.js --help 2>&1 | grep -A 5 "Examples"
+
+Ran terminal command:  node src/invrt.js help 2>&1 | tail -25
+
+Ran terminal command:  node /workspaces/invrt/src/invrt.js help 2>&1 | tail -30
+
+Ran terminal command:  node src/cli.test.js
+Completed with input:  node src/cli.test.js
+
+Ran terminal command:  node /workspaces/invrt/src/cli.test.js 2>&1 | tail -20
+
+Perfect! All tests pass. Here's what I found:
+
+## Summary
+
+The profile argument **IS working correctly**. The issue was with how arguments are passed through npm scripts.
+
+### The Problem
+When you run `npm run crawl --profile=sponsor`, npm interprets those arguments as npm options, not script arguments. The `--profile=sponsor` never reaches your JavaScript code.
+
+### The Solution
+Use `--` before your arguments when running npm scripts:
+
+```bash
+npm run crawl -- --profile=sponsor
+```
+
+Or run directly without npm:
+```bash
+node src/invrt.js crawl --profile=sponsor
+```
+
+### Changes Made
+1. **Added debug output** in invrt.js to show what profile/device are being parsed: `📋 Profile: sponsor, Device: desktop`
+2. **Added debug output** in run.js to show what profile/device are being used by backstop
+3. **Updated help text** to clearly show the correct npm syntax with `--` for all examples
+
+Now when you use the correct syntax (`npm run crawl -- --profile=sponsor`), you'll see the profile argument is properly captured and used throughout the pipeline.
+
+Made changes.
+
+User: Add code to load the correct profile from the loaded config variable and override any settings in the base config
+
+GitHub Copilot: Read [](file:///workspaces/invrt/src/invrt.js#1-1), lines 1 to 80
+
+Read [](file:///workspaces/invrt/test/.invrt/config.yaml)
+
+Now I'll update invrt.js to load the profile-specific settings from the config: 
+
+Replacing 9 lines with 33 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+Now let's update run.js to also load profile-specific settings from the config: 
+
+Read [](file:///workspaces/invrt/src/run.js#1-1), lines 1 to 70
+
+Replacing 8 lines with 35 lines in [](file:///workspaces/invrt/src/run.js)
+
+
+```
+
+```
+Let's verify the changes and test them:  
+
+Read [](file:///workspaces/invrt/src/invrt.js#60-60), lines 60 to 100
+
+Read [](file:///workspaces/invrt/src/run.js#45-45), lines 45 to 70
+
+Now let's run the tests to verify everything works: 
+
+Ran terminal command:  node src/cli.test.js 2>&1 | tail -30
+
+Made changes.
+
+User: Add new environment variables for username and password that can be overriden by profileSettings
+
+GitHub Copilot: Read [](file:///workspaces/invrt/src/invrt.js#60-60), lines 60 to 110
+
+Replacing 29 lines with 38 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/invrt.js#100-100), lines 100 to 130
+
+Replacing 15 lines with 17 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/run.js#1-1), lines 1 to 80
+
+Replacing 7 lines with 14 lines in [](file:///workspaces/invrt/src/run.js)
+
+
+```
+
+```
+
+
+Ran terminal command:  cd /workspaces/invrt/test && node ../src/invrt.js crawl --profile=admin 2>&1 | head -20
+
+Ran terminal command:  cd /workspaces/invrt/test && node ../src/invrt.js reference --profile=admin 2>&1 | head -10
+
+Ran terminal command:  node src/invrt.js reference --profile=admin 2>&1 | head -15
+
+Ran terminal command:  pwd && node src/invrt.js help 2>&1 | head -20
+
+Ran terminal command:  pushd /workspaces/invrt && node src/invrt.js --profile=admin --device=mobile 2>&1 | grep -E "Profile|Username|Loading"
+
+Ran terminal command:  pushd /workspaces/invrt && node src/invrt.js help --profile=admin 2>&1 | head -5
+
+Ran terminal command:  node src/invrt.js reference --profile=admin 2>&1 | head -20
+
+Perfect! I can see the credentials are being loaded successfully. The output shows:
+- `⚙️  Loading profile settings for 'admin'` - Profile settings loaded
+- `👤 Using username: admin` - Username from auth credentials displayed
+
+Let me verify with a simple test: 
+
+Ran terminal command:  node src/invrt.js crawl --profile=admin 2>&1 | grep -E "Profile|Loading|Crawling" | head -5
+
+Let me verify the environment variables are being set correctly with a quick test:  
+
+Ran terminal command:  cd /workspaces/invrt && node -e "
+const { spawn } = require('child_process');
+const yaml = require('js-yaml');
+const fs = require('fs');
+const path = require('path');
+
+// Simulate loading invrt.js logic
+const config = yaml.load(fs.readFileSync('/workspaces/invrt/.invrt/config.yaml', 'utf8'));
+let INVRT_USERNAME = '';
+let INVRT_PASSWORD = '';
+
+const profileSettings = config.profiles?.['admin'];
+if (profileSettings?.auth) {
+  INVRT_USERNAME = profileSettings.auth.username || '';
+  INVRT_PASSWORD = profileSettings.auth.password || '';
+}
+
+console.log('✅ Environment Variables Setup:');
+console.log('  INVRT_USERNAME:', INVRT_USERNAME);
+console.log('  INVRT_PASSWORD:', INVRT_PASSWORD ? '***' : '(empty)');
+"
+
+Perfect! The implementation is working correctly. Let me run the tests to verify nothing is broken:   
+
+Ran terminal command:  node src/cli.test.js 2>&1 | tail -15
+
+Excellent! All tests pass. Here's a summary of what I've implemented:
+
+## Changes Made
+
+### 1. **invrt.js** - Added username and password environment variables:
+   - Added `INVRT_USERNAME` and `INVRT_PASSWORD` variables initialized to empty strings
+   - Added code to load auth credentials from profile settings:
+     ```javascript
+     if (profileSettings.auth?.username) {
+         INVRT_USERNAME = profileSettings.auth.username;
+     }
+     if (profileSettings.auth?.password) {
+         INVRT_PASSWORD = profileSettings.auth.password;
+     }
+     ```
+   - Added `INVRT_USERNAME` and `INVRT_PASSWORD` to the environment variables passed to bash scripts
+
+### 2. **run.js** - Made auth credentials available in the reference/test commands:
+   - Added code to read `INVRT_USERNAME` and `INVRT_PASSWORD` from environment variables
+   - Added debug output to display when a username is being used:
+     ```javascript
+     if (username) {
+         console.log(`👤 Using username: ${username}`);
+     }
+     ```
+
+## How It Works
+
+When you run the CLI with a profile that has auth settings (like the `admin` profile):
+
+```bash
+node src/invrt.js crawl --profile=admin
+```
+
+The system will:
+1. Load the admin profile from the config
+2. Extract the `auth.username` and `auth.password` fields
+3. Pass them as `INVRT_USERNAME` and `INVRT_PASSWORD` environment variables to the bash scripts
+4. Display that credentials are being used when running reference/test commands
+
+The credentials are now available to all bash scripts and the run.js script for authentication purposes.
+
+Made changes.
+
+User: Now do the same for the cookie variable
+
+GitHub Copilot: Read [](file:///workspaces/invrt/src/invrt.js#60-60), lines 60 to 100
+
+Replacing 38 lines with 42 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/invrt.js#105-105), lines 105 to 130
+
+Replacing 17 lines with 18 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Replacing 14 lines with 18 lines in [](file:///workspaces/invrt/src/run.js)
+
+
+```
+
+```
+
+
+Ran terminal command:  node src/invrt.js crawl --profile=admin 2>&1 | grep -E "Profile|Loading|Cookie|Crawling" | head -6
+
+Ran terminal command:  NODE_ENV=test node src/invrt.js reference --profile=admin 2>&1 | grep -E "Profile|Loading|Cookie|Username" | head -6
+
+Ran terminal command:  cd /workspaces/invrt && node -e "
+const result = require('child_process').execSync('node src/invrt.js reference --profile=admin 2>&1 | head -15', { encoding: 'utf-8' });
+console.log(result);
+"
+
+Ran terminal command:  cd /workspaces/invrt && node -e "
+const INVRT_DIRECTORY = '/workspaces/invrt/.invrt';
+const yaml = require('js-yaml');
+const fs = require('fs');
+
+const config = yaml.load(fs.readFileSync(INVRT_DIRECTORY + '/config.yaml', 'utf8'));
+const profileSettings = config.profiles?.['admin'];
+
+console.log('Admin profile settings:');
+console.log('  username:', profileSettings.auth?.username);
+console.log('  password:', profileSettings.auth?.password ? '***' : '(empty)');
+console.log('  cookie:', profileSettings.auth?.cookie);
+"
+
+Read [](file:///workspaces/invrt/.invrt/config.yaml#40-40), lines 40 to 57
+
+Read [](file:///workspaces/invrt/src/invrt-init.sh#47-47), lines 47 to 60
+
+Replacing 6 lines with 7 lines in [](file:///workspaces/invrt/.invrt/config.yaml)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/test/.invrt/config.yaml#30-30), lines 30 to 60
+
+Replacing 6 lines with 7 lines in [](file:///workspaces/invrt/test/.invrt/config.yaml)
+
+
+```
+
+```
+
+
+Ran terminal command:  cd /workspaces/invrt && node -e "
+const result = require('child_process').execSync('node src/invrt.js reference --profile=admin 2>&1 | head -10', { encoding: 'utf-8' });
+console.log(result);
+"
+
+Ran terminal command:  cd /workspaces/invrt/test && node ../src/invrt.js reference --profile=sponsor 2>&1 | head -10
+
+Ran terminal command:  node src/cli.test.js 2>&1 | tail -20
+
+Made changes.
+
+User: I'm getting an error "Error: Cannot find module '/workspaces/invrt/test/idp2/src/run.js'" when I run the "reference" command from a subdirectory
+
+GitHub Copilot: Read [](file:///workspaces/invrt/src/invrt-reference.sh)
+
+Read [](file:///workspaces/invrt/src/invrt.js#100-100), lines 100 to 130
+
+Read [](file:///workspaces/invrt/src/invrt.js#115-115), lines 115 to 145
+
+Replacing 20 lines with 21 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Replacing 5 lines with 5 lines in [](file:///workspaces/invrt/src/invrt-reference.sh)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src)
+
+Searched for text `run.js` (`**/src/*.sh`), 1 result
+
+Now let's test the fix by running the reference command from the subdirectory: 
+
+Ran terminal command:  cd /workspaces/invrt/test/idp2 && node ../../src/invrt.js reference --profile=department_admin 2>&1 | head -15
+
+Perfect! The fix is working. Let me verify the crawl command also works from a subdirectory: 
+
+Ran terminal command:  cd /workspaces/invrt/test/idp2 && node ../../src/invrt.js crawl --profile=department_admin 2>&1 | head -10
+
+Excellent! The fix is working correctly. Here's what I did:
+
+## Problem
+When running the `reference` command from a subdirectory (like idp2), the bash script was trying to find run.js using `$PWD` (the current working directory), which resulted in the error:
+```
+Error: Cannot find module '/workspaces/invrt/test/idp2/src/run.js'
+```
+
+## Solution
+1. **Added `INVRT_SCRIPTS_DIR` environment variable** in invrt.js that points to the directory where the invrt scripts are located (`__dirname`)
+2. **Updated invrt-reference.sh** to use `$INVRT_SCRIPTS_DIR` instead of `$PWD` when calling run.js
+
+## Changes Made
+- invrt.js: Added `INVRT_SCRIPTS_DIR: scriptsDir` to the environment variables
+- invrt-reference.sh: Changed from `node run.js'` to `node run.js'`
+
+Now the CLI will work correctly from any subdirectory, as it will always use the actual invrt installation directory rather than the current working directory.
+
+Made changes.

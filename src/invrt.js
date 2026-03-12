@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const yaml = require('js-yaml');
+const { loginAndSaveCookies } = require('./playwright-login');
 
 // Get the INVRT_DIRECTORY
 const INVRT_DIRECTORY = path.join(process.env.INIT_CWD || process.cwd(), '.invrt');
@@ -107,6 +108,7 @@ const INVRT_DATA_DIR = path.join(INVRT_DIRECTORY, 'data', INVRT_PROFILE, INVRT_D
 const INVRT_CRAWL_OUTPUT_DIR = path.join(INVRT_DATA_DIR, 'crawled_urls.txt');
 const INVRT_CRAWL_LOG_DIR = path.join(INVRT_DATA_DIR, 'logs', 'crawl.log');
 const INVRT_CRAWL_ERROR_LOG_DIR = path.join(INVRT_DATA_DIR, 'logs', 'crawl_error.log');
+const INVRT_COOKIES_FILE = path.join(INVRT_DATA_DIR, 'cookies.json');
 
 
 
@@ -118,6 +120,7 @@ const env = {
     ...process.env,
     INVRT_DIRECTORY,
     INVRT_DATA_DIR,
+    INVRT_SCRIPTS_DIR: scriptsDir,
     INVRT_URL,
     INVRT_DEPTH_TO_CRAWL,
     INVRT_MAX_PAGES,
@@ -131,6 +134,7 @@ const env = {
     INVRT_USERNAME,
     INVRT_PASSWORD,
     INVRT_COOKIE,
+    INVRT_COOKIES_FILE,
 };
 
 // Map commands to bash scripts
@@ -140,6 +144,120 @@ const scriptMap = {
     'reference': 'invrt-reference.sh',
     'test': 'invrt-test.sh',
 };
+
+// Function to login if credentials exist
+async function loginIfCredentialsExist() {
+    if (!INVRT_USERNAME || !INVRT_PASSWORD) {
+        console.log('ℹ️  No username/password found in profile. Skipping login.');
+        return;
+    }
+
+    if (!INVRT_URL) {
+        console.error('❌ Profile has credentials but no URL configured. Cannot login.');
+        process.exit(1);
+    }
+
+    try {
+        console.log('🔐 Logging in with provided credentials...');
+        
+        // Determine login URL (assume /login path or root)
+        const baseUrl = INVRT_URL.endsWith('/') ? INVRT_URL.slice(0, -1) : INVRT_URL;
+        const loginUrl = `${baseUrl}/user/login`;
+        
+        // Ensure data directory exists
+        const cookieDir = path.dirname(INVRT_COOKIES_FILE);
+        if (!fs.existsSync(cookieDir)) {
+            fs.mkdirSync(cookieDir, { recursive: true });
+        }
+
+        await loginAndSaveCookies(
+            loginUrl,
+            INVRT_USERNAME,
+            INVRT_PASSWORD,
+            INVRT_COOKIES_FILE,
+            {
+                usernameSelector: 'input[name="name"], input[type="email"], input[name="username"], input[id="username"], input[data-testid="username"]',
+                passwordSelector: 'input[name="pass"], input[type="password"]',
+                submitSelector: 'button[type="submit"], input[type="submit"], button[name="submit"]',
+                timeout: 60000,
+            }
+        );
+
+
+
+        console.log('✅ Login successful!');
+        
+        // Convert cookies to wget format
+        convertCookiesForWget(INVRT_COOKIES_FILE);
+    } catch (error) {
+        console.error('❌ Login failed:', error.message);
+        process.exit(1);
+    }
+}
+
+// Function to convert cookies.json to wget/curl compatible Netscape format
+function convertCookiesForWget(jsonFilePath) {
+    try {
+        if (!fs.existsSync(jsonFilePath)) {
+            console.log('ℹ️  Cookies file not found. Skipping wget format conversion.');
+            return;
+        }
+
+        const cookiesJson = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
+        const txtFilePath = jsonFilePath.replace('.json', '.txt');
+
+        // Netscape format header
+        let netscapeFormat = '# Netscape HTTP Cookie File\n';
+        netscapeFormat += '# http://curl.haxx.se/rfc/cookie_spec.html\n';
+        netscapeFormat += '# This is a generated file!  Do not edit.\n\n';
+
+        // Convert each cookie
+        cookiesJson.forEach(cookie => {
+            const domain = cookie.domain || '.localhost';
+            const flag = cookie.secure ? 'TRUE' : 'FALSE'; // Use secure flag as domain flag
+            const path = cookie.path || '/';
+            const secure = cookie.secure ? 'TRUE' : 'FALSE';
+            const expiration = cookie.expires || '0';
+            const name = cookie.name || '';
+            const value = cookie.value || '';
+
+            netscapeFormat += `${domain}\t${flag}\t${path}\t${secure}\t${expiration}\t${name}\t${value}\n`;
+        });
+
+        fs.writeFileSync(txtFilePath, netscapeFormat);
+        console.log(`📄 Cookies converted to wget format: ${txtFilePath}`);
+    } catch (error) {
+        console.error('⚠️  Warning: Could not convert cookies to wget format:', error.message);
+        // Don't exit on this error, as the main functionality (cookies.json) still works
+    }
+}
+
+// Execute the command
+async function executeCommand() {
+    // Login before executing crawl, reference, or test commands
+    if ((command === 'crawl' || command === 'reference' || command === 'test') && (INVRT_USERNAME || INVRT_PASSWORD)) {
+        await loginIfCredentialsExist();
+    }
+
+    // Execute the appropriate bash script
+    const scriptPath = path.join(scriptsDir, scriptMap[command]);
+
+    if (!fs.existsSync(scriptPath)) {
+        console.error('❌ Script not found:', scriptPath);
+        process.exit(1);
+    }
+
+    const proc = spawn('bash', [scriptPath], { env, stdio: 'inherit' });
+
+    proc.on('exit', (code) => {
+        process.exit(code || 0);
+    });
+
+    proc.on('error', (error) => {
+        console.error('❌ Error executing script:', error.message);
+        process.exit(1);
+    });
+}
 
 // Show help
 function showHelp() {
@@ -196,21 +314,5 @@ if (!scriptMap[command]) {
     process.exit(1);
 }
 
-// Execute the appropriate bash script
-const scriptPath = path.join(scriptsDir, scriptMap[command]);
-
-if (!fs.existsSync(scriptPath)) {
-    console.error('❌ Script not found:', scriptPath);
-    process.exit(1);
-}
-
-const proc = spawn('bash', [scriptPath], { env, stdio: 'inherit' });
-
-proc.on('exit', (code) => {
-    process.exit(code || 0);
-});
-
-proc.on('error', (error) => {
-    console.error('❌ Error executing script:', error.message);
-    process.exit(1);
-});
+// Execute the command with login handling
+executeCommand();

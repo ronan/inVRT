@@ -3,34 +3,14 @@ const fs = require('fs');
 const backstop = require('backstopjs');
 const path = require('path');
 
-
 const profile = process.env.INVRT_PROFILE || 'default';
 const device = process.env.INVRT_DEVICE || 'desktop';
-const invrt_dir = process.env.INIT_CWD + '/.invrt';
+const invrt_dir = process.env.INVRT_DIRECTORY || (process.env.INIT_CWD + '/.invrt');
 const data_dir = process.env.INVRT_DATA_DIR || (invrt_dir + '/data/' + profile + '/' + device);
 
-// Get auth credentials from environment
-const username = process.env.INVRT_USERNAME || '';
-const password = process.env.INVRT_PASSWORD || '';
-const cookie = process.env.INVRT_COOKIE || '';
+const op = process.argv[2] || 'test';
 
-console.log(`🎯 Using profile: ${profile}, device: ${device}`);
-if (username) {
-    console.log(`👤 Using username: ${username}`);
-}
-
-// if (cookie) {
-//   console.log(`🍪 Using cookie: ${cookie}`);
-//   const content = JSON.stringify({ cookie });
-//   fs.writeFile(data_dir + 'cookies.json', content, (err) => {
-//   if (err) {
-//     console.error(err);
-//     return;
-//   }
-//   console.log('Cookue file written successfully');
-// });
-// }
-console.log(`📂 Data directory: ${data_dir}`);
+console.log(`📂 Data directory: ${data_dir}. Operation: ${op}`);
 
 const config = {
   "viewports": [
@@ -50,12 +30,13 @@ const config = {
     "engine_scripts":     invrt_dir + "/scripts",
     "html_report":        data_dir + "/reports",
     "ci_report":          data_dir + "/reports/ci",
+    "json_report":          data_dir + "/reports/json",
     "bitmaps_reference":  data_dir + "/bitmaps/reference",
     "bitmaps_test":       data_dir + "/bitmaps/test"
   },
   "report": ["browser","json"],
   "engine": "playwright",
-  // "onReadyScript": "onReady.js",
+  "onReadyScript": "onReady.js",
   "onBeforeScript": "onBefore.js",
   "engineOptions": {
     "browser": "chromium"
@@ -73,8 +54,6 @@ const config = {
 }
 
 try {
-
-
   const project_config = yaml.load(fs.readFileSync(invrt_dir + '/config.yaml', 'utf8'));
   
   // Get base URL from project config
@@ -120,7 +99,6 @@ try {
                 );
               });
 
-  const op = process.argv[2] || 'test';
   backstop(op, {config: config}).then(() => {
       console.log('Test complete')
     }).catch((err) => {
