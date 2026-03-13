@@ -13,9 +13,6 @@ const scripts_dir = process.env.INVRT_SCRIPTS_DIR || (invrt_dir + '/scripts');
 const op = process.argv[2] || 'test';
 
 console.log(`🎯 Using profile: ${profile}, device: ${device}${environment ? `, environment: ${environment}` : ''}`);
-if (username) {
-    console.log(`👤 Using username: ${username}`);
-}
 console.log(`📂 Data directory: ${data_dir}. Operation: ${op}`);
 
 const config = {
@@ -42,7 +39,7 @@ const config = {
   },
   "report": ["browser","json"],
   "engine": "playwright",
-  "onReadyScript": "onReady.js",
+  "onReadyScript": "playwright-onready.js",
   "onBeforeScript": "playwright-onbefore.js",
   "engineOptions": {
     "browser": "chromium"
@@ -106,7 +103,7 @@ try {
               });
 
   backstop(op, {config: config}).then(() => {
-      console.log('Test complete')
+      console.log('Test complete');
     }).catch((err) => {
       console.log(err);
     });
