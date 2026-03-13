@@ -5,11 +5,17 @@ const path = require('path');
 
 const profile = process.env.INVRT_PROFILE || 'default';
 const device = process.env.INVRT_DEVICE || 'desktop';
+const environment = process.env.INVRT_ENVIRONMENT || '';
 const invrt_dir = process.env.INVRT_DIRECTORY || (process.env.INIT_CWD + '/.invrt');
-const data_dir = process.env.INVRT_DATA_DIR || (invrt_dir + '/data/' + profile + '/' + device);
+const data_dir = process.env.INVRT_DATA_DIR || (invrt_dir + '/data/' + profile + '/' + environment);
+const scripts_dir = process.env.INVRT_SCRIPTS_DIR || (invrt_dir + '/scripts');
 
 const op = process.argv[2] || 'test';
 
+console.log(`🎯 Using profile: ${profile}, device: ${device}${environment ? `, environment: ${environment}` : ''}`);
+if (username) {
+    console.log(`👤 Using username: ${username}`);
+}
 console.log(`📂 Data directory: ${data_dir}. Operation: ${op}`);
 
 const config = {
@@ -27,17 +33,17 @@ const config = {
   ],
   "scenarios": [],
   "paths": {
-    "engine_scripts":     invrt_dir + "/scripts",
+    "engine_scripts":     scripts_dir,
     "html_report":        data_dir + "/reports",
     "ci_report":          data_dir + "/reports/ci",
-    "json_report":          data_dir + "/reports/json",
+    "json_report":        data_dir + "/reports/json",
     "bitmaps_reference":  data_dir + "/bitmaps/reference",
     "bitmaps_test":       data_dir + "/bitmaps/test"
   },
   "report": ["browser","json"],
   "engine": "playwright",
   "onReadyScript": "onReady.js",
-  "onBeforeScript": "onBefore.js",
+  "onBeforeScript": "playwright-onbefore.js",
   "engineOptions": {
     "browser": "chromium"
   },

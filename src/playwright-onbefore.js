@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-module.exports = async (browserContext, scenario) => {
+const loadCookies = async (browserContext, scenario) => {
   let cookies = [];
   const cookiePath = scenario.cookiePath;
 
@@ -11,4 +11,10 @@ module.exports = async (browserContext, scenario) => {
 
   // Add cookies to browser
   browserContext.addCookies(cookies);
+};
+
+module.exports = async (page, scenario, viewport, isReference, browserContext) => {
+  console.log('Running onBefore script with scenario:', scenario.name);
+
+  await loadCookies(browserContext, scenario);
 };

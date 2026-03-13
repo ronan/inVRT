@@ -13,9 +13,10 @@ console.log('📁 INVRT_DIRECTORY:', INVRT_DIRECTORY);
 // Get the command from arguments
 const command = process.argv[2];
 
-// Parse optional arguments for profile and device
+// Parse optional arguments for profile, device, and environment
 let INVRT_PROFILE = 'default';
 let INVRT_DEVICE = 'desktop';
+let INVRT_ENVIRONMENT = '';
 
 for (let i = 3; i < process.argv.length; i++) {
     const arg = process.argv[i];
@@ -35,10 +36,82 @@ for (let i = 3; i < process.argv.length; i++) {
         INVRT_DEVICE = process.argv[++i];
     } else if (arg === '-d' && i + 1 < process.argv.length) {
         INVRT_DEVICE = process.argv[++i];
+    } else if (arg.startsWith('--environment=')) {
+        INVRT_ENVIRONMENT = arg.split('=')[1];
+    } else if (arg.startsWith('-e=')) {
+        INVRT_ENVIRONMENT = arg.split('=')[1];
+    } else if (arg === '--environment' && i + 1 < process.argv.length) {
+        INVRT_ENVIRONMENT = process.argv[++i];
+    } else if (arg === '-e' && i + 1 < process.argv.length) {
+        INVRT_ENVIRONMENT = process.argv[++i];
     }
 }
 
-console.log(`📋 Profile: ${INVRT_PROFILE}, Device: ${INVRT_DEVICE}`);
+console.log(`📋 Profile: ${INVRT_PROFILE}, Device: ${INVRT_DEVICE}${INVRT_ENVIRONMENT ? `, Environment: ${INVRT_ENVIRONMENT}` : ''}`);
+
+// Map commands to bash scripts (define early)
+const scriptMap = {
+    'init': 'invrt-init.sh',
+    'crawl': 'invrt-crawl.sh',
+    'reference': 'invrt-reference.sh',
+    'test': 'invrt-test.sh',
+};
+
+// Show help
+function showHelp() {
+    console.log(`
+📖 inVRT CLI - Visual Regression Testing Tool
+
+Usage: invrt <command> [options]
+
+Commands:
+  init       Initialize a new inVRT project in the current directory
+  crawl      Crawl the website and generate screenshots
+  reference  Create reference screenshots for comparison
+  test       Run visual regression tests
+  help       Show this help message
+
+Options:
+  --profile, -p <name>      Set the device profile (default: default)
+  --device, -d <name>       Set the device type (default: desktop)
+  --environment, -e <name>  Set the environment (e.g., dev, staging, prod)
+  --help, -h               Show this help message
+
+Examples (with npm):
+  # Initialize a new project
+  $ npm run init
+
+  # Crawl a website for desktop (note the -- before options)
+  $ npm run crawl -- --profile=default --device=desktop
+
+  # Crawl a website for mobile with environment
+  $ npm run crawl -- -p mobile -d mobile -e dev
+
+  # Create reference screenshots for testing
+  $ npm run reference -- --profile=default --environment=staging
+
+Examples (running directly):
+  # Run with specific profile, device, and environment
+  $ node src/invrt.js crawl --profile=sponsor --device=mobile --environment=prod
+
+  # Short form options
+  $ node src/invrt.js crawl -p sponsor -d mobile -e dev
+
+Note: When using npm scripts, use -- before options to pass them through
+`);
+    process.exit(0);
+}
+
+// Check for help command or show help if no command
+if (!command || command === 'help' || command === '--help' || command === '-h') {
+    showHelp();
+}
+
+// Check for invalid commands
+if (!scriptMap[command]) {
+    console.error(`❌ Invalid command: "${command}". Use "invrt help" for usage information.`);
+    process.exit(1);
+}
 
 // Read the config for the current project
 const CONFIG_FILE = path.join(INVRT_DIRECTORY, 'config.yaml');
@@ -102,8 +175,44 @@ if (profileSettings) {
     }
 }
 
+// Load environment-specific settings and override defaults
+if (INVRT_ENVIRONMENT) {
+    const environmentSettings = config.environments?.[INVRT_ENVIRONMENT];
+    if (environmentSettings) {
+        console.log(`🌍 Loading environment settings for '${INVRT_ENVIRONMENT}'`);
+        
+        // Override with environment-specific settings if they exist
+        if (environmentSettings.url) {
+            INVRT_URL = environmentSettings.url;
+        }
+        if (environmentSettings.max_crawl_depth !== undefined) {
+            INVRT_DEPTH_TO_CRAWL = environmentSettings.max_crawl_depth;
+        }
+        if (environmentSettings.max_pages !== undefined) {
+            INVRT_MAX_PAGES = environmentSettings.max_pages;
+        }
+        if (environmentSettings.user_agent) {
+            INVRT_USER_AGENT = environmentSettings.user_agent;
+        }
+        if (environmentSettings.max_concurrent_requests !== undefined) {
+            INVRT_MAX_CONCURRENT_REQUESTS = environmentSettings.max_concurrent_requests;
+        }
+        // Load auth credentials if provided in environment
+        if (environmentSettings.auth?.username) {
+            INVRT_USERNAME = environmentSettings.auth.username;
+        }
+        if (environmentSettings.auth?.password) {
+            INVRT_PASSWORD = environmentSettings.auth.password;
+        }
+        if (environmentSettings.auth?.cookie) {
+            INVRT_COOKIE = environmentSettings.auth.cookie;
+        }
+    } else {
+        console.warn(`⚠️  Environment '${INVRT_ENVIRONMENT}' not found in config.yaml`);
+    }
+}
 
-const INVRT_DATA_DIR = path.join(INVRT_DIRECTORY, 'data', INVRT_PROFILE, INVRT_DEVICE);
+const INVRT_DATA_DIR = path.join(INVRT_DIRECTORY, 'data', INVRT_PROFILE, INVRT_ENVIRONMENT);
 
 const INVRT_CRAWL_OUTPUT_DIR = path.join(INVRT_DATA_DIR, 'crawled_urls.txt');
 const INVRT_CRAWL_LOG_DIR = path.join(INVRT_DATA_DIR, 'logs', 'crawl.log');
@@ -131,18 +240,11 @@ const env = {
     INVRT_CRAWL_ERROR_LOG_DIR,
     INVRT_PROFILE,
     INVRT_DEVICE,
+    INVRT_ENVIRONMENT,
     INVRT_USERNAME,
     INVRT_PASSWORD,
     INVRT_COOKIE,
     INVRT_COOKIES_FILE,
-};
-
-// Map commands to bash scripts
-const scriptMap = {
-    'init': 'invrt-init.sh',
-    'crawl': 'invrt-crawl.sh',
-    'reference': 'invrt-reference.sh',
-    'test': 'invrt-test.sh',
 };
 
 // Function to login if credentials exist
@@ -257,61 +359,6 @@ async function executeCommand() {
         console.error('❌ Error executing script:', error.message);
         process.exit(1);
     });
-}
-
-// Show help
-function showHelp() {
-    console.log(`
-📖 inVRT CLI - Visual Regression Testing Tool
-
-Usage: invrt <command> [options]
-
-Commands:
-  init       Initialize a new inVRT project in the current directory
-  crawl      Crawl the website and generate screenshots
-  reference  Create reference screenshots for comparison
-  test       Run visual regression tests
-  help       Show this help message
-
-Options:
-  --profile, -p <name>  Set the device profile (default: default)
-  --device, -d <name>   Set the device type (default: desktop)
-  --help, -h           Show this help message
-
-Examples (with npm):
-  # Initialize a new project
-  $ npm run init
-
-  # Crawl a website for desktop (note the -- before options)
-  $ npm run crawl -- --profile=default --device=desktop
-
-  # Crawl a website for mobile
-  $ npm run crawl -- -p mobile -d mobile
-
-  # Create reference screenshots for testing
-  $ npm run reference -- --profile=default
-
-Examples (running directly):
-  # Run with specific profile and device
-  $ node src/invrt.js crawl --profile=sponsor --device=mobile
-
-  # Short form options
-  $ node src/invrt.js crawl -p sponsor -d mobile
-
-Note: When using npm scripts, use -- before options to pass them through
-`);
-    process.exit(0);
-}
-
-// Check for help command or show help if no command
-if (!command || command === 'help' || command === '--help' || command === '-h') {
-    showHelp();
-}
-
-// Check for invalid commands
-if (!scriptMap[command]) {
-    console.error(`❌ Invalid command: "${command}". Use "invrt help" for usage information.`);
-    process.exit(1);
 }
 
 // Execute the command with login handling

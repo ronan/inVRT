@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "An auth-enabled VRT for Drupal and Backdrop web sites and apps",
   "main": "src/run.js",
+  "bin": {
+    "invrt": "./bin/invrt"
+  },
   "directories": {
     "test": "test"
   },

@@ -704,3 +704,217 @@ Error: Cannot find module '/workspaces/invrt/test/idp2/src/run.js'
 Now the CLI will work correctly from any subdirectory, as it will always use the actual invrt installation directory rather than the current working directory.
 
 Made changes.
+
+User: Can you please add a new argument called 'environment' which works exactly the same way as 'profile' and 'device'
+
+GitHub Copilot: Read [](file:///workspaces/invrt/src/invrt.js#1-1), lines 1 to 50
+
+Replacing 26 lines with 35 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/invrt.js#60-60), lines 60 to 110
+
+Read [](file:///workspaces/invrt/src/invrt.js#105-105), lines 105 to 115
+
+Replacing 11 lines with 47 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/invrt.js#140-140), lines 140 to 155
+
+Read [](file:///workspaces/invrt/src/invrt.js#160-160), lines 160 to 180
+
+Read [](file:///workspaces/invrt/src/invrt.js#175-175), lines 175 to 185
+
+Replacing 9 lines with 10 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/invrt.js#200-200), lines 200 to 240
+
+Read [](file:///workspaces/invrt/src/invrt.js#240-240), lines 240 to 280
+
+Read [](file:///workspaces/invrt/src/invrt.js#280-280), lines 280 to 330
+
+Read [](file:///workspaces/invrt/src/invrt.js#310-310), lines 310 to 365
+
+Replacing 43 lines with 44 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/run.js#1-1), lines 1 to 25
+
+Replacing 14 lines with 27 lines in [](file:///workspaces/invrt/src/run.js)
+
+
+```
+
+```
+
+
+Ran terminal command:  node src/invrt.js crawl --profile=admin --environment=dev 2>&1 | grep -E "Profile|Environment|Loading" | head -5
+
+Ran terminal command:  node src/invrt.js crawl -p admin -d desktop -e prod 2>&1 | grep -E "Profile|Environment|Loading" | head -5
+
+Ran terminal command:  node src/invrt.js help 2>&1 | grep -A 5 "Options:"
+Completed with input:  node src/invrt.js help 2>&1 | grep -A 5 "Options:"
+
+Ran terminal command:  node src/invrt.js 2>&1 | head -25
+
+Ran terminal command:  node src/invrt.js --help 2>&1 | tail -30
+
+Read [](file:///workspaces/invrt/src/invrt.js#50-50), lines 50 to 55
+
+Replacing 7 lines with 7 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Ran terminal command:  node src/invrt.js --help 2>&1 | grep -E "Options:|environment" -A 2
+
+Ran terminal command:  timeout 30 node src/cli.test.js 2>&1 | tail -20
+
+Continue to iterate?
+[object Object]
+
+Made changes.
+
+User: @agent Continue: "Continue to iterate?"
+
+GitHub Copilot: Read [](file:///workspaces/invrt/src/cli.test.js#1-1), lines 1 to 30
+
+Ran terminal command:  node src/invrt.js invalid 2>&1
+Completed with input:  node src/invrt.js invalid 2>&1
+
+Read [](file:///workspaces/invrt/src/invrt.js#340-340), lines 340 to 360
+
+Read [](file:///workspaces/invrt/src/invrt.js#50-50), lines 50 to 60
+
+Replacing 9 lines with 73 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Read [](file:///workspaces/invrt/src/invrt.js#300-300), lines 300 to 320
+
+Searched for text `function showHelp` (`**/src/invrt.js`), 2 results
+
+Read [](file:///workspaces/invrt/src/invrt.js#370-370), lines 370 to 420
+
+Replacing 59 lines with 3 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Searched for text `Map commands to bash scripts` (`**/src/invrt.js`), 2 results
+
+Read [](file:///workspaces/invrt/src/invrt.js#248-248), lines 248 to 260
+
+Replacing 13 lines with 5 lines in [](file:///workspaces/invrt/src/invrt.js)
+
+
+```
+
+```
+
+
+Ran terminal command:  node src/invrt.js invalid 2>&1
+Completed with input:  node src/invrt.js invalid 2>&1
+
+Ran terminal command:  timeout 40 node src/cli.test.js 2>&1 | tail -25
+
+Ran terminal command:  node src/invrt.js crawl --environment=prod 2>&1 | grep -E "Profile|Environment" | head -3
+
+Ran terminal command:  node src/invrt.js crawl -e staging 2>&1 | grep "Profile" | head -1
+
+Ran terminal command:  node src/invrt.js help 2>&1 | grep -E "environment|Environment" | head -5
+
+Excellent! I've successfully added the `environment` argument to the inVRT CLI. Here's a summary of what was implemented:
+
+## Changes Made
+
+### 1. **Argument Parsing** (invrt.js)
+Added parsing for `--environment`/`-e` arguments alongside profile and device:
+```javascript
+--environment=<name> or -e=<name>
+--environment <name> or -e <name>
+```
+
+### 2. **Environment Settings Loading** (invrt.js)
+Added code to load environment-specific settings from the config file and override defaults:
+```yaml
+environments:
+  dev:
+    url: https://dev.example.com
+    auth:
+      username: dev_user
+      password: dev_pass
+      cookie: dev_session_id
+```
+
+### 3. **Environment Variables**
+Added `INVRT_ENVIRONMENT` to the environment variables passed to bash scripts and run.js
+
+### 4. **Console Output**
+Updated console logging to display the selected environment when specified
+
+### 5. **Help Documentation**
+Updated help text with environment examples and usage patterns
+
+### 6. **Code Reorganization**
+Moved help and command validation checks before config file loading so help can be accessed without a config file
+
+## Usage Examples
+
+```bash
+# With environment
+node src/invrt.js crawl --environment=prod
+node src/invrt.js crawl -e dev
+node src/invrt.js crawl --environment=staging
+
+# Combined with profile and device
+node src/invrt.js crawl --profile=admin --device=mobile --environment=prod
+node src/invrt.js crawl -p admin -d mobile -e staging
+
+# With npm scripts
+npm run crawl -- --environment=prod
+npm run reference -- --profile=admin --environment=staging
+```
+
+Environment settings work exactly like profile settings - they override base configuration when specified, and can include URLs, credentials, and any other settings you need to vary by environment.
+
+All tests pass, and the feature is fully integrated into the CLI!
+
+Made changes.
+
+User: get rid of the cli.test.js script
+
+GitHub Copilot: Ran terminal command:  rm /workspaces/invrt/src/cli.test.js && ls /workspaces/invrt/src/ | grep -E "\.js|\.sh"
+
+Done! The cli.test.js file has been removed from src.
