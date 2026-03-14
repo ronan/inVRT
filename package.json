@@ -3,17 +3,19 @@
   "version": "1.0.0",
   "description": "An auth-enabled VRT for Drupal and Backdrop web sites and apps",
   "main": "src/run.js",
+  "bin": {
+    "invrt": "./bin/invrt"
+  },
   "directories": {
     "test": "test"
   },
   "scripts": {
     "test": "node 'src/run.js'",
-    "init": "node src/cli.js init",
-    "crawl": "node src/cli.js crawl",
-    "reference": "node src/cli.js reference",
-    "install-deps": "sudo npx playwright install-deps &&npx playwright install",
-    "log-cwd": "echo The package root is $PWD and the initial working directory is $INIT_CWD"
-
+    "crawl": "node src/invrt.js crawl",
+    "init": "node src/invrt.js init",
+    "reference": "node src/invrt.js reference",
+    "self-test": "node src/cli.test.js",
+    "install-deps": "sudo npx playwright install-deps && npx playwright install"
   },
   "repository": {
     "type": "git",
@@ -32,6 +34,7 @@
   "homepage": "https://github.com/ronan/inVRT#readme",
   "dependencies": {
     "backstopjs": "^6.3.25",
-    "js-yaml": "^4.1.1"
+    "js-yaml": "^4.1.1",
+    "playwright": "^1.58.2"
   }
 }

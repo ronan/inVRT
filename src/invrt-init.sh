@@ -1,7 +1,17 @@
 #!/bin/bash
 
-mkdir -p ./invrt/data/bitmaps ./invrt/data/reports ./invrt/data/logs ./invrt/data/clones ./invrt/profiles ./invrt/scripts
-echo "Created data directories for images, report, logs, clones, profiles, and scripts."
+echo "🚀 Initializing InVRT for the project at $INIT_CWD"
+
+if [ -d "$INIT_CWD/.invrt" ]; then
+    echo "⚠️  InVRT is already initialized for this project. Please remove the .invrt directory if you want to re-initialize."
+    exit 1
+fi
+
+mkdir -p $INVRT_DIRECTORY
+echo "Created invrt directory at $INVRT_DIRECTORY"
+cd $INVRT_DIRECTORY
+mkdir -p data scripts
+echo "Created data directories for genrated data, and user scripts."
 
 echo "
 # InVRT Configuration File
@@ -27,7 +37,6 @@ environments:
   dev:
     name: Development
     url: https://dev.example.com
-    credentials:
 
   prod:
     name: Production
@@ -42,6 +51,7 @@ profiles:
     name: Admin Profile
     description: A profile with admin privileges.
     auth:
+      cookie: sessionid
       username: admin
       password: password123
 
@@ -58,12 +68,7 @@ viewports:
     width: 375
     height: 667
 
-" > ./invrt/config.yaml
-echo "Initialized InVRT configuration file at ./.config.yaml"
+" > config.yaml
+echo "Initialized InVRT configuration file at $INVRT_DIRECTORY/config.yaml"
 
-echo "# Add urls to this file to exclude them from testing. Regex patterns are supported. For example:
-
-/do-not-crawl-this-url
-/do-not-crawl-this-directory/.*
-
-" > ./invrt/data/exclude_urls.txt
+echo "/user/logout,/files/*" > ./exclude_urls.txt
