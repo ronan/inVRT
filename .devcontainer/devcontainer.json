@@ -3,14 +3,15 @@
 {
 	"name": "InVRT Development Container",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-		"ghcr.io/devcontainers-extra/features/fzf:1": {},
+		"ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
 		"ghcr.io/devcontainers-extra/features/zsh-plugins:0": {},
 		"ghcr.io/larsnieuwenhuizen/features/jqyq:0": {},
-		"ghcr.io/stuartleeks/dev-container-features/shell-history:0": {},
-		"ghcr.io/devcontainers/features/node:1": {}
+		"ghcr.io/schlich/devcontainer-features/playwright:0": {
+			"browsers": "chromium"
+		}
 	},
 	"postCreateCommand": "npm install",
 	"remoteEnv": {

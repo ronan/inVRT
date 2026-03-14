@@ -34,3 +34,8 @@ The instance of the project under test.
     invrt crawl --environment=local
     invrt test --environment=prod,stage
 
+## Run Using Docker
+
+You can run inVRT using the docker container without installing it.
+
+     docker run -it --volume .:/dir ronan4000/invrt init
