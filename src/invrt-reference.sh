@@ -1,5 +1,5 @@
 #!/bin/bash
 
-echo "📸 Capturing references from $INVRT_URL with profile $INVRT_PROFILE with device $INVRT_DEVICE to depth $INVRT_DEPTH_TO_CRAWL"
+echo "📸 Capturing references from '$INVRT_ENVIRONMENT' environment ($INVRT_URL) with profile: '$INVRT_PROFILE' and device: '$INVRT_DEVICE'"
 
-node $INVRT_SCRIPTS_DIR'/run.js' reference
+node $INVRT_SCRIPTS_DIR'/backstop.js' reference

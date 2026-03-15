@@ -23,7 +23,6 @@ project:
   url: http://example.com
   description: A description of your project.
 
-settings:
   max_crawl_depth: 3
   max_pages: 100
   max_concurrent_requests: 5
@@ -50,23 +49,21 @@ profiles:
   admin:
     name: Admin Profile
     description: A profile with admin privileges.
-    auth:
-      cookie: sessionid
-      username: admin
-      password: password123
+    username: admin
+    password: password123
 
-viewports:
-  default:
-    name: Default Viewport
+devices:
+  desktop:
+    name: Desktop Viewport
     description: A desktop sized viewport for testing.
-    width: 1920
-    height: 1080
+    viewport_width: 1920
+    viewport_height: 1080
 
   mobile:
     name: Mobile Viewport
     description: A viewport for mobile testing.
-    width: 375
-    height: 667
+    viewport_width: 375
+    viewport_height: 667
 
 " > config.yaml
 echo "Initialized InVRT configuration file at $INVRT_DIRECTORY/config.yaml"

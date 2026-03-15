@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-echo "🕸️ Crawling $INVRT_URL with profile $INVRT_PROFILE to depth $INVRT_DEPTH_TO_CRAWL max $INVRT_MAX_PAGES"
+echo "🕸️ Crawling '$INVRT_ENVIRONMENT' environment ($INVRT_URL) with profile: '$INVRT_PROFILE' to depth: $INVRT_MAX_CRAWL_DEPTH, max pages: $INVRT_MAX_PAGES"
 
 mkdir -p $INVRT_DATA_DIR/clones $INVRT_DATA_DIR/logs
 rm -rf $INVRT_DATA_DIR/clones/* $INVRT_DATA_DIR/logs/*
@@ -10,7 +10,7 @@ rm -rf $INVRT_DATA_DIR/clones/* $INVRT_DATA_DIR/logs/*
 INVRT_DOMAIN=$(echo "$INVRT_URL" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
 
 wget \
-      --level=$INVRT_DEPTH_TO_CRAWL \
+      --level=$INVRT_MAX_CRAWL_DEPTH \
       --recursive \
       --max-redirect=2 \
       --user-agent=invrt/crawler \
