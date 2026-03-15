@@ -1,0 +1,16 @@
+{
+    "name": "invrt/php-cli",
+    "description": "An auth-enabled VRT for Drupal and Backdrop web sites and apps (PHP version)",
+    "type": "application",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ronan Dowling"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "symfony/yaml": "^5.4|^6.0"
+    },
+    "bin": ["src/invrt.php"]
+}

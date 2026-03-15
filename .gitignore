@@ -5,3 +5,5 @@ scratch
 .invrt
 .DS_Store
 tmp-test-cli
+vendor
+composer.lock
