@@ -34,6 +34,37 @@ The instance of the project under test.
     invrt crawl --environment=local
     invrt test --environment=prod,stage
 
+## Testing
+
+The project includes a PHPUnit test suite covering utility functions, CLI argument parsing, and configuration handling.
+
+### Run Tests with Composer
+
+    # Run all tests
+    composer test
+
+    # Run only unit tests
+    composer test:unit
+
+    # Run only integration tests
+    composer test:integration
+
+    # Generate code coverage report
+    composer test:coverage
+
+    # Generate HTML code coverage report
+    composer test:coverage-html
+
+### Dependencies
+
+Test dependencies are installed with:
+
+    composer install
+
+The test suite requires PHPUnit (installed as a dev dependency) and Symfony YAML.
+
+For more information about the test suite, see [tests/README.md](tests/README.md).
+
 ## Run Using Docker
 
 You can run inVRT using the docker container without installing it.
