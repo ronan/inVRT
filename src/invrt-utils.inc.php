@@ -79,16 +79,18 @@ function convertCookiesForWget($jsonFilePath) {
         $netscapeFormat .= "# This is a generated file!  Do not edit.\n\n";
 
         // Convert each cookie
-        foreach ($cookiesJson as $cookie) {
-            $domain = isset($cookie['domain']) ? $cookie['domain'] : '.localhost';
-            $flag = (isset($cookie['secure']) && $cookie['secure']) ? 'TRUE' : 'FALSE';
-            $path = isset($cookie['path']) ? $cookie['path'] : '/';
-            $secure = (isset($cookie['secure']) && $cookie['secure']) ? 'TRUE' : 'FALSE';
-            $expiration = isset($cookie['expires']) ? $cookie['expires'] : '0';
-            $name = isset($cookie['name']) ? $cookie['name'] : '';
-            $value = isset($cookie['value']) ? $cookie['value'] : '';
+        if (is_array($cookiesJson)) {
+            foreach ($cookiesJson as $cookie) {
+                $domain = isset($cookie['domain']) ? $cookie['domain'] : '.localhost';
+                $flag = (isset($cookie['secure']) && $cookie['secure']) ? 'TRUE' : 'FALSE';
+                $path = isset($cookie['path']) ? $cookie['path'] : '/';
+                $secure = (isset($cookie['secure']) && $cookie['secure']) ? 'TRUE' : 'FALSE';
+                $expiration = isset($cookie['expires']) ? $cookie['expires'] : '0';
+                $name = isset($cookie['name']) ? $cookie['name'] : '';
+                $value = isset($cookie['value']) ? $cookie['value'] : '';
 
-            $netscapeFormat .= "{$domain}\t{$flag}\t{$path}\t{$secure}\t{$expiration}\t{$name}\t{$value}\n";
+                $netscapeFormat .= "{$domain}\t{$flag}\t{$path}\t{$secure}\t{$expiration}\t{$name}\t{$value}\n";
+            }
         }
 
         file_put_contents($txtFilePath, $netscapeFormat);

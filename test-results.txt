@@ -1,0 +1,71 @@
+PHPUnit 10.5.63 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.4
+Configuration: /workspaces/invrt/phpunit.xml
+
+....................................................              52 / 52 (100%)
+
+Time: 00:00.061, Memory: 10.00 MB
+
+Argument Parsing (Tests\Integration\ArgumentParsing)
+ ✔ Parse profile with equals
+ ✔ Parse profile short with equals
+ ✔ Parse device with equals
+ ✔ Parse environment with equals
+ ✔ Extract command from argv
+ ✔ No command provided
+ ✔ Argument parsing loop
+ ✔ Parsing multiple argument formats
+ ✔ Default values preserved
+ ✔ Valid command validation
+ ✔ Help command handling
+ ✔ Command with no options
+ ✔ Real world argument sequence
+ ✔ Argument with special characters
+ ✔ Empty argument value
+
+Configuration Integration (Tests\Integration\ConfigurationIntegration)
+ ✔ Load full config fixture
+ ✔ Load minimal config fixture
+ ✔ Load cookies fixture
+ ✔ Config value extraction
+ ✔ Profile override behavior
+ ✔ Environment override behavior
+ ✔ Auth credentials extraction from profiles
+ ✔ Auth credentials extraction from environments
+ ✔ Device specific profiles
+ ✔ Missing optional setting returns default
+ ✔ Complete configuration scenario
+
+Invrt Cli (Tests\Unit\InvrtCli)
+ ✔ Yaml config parsing
+ ✔ Yaml config with profiles
+ ✔ Yaml config with environments
+ ✔ Yaml parsing with invalid syntax
+ ✔ Yaml parsing empty file
+ ✔ Complex config with mixed settings
+ ✔ Valid commands
+ ✔ Invalid command detection
+ ✔ Environment variable handling
+ ✔ Environment variable merging
+ ✔ Data directory construction
+ ✔ Cookies file path construction
+
+Invrt Utils (Tests\Unit\InvrtUtils)
+ ✔ Get config simple key
+ ✔ Get config nested key
+ ✔ Get config deeply nested key
+ ✔ Get config non existent key returns default
+ ✔ Get config non existent key returns empty
+ ✔ Get config with empty value
+ ✔ Get config with zero value
+ ✔ Join path two segments
+ ✔ Join path multiple segments
+ ✔ Join path single segment
+ ✔ Convert cookies for wget file not found
+ ✔ Convert cookies for wget success
+ ✔ Convert cookies for wget minimal cookie data
+ ✔ Convert cookies for wget invalid json
+
+OK, but there were issues!
+Tests: 52, Assertions: 126, PHPUnit Deprecations: 1.

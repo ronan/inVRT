@@ -1,0 +1,7 @@
+project:
+  url: https://example.com
+
+settings:
+  max_crawl_depth: 2
+  max_pages: 100
+  user_agent: Custom User Agent

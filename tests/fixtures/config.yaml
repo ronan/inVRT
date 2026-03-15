@@ -1,0 +1,38 @@
+project:
+  url: https://example.com
+  name: Example Project
+
+settings:
+  max_crawl_depth: 5
+  max_pages: 200
+  user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+  max_concurrent_requests: 10
+
+profiles:
+  default:
+    url: https://example.com
+    max_crawl_depth: 3
+    auth:
+      username: default_user
+      password: default_pass
+
+  mobile:
+    url: https://example.com
+    max_crawl_depth: 2
+    user_agent: Mobile Safari
+
+environments:
+  local:
+    url: http://localhost:8000
+
+  dev:
+    url: https://dev.example.com
+    auth:
+      username: dev_user
+      password: dev_pass
+
+  staging:
+    url: https://staging.example.com
+
+  prod:
+    url: https://example.com
