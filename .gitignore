@@ -1,9 +1,7 @@
 node_modules
-test/*
-test
-scratch
-.invrt
-.DS_Store
-tmp-test-cli
 vendor
 composer.lock
+scratch
+.phpunit.result.cache
+.invrt
+.DS_Store
