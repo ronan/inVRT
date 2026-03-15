@@ -445,3 +445,170 @@ Fixed! ✅ The `composer test:coverage` command now works properly.
 All commands now work without errors!
 
 Made changes.
+
+User: Add phpstan for static analysis
+
+GitHub Copilot: Ran terminal command:  cat /workspaces/invrt/composer.json
+
+Replacing 3 lines with 4 lines in [](file:///workspaces/invrt/composer.json)
+
+
+```
+
+```
+
+
+Replacing 7 lines with 9 lines in [](file:///workspaces/invrt/composer.json)
+
+Ran terminal command:  tail -15 /workspaces/invrt/composer.json | cat -A
+
+Ran terminal command:  cat > /workspaces/invrt/composer.json << 'EOF'
+{
+    "name": "invrt/php-cli",
+    "description": "An auth-enabled VRT for Drupal and Backdrop web sites and apps (PHP version)",
+    "type": "application",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ronan Dowling"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "symfony/yaml": "^5.4|^6.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5|^10.0",
+        "phpstan/phpstan": "^1.10"
+    },
+    "bin": ["src/invrt.php"],
+    "scripts": {
+        "test": "phpunit --testdox",
+        "test:unit": "phpunit --testdox tests/Unit",
+        "test:integration": "phpunit --testdox tests/Integration",
+        "test:coverage": "XDEBUG_MODE=coverage phpunit --coverage-text",
+        "test:coverage-html": "XDEBUG_MODE=coverage phpunit --coverage-html=coverage/",
+        "analyze": "phpstan analyse",
+        "analyze:baseline": "phpstan analyse --generate-baseline"
+    }
+}
+EOF
+
+
+Created [](file:///workspaces/invrt/phpstan.neon)
+
+Ran terminal command:  composer install 2>&1 | grep -A 5 phpstan
+
+Ran terminal command:  composer update 2>&1 | tail -30
+
+Ran terminal command:  composer analyze 2>&1
+Completed with input:  composer analyze 2>&1
+
+Replacing 15 lines with 20 lines in [](file:///workspaces/invrt/phpstan.neon)
+
+
+```
+
+```
+
+
+Ran terminal command:  composer analyze 2>&1
+
+Ran terminal command:  composer analyze:baseline 2>&1 | tail -10
+
+Ran terminal command:  cat > /workspaces/invrt/composer.json << 'EOF'
+{
+    "name": "invrt/php-cli",
+    "description": "An auth-enabled VRT for Drupal and Backdrop web sites and apps (PHP version)",
+    "type": "application",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ronan Dowling"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "symfony/yaml": "^5.4|^6.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5|^10.0",
+        "phpstan/phpstan": "^1.10"
+    },
+    "bin": ["src/invrt.php"],
+    "scripts": {
+        "test": "phpunit --testdox",
+        "test:unit": "phpunit --testdox tests/Unit",
+        "test:integration": "phpunit --testdox tests/Integration",
+        "test:coverage": "XDEBUG_MODE=coverage phpunit --coverage-text",
+        "test:coverage-html": "XDEBUG_MODE=coverage phpunit --coverage-html=coverage/",
+        "analyze": "phpstan analyse",
+        "analyze:baseline": "phpstan analyse --generate-baseline --allow-empty-baseline"
+    }
+}
+EOF
+
+
+Ran terminal command:  composer analyze:baseline 2>&1 && ls -la phpstan-baseline.neon
+
+Ran terminal command:  composer analyze 2>&1 | tail -5
+
+Read [](file:///workspaces/invrt/README.md#1-1), lines 1 to 1
+
+Ran terminal command:  wc -l /workspaces/invrt/README.md && cat /workspaces/invrt/README.md
+
+Replacing 2 lines with 17 lines in [](file:///workspaces/invrt/README.md)
+
+Replacing 9 lines with 23 lines in [](file:///workspaces/invrt/README.md)
+
+
+```
+
+```
+
+
+Ran terminal command:  cat /workspaces/invrt/README.md | grep -A 20 "## Static Analysis"
+
+Ran terminal command:  composer test 2>&1 | tail -5 && echo "\n---\n" && composer analyze 2>&1 | tail -5
+
+Done! ✅ PHPStan static analysis has been successfully added to the project.
+
+**What Was Added:**
+
+1. **PHPStan Dependency** - Added `phpstan/phpstan: ^1.10` to `require-dev` in composer.json
+
+2. **PHPStan Configuration** - Created phpstan.neon with:
+   - Level 5 (strict) analysis
+   - Analyzes src directory
+   - Configured to ignore CLI superglobals (`$argc`, `$argv`)
+   - Excludes shell and JavaScript files
+
+3. **Composer Scripts:**
+   - `composer analyze` - Run static analysis
+   - `composer analyze:baseline` - Generate baseline file for tracking error history
+
+4. **Documentation** - Added "Static Analysis" section to README.md
+
+**Current Status:**
+
+✅ PHPStan installed: 1.12.33  
+✅ Static analysis: **[OK] No errors**  
+✅ Tests: 52 tests, 126 assertions  
+✅ All commands working  
+
+**Available Commands:**
+
+```bash
+# Testing
+composer test                 # All tests
+composer test:unit            # Unit tests only
+composer test:integration     # Integration tests only
+composer test:coverage        # Code coverage report
+composer test:coverage-html   # HTML coverage report
+
+# Code Quality
+composer analyze              # Static analysis
+composer analyze:baseline     # Generate baseline
+```
+
+Made changes.

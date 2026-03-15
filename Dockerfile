@@ -5,6 +5,7 @@ WORKDIR /app
 COPY . .
 
 RUN npm install
+RUN composer install --no-dev --optimize-autoloader
 
 WORKDIR /dir
 

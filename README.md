@@ -65,6 +65,20 @@ The test suite requires PHPUnit (installed as a dev dependency) and Symfony YAML
 
 For more information about the test suite, see [tests/README.md](tests/README.md).
 
+## Static Analysis
+
+The project uses PHPStan for static code analysis to catch potential bugs and type errors.
+
+### Run Static Analysis
+
+    # Analyze code
+    composer analyze
+
+    # Generate baseline for tracking error changes
+    composer analyze:baseline
+
+The analysis runs at level 5 (strict) and checks the `src/` directory. Configuration is in `phpstan.neon`.
+
 ## Run Using Docker
 
 You can run inVRT using the docker container without installing it.

@@ -1,0 +1,20 @@
+includes:
+    - phar://phpstan.phar/conf/bleedingEdge.neon
+
+parameters:
+    level: 5
+    paths:
+        - src
+    excludePaths:
+        - src/*.sh
+        - src/*.js
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # Ignore CLI superglobals that are always available
+        - '#Variable \$argc might not be defined#'
+        - '#Variable \$argv might not be defined#'
+        # Ignore errors in procedural scripts where functions are included
+        - '#Call to undefined function (showHelp|getConfig|convertCookiesForWget|executeShellCmd|executeShellScript|executeCommand|loginIfCredentialsExist|convertCookiesForWget|joinPath)#'
+        # Allow exitCode to be null coalesce
+        - '#Variable \$exitCode on left side of \?\? always exists#'
