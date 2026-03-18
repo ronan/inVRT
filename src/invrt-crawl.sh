@@ -9,7 +9,7 @@ rm -rf $INVRT_DATA_DIR/clones/* $INVRT_DATA_DIR/logs/*
 INVRT_DOMAIN=$(echo "$INVRT_URL" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
 
 if [ -f "$INVRT_DIRECTORY/exclude_urls.txt" ]; then
-      EXCLUDE_URLS=$(cat $INVRT_DIRECTORY/exclude_urls.txt | tr '\n' ',' | sed 's/,$//')
+      EXCLUDE_URLS=$(cat $INVRT_DIRECTORY/exclude_urls.txt | grep -v '^\s*#'| tr '\n' ',' | sed 's/,$//')
       echo "Excluding URLs: $EXCLUDE_URLS"
 else
       EXCLUDE_URLS='/files/sites,/user/logout';
@@ -19,17 +19,19 @@ fi
 wget \
       --level=$INVRT_MAX_CRAWL_DEPTH \
       --recursive \
-      --max-redirect=2 \
+      --max-redirect=3 \
       --user-agent=invrt/crawler \
       --load-cookies=$INVRT_DATA_DIR/cookies.txt \
       --ignore-length \
       --exclude-directories="$EXCLUDE_URLS" \
       --ignore-length \
       --no-verbose \
-      --no-host-directories \
-      --no-directories \
+      --no-check-certificate \
       --reject=css,js,woff,jpg,png,gif,svg \
       --directory-prefix=$INVRT_DATA_DIR/clones \
+      --no-directories \
+      --no-host-directories \
+      --delete-after \
       --execute robots=off \
       --domains=$INVRT_DOMAIN \
       "$INVRT_URL" 2>&1 \
