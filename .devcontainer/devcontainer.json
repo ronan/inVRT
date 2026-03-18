@@ -14,7 +14,8 @@
 	},
 	"postCreateCommand": "npm install",
 	"remoteEnv": {
-    	"PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/bin"
+    	"PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/bin",
+		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
   	},
 
 	// Configure tool-specific properties.
