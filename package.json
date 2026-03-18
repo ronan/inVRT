@@ -10,12 +10,10 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node 'src/run.js'",
-    "crawl": "node src/invrt.js crawl",
-    "init": "node src/invrt.js init",
-    "reference": "node src/invrt.js reference",
-    "self-test": "node src/cli.test.js",
-    "install-deps": "sudo npx playwright install-deps && npx playwright install"
+    "crawl": "./bin/invrt crawl",
+    "init": "./bin/invrt init",
+    "reference": "./bin/invrt reference",
+    "install-deps": "npx playwright install-deps && npx playwright install"
   },
   "repository": {
     "type": "git",

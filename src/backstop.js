@@ -9,6 +9,10 @@ const environment = process.env.INVRT_ENVIRONMENT || '';
 const invrt_dir = process.env.INVRT_DIRECTORY || (process.env.INIT_CWD + '/.invrt');
 const data_dir = process.env.INVRT_DATA_DIR || (invrt_dir + '/data/' + profile + '/' + environment);
 const scripts_dir = process.env.INVRT_SCRIPTS_DIR || (invrt_dir + '/scripts');
+const base_url = process.env.INVRT_URL || 'http://localhost:8080';
+const viewport_width = parseInt(process.env.INVRT_VIEWPORT_WIDTH) || 1920;
+const viewport_height = parseInt(process.env.INVRT_VIEWPORT_HEIGHT) || 1080;
+const viewport_name = process.env.INVRT_PROFILE || 'desktop';
 
 const op = process.argv[2] || 'test';
 
@@ -16,28 +20,25 @@ console.log(`🎯 Using profile: ${profile}, device: ${device}${environment ? `,
 console.log(`📂 Data directory: ${data_dir}. Operation: ${op}`);
 
 const config = {
+  "dynamicTestId": 'latest',
   "viewports": [
     {
-      "label": "desktop",
-      "width": 1920,
-      "height": 1080
+      "label": viewport_name,
+      "width": viewport_width,
+      "height": viewport_height
     },
-    {
-      "label": "mobile",
-      "width": 360,
-      "height": 800
-    }
   ],
   "scenarios": [],
   "paths": {
     "engine_scripts":     scripts_dir,
-    "html_report":        data_dir + "/reports",
+    "html_report":        data_dir + "/reports/html",
     "ci_report":          data_dir + "/reports/ci",
     "json_report":        data_dir + "/reports/json",
     "bitmaps_reference":  data_dir + "/bitmaps/reference",
     "bitmaps_test":       data_dir + "/bitmaps/test"
   },
-  "report": ["browser","json"],
+  // "fileNameTemplate": '{scenarioIndex}_{selectorIndex}_{selectorLabel}_{viewportLabel}',
+  "report": ["json"],
   "engine": "playwright",
   "onReadyScript": "playwright-onready.js",
   "onBeforeScript": "playwright-onbefore.js",
@@ -45,8 +46,8 @@ const config = {
     "browser": "chromium"
   },
   "misMatchThreshold": 0.5,
-  "asyncCaptureLimit": 1,
-  "asyncCompareLimit": 10,
+  "asyncCaptureLimit": 5,
+  "asyncCompareLimit": 50,
   "resembleOutputOptions": {
     "ignoreAntialiasing": true,
     "usePreciseMatching": true
@@ -57,38 +58,7 @@ const config = {
 }
 
 try {
-  const project_config = yaml.load(fs.readFileSync(invrt_dir + '/config.yaml', 'utf8'));
-  
-  // Get base URL from project config
-  let base_url = project_config.project.url;
-  
-  // Load profile-specific settings and override defaults
-  const profileSettings = project_config.profiles?.[profile];
-  if (profileSettings) {
-    console.log(`⚙️  Loading profile settings for '${profile}'`);
-    
-    // Override URL if profile specifies one
-    if (profileSettings.url) {
-      base_url = profileSettings.url;
-      console.log(`🔗 Using profile-specific URL: ${base_url}`);
-    }
-    
-    // Merge profile-specific config settings into backstop config
-    if (profileSettings.misMatchThreshold !== undefined) {
-      config.misMatchThreshold = profileSettings.misMatchThreshold;
-    }
-    if (profileSettings.asyncCaptureLimit !== undefined) {
-      config.asyncCaptureLimit = profileSettings.asyncCaptureLimit;
-    }
-    if (profileSettings.asyncCompareLimit !== undefined) {
-      config.asyncCompareLimit = profileSettings.asyncCompareLimit;
-    }
-    if (profileSettings.engineOptions) {
-      config.engineOptions = { ...config.engineOptions, ...profileSettings.engineOptions };
-    }
-  }
-
-  var cookiePath = path.join(data_dir, 'cookies.json');
+  const cookiePath = path.join(data_dir, 'cookies.json');
   fs
     .readFileSync(data_dir + "/crawled_urls.txt", 'utf-8')
     .split(/\n/)

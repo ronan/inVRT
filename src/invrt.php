@@ -6,14 +6,19 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/invrt-utils.inc.php';
 
 use Symfony\Component\Yaml\Yaml;
+use League\CLImate\CLImate;
 
-// Parse optional arguments for profile, device, and environment
-$_ENV['INVRT_PROFILE'] = 'default';
-$_ENV['INVRT_DEVICE'] = 'desktop';
-$_ENV['INVRT_ENVIRONMENT'] = 'local';
+// Initialize CLImate
+$climate = new CLImate();
+
+// Set default values
+$_ENV['INVRT_PROFILE']      = 'anonymous';
+$_ENV['INVRT_DEVICE']       = 'desktop';
+$_ENV['INVRT_ENVIRONMENT']  = 'local';
 
 // Get the scripts directory
-$_ENV['INVRT_SCRIPTS_DIR'] = __DIR__;
+$_ENV['INVRT_SCRIPTS_DIR']  = __DIR__;
+putenv('INVRT_SCRIPTS_DIR=' . $_ENV['INVRT_SCRIPTS_DIR']);
 
 // Get the INVRT_DIRECTORY
 if (getenv('INVRT_DIRECTORY')) {
@@ -22,112 +27,125 @@ if (getenv('INVRT_DIRECTORY')) {
     $currentDir = getenv('INIT_CWD') ? getenv('INIT_CWD') : getcwd();
     $_ENV['INVRT_DIRECTORY'] = joinPath($currentDir, '.invrt');
 }
-echo "📁 INVRT_DIRECTORY: " . $_ENV['INVRT_DIRECTORY'] . "\n";
+
+// Define CLImate options (named arguments only)
+$climate->arguments->add([
+    'profile' => [
+        'prefix'      => 'p',
+        'longPrefix'  => 'profile',
+        'description' => 'Profile name',
+        'defaultValue' => 'anonymous',
+    ],
+    'device' => [
+        'prefix'      => 'd',
+        'longPrefix'  => 'device',
+        'description' => 'Device type',
+        'defaultValue' => 'desktop',
+    ],
+    'environment' => [
+        'prefix'      => 'e',
+        'longPrefix'  => 'environment',
+        'description' => 'Environment name',
+        'defaultValue' => 'local',
+    ],
+    'help' => [
+        'longPrefix'  => 'help',
+        'description' => 'Show help information',
+        'noValue'     => true,
+    ],
+]);
+
+try {
+    $climate->arguments->parse();
+} catch (\Exception $exception) {
+    $climate->error($exception->getMessage());
+    exit(1);
+}
+
+// Get the command from the first positional argument (non-flag argument)
+// Filter out all arguments starting with '-' to allow flags before the command
+$positionalArgs = array_values(array_filter($_SERVER['argv'], function($arg) {
+    return strpos($arg, '-') !== 0;
+}));
+$command = $positionalArgs[1] ?? '';
+
+// Check for help flag
+if ($climate->arguments->get('help') || !$command || $command === 'help') {
+    showHelp();
+    exit(0);
+}
+
+// Get options with CLImate
+$_ENV['INVRT_PROFILE'] = $climate->arguments->get('profile');
+$_ENV['INVRT_DEVICE'] = $climate->arguments->get('device');
+$_ENV['INVRT_ENVIRONMENT'] = $climate->arguments->get('environment');
+
+// Check for invalid commands
+if (!in_array($command, ['init', 'crawl', 'reference', 'test', 'config', 'help'])) {
+    $climate->error("Invalid command: \"" . $command . "\". Use \"invrt help\" for usage information.");
+    exit(1);
+}
 
 // Set up the data directory and cookies file path
 $_ENV['INVRT_DATA_DIR'] = joinPath($_ENV['INVRT_DIRECTORY'], 'data', $_ENV['INVRT_PROFILE'], $_ENV['INVRT_ENVIRONMENT']);
 $_ENV['INVRT_COOKIES_FILE'] = joinPath($_ENV['INVRT_DATA_DIR'], 'cookies.json');
 
-// Get the command from arguments
-$command = $argc > 1 ? $argv[1] : '';
+// Load profile-specific settings and override defaults
+if ($command != 'init') {
+    $_ENV['INVRT_CONFIG_FILE'] = joinPath($_ENV['INVRT_DIRECTORY'], 'config.yaml');
 
-// Parse optional arguments for profile, device, and environment
-for ($i = 2; $i < $argc; $i++) {
-    $arg = $argv[$i];
-    if (strpos($arg, '--profile=') === 0) {
-        $_ENV['INVRT_PROFILE'] = substr($arg, 10);
-    } elseif (strpos($arg, '-p=') === 0) {
-        $_ENV['INVRT_PROFILE'] = substr($arg, 3);
-    } elseif ($arg === '--profile' && $i + 1 < $argc) {
-        $_ENV['INVRT_PROFILE'] = $argv[++$i];
-    } elseif ($arg === '-p' && $i + 1 < $argc) {
-        $_ENV['INVRT_PROFILE'] = $argv[++$i];
-    } elseif (strpos($arg, '--device=') === 0) {
-        $_ENV['INVRT_DEVICE'] = substr($arg, 9);
-    } elseif (strpos($arg, '-d=') === 0) {
-        $_ENV['INVRT_DEVICE'] = substr($arg, 3);
-    } elseif ($arg === '--device' && $i + 1 < $argc) {
-        $_ENV['INVRT_DEVICE'] = $argv[++$i];
-    } elseif ($arg === '-d' && $i + 1 < $argc) {
-        $_ENV['INVRT_DEVICE'] = $argv[++$i];
-    } elseif (strpos($arg, '--environment=') === 0) {
-        $_ENV['INVRT_ENVIRONMENT'] = substr($arg, 14);
-    } elseif (strpos($arg, '-e=') === 0) {
-        $_ENV['INVRT_ENVIRONMENT'] = substr($arg, 3);
-    } elseif ($arg === '--environment' && $i + 1 < $argc) {
-        $_ENV['INVRT_ENVIRONMENT'] = $argv[++$i];
-    } elseif ($arg === '-e' && $i + 1 < $argc) {
-        $_ENV['INVRT_ENVIRONMENT'] = $argv[++$i];
-    }
-}
-
-echo "📋 Profile: " . $_ENV['INVRT_PROFILE'] . ", Device: " . $_ENV['INVRT_DEVICE'] . ", Environment: " . $_ENV['INVRT_ENVIRONMENT'] . "\n";
-
-// Check for help command or show help if no command
-if (!$command || $command === 'help' || $command === '--help' || $command === '-h') {
-    showHelp();
-}
-
-// Check for invalid commands
-if (!in_array($command, ['init', 'crawl', 'reference', 'test'])) {
-    fwrite(STDERR, "❌ Invalid command: \"" . $command . "\". Use \"invrt help\" for usage information.\n");
-    exit(1);
-}
-
-// Read the config for the current project
-$CONFIG_FILE = joinPath($_ENV['INVRT_DIRECTORY'], 'config.yaml');
-
-$config = [];
-if (!file_exists($CONFIG_FILE) && $command !== 'init') {
-    fwrite(STDERR, "❌ Configuration file not found at " . $CONFIG_FILE . ". Please run 'invrt init' to initialize the project.\n");
-    exit(1);
-}
-
-if (file_exists($CONFIG_FILE)) {
-    try {
-        $fileContents = file_get_contents($CONFIG_FILE);
-        $config = Yaml::parse($fileContents) ?: [];
-    } catch (Exception $error) {
-        fwrite(STDERR, "❌ Error reading config file: " . $error->getMessage() . "\n");
+    if (!file_exists($_ENV['INVRT_CONFIG_FILE'])) {
+        $climate->error("Configuration file not found at " . $_ENV['INVRT_CONFIG_FILE'] . ". Please run 'invrt init' to initialize the project.");
         exit(1);
     }
+
+    $climate->comment("#  Loading project settings for profile: " .  $_ENV['INVRT_PROFILE'] .
+        " device: " . $_ENV['INVRT_DEVICE'] .
+        " environment: " . $_ENV['INVRT_ENVIRONMENT']);
+
+    loadConfig($_ENV['INVRT_CONFIG_FILE']);
 }
 
-$config_keys = [
-    'url' => '',
-    'max_crawl_depth' => 3,
-    'max_pages' => 100,
-    'user_agent' => 'InVRT/1.0',
-    'max_concurrent_requests' => 5,
-    'username' => '',
-    'password' => '',
-    'viewport_width' => 1920,
-    'viewport_height' => 1080,
-];
-
-// Load profile-specific settings and override defaults
-echo "⚙️  Loading profile settings for '" . $_ENV['INVRT_PROFILE'] . "'\n";
-echo "⚙️  Loading environment settings for '" . $_ENV['INVRT_ENVIRONMENT'] . "'\n";
-echo "⚙️  Loading device settings for '" . $_ENV['INVRT_DEVICE'] . "'\n";
-
-// Read the config values for the current profile, device and environment
-foreach ([
-        "project",
-        "environments.$_ENV[INVRT_ENVIRONMENT]",
-        "profiles.$_ENV[INVRT_PROFILE]",
-        "devices.$_ENV[INVRT_DEVICE]", 
-    ] as $section) {
-    if (empty(getConfig($config, $section))) {
-        echo "⚠️  Section '" . $section . "' not found in config.yaml, using defaults\n";
-    }
-
-    foreach ($config_keys as $key => $default) {
-        $env_var_name = 'INVRT_' . strtoupper($key);
-        $_ENV[$env_var_name] = getConfig($config, "$section.$key", $_ENV[$env_var_name] ?? $default);
-    }
-}
 
 // Execute the command with login handling
 executeCommand($command, $_ENV);
+
+// Execute the command
+function executeCommand($command, $env) {
+    // Extract values from environment
+    $INVRT_USERNAME = $env['INVRT_USERNAME'] ?? '';
+    $INVRT_PASSWORD = $env['INVRT_PASSWORD'] ?? '';
+    $INVRT_URL = $env['INVRT_URL'] ?? '';
+    $INVRT_COOKIES_FILE = $env['INVRT_COOKIES_FILE'] ?? '';
+    $INVRT_DIRECTORY = $env['INVRT_DIRECTORY'] ?? '';
+    
+    // Login before executing crawl, reference, or test commands
+    if (($command === 'crawl' || $command === 'reference' || $command === 'test') && ($INVRT_USERNAME || $INVRT_PASSWORD)) {
+        loginIfCredentialsExist($INVRT_USERNAME, $INVRT_PASSWORD, $INVRT_URL, $INVRT_COOKIES_FILE, $INVRT_DIRECTORY);
+    }
+
+    // Execute command
+    switch ($command) {
+        case 'init':
+            executeShellScript('invrt-init.sh', $env);
+            break;
+        case 'crawl':
+            executeShellScript('invrt-crawl.sh', $env);
+            break;
+        case 'reference':
+            executeShellScript('invrt-reference.sh', $env);
+            break;
+        case 'test':
+            executeShellScript('invrt-test.sh', $env);
+            break;
+        case 'config':
+            include __DIR__ . '/invrt-config.php';
+            break;
+        default:
+            $climate = new CLImate();
+            $climate->error("Unknown command: \"" . $command . "\"");
+            exit(1);
+    }
+}
 
 ?>

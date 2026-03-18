@@ -10,7 +10,8 @@
     ],
     "require": {
         "php": ">=7.4",
-        "symfony/yaml": "^5.4|^6.0"
+        "symfony/yaml": "^5.4|^6.0",
+        "league/climate": "^3.10"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5|^10.0",
@@ -24,6 +25,7 @@
         "test:coverage": "XDEBUG_MODE=coverage phpunit --coverage-text",
         "test:coverage-html": "XDEBUG_MODE=coverage phpunit --coverage-html=coverage/",
         "analyze": "phpstan analyse",
-        "analyze:baseline": "phpstan analyse --generate-baseline --allow-empty-baseline"
+        "analyze:baseline": "phpstan analyse --generate-baseline --allow-empty-baseline",
+        "build-docker": "docker build -t ronan4000/invrt ."
     }
 }

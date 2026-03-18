@@ -5,9 +5,16 @@ echo "🕸️ Crawling '$INVRT_ENVIRONMENT' environment ($INVRT_URL) with profil
 
 mkdir -p $INVRT_DATA_DIR/clones $INVRT_DATA_DIR/logs
 rm -rf $INVRT_DATA_DIR/clones/* $INVRT_DATA_DIR/logs/*
-# cd $INVRT_DATA_DIR/clones
 
 INVRT_DOMAIN=$(echo "$INVRT_URL" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
+
+if [ -f "$INVRT_DIRECTORY/exclude_urls.txt" ]; then
+      EXCLUDE_URLS=$(cat $INVRT_DIRECTORY/exclude_urls.txt | tr '\n' ',' | sed 's/,$//')
+      echo "Excluding URLs: $EXCLUDE_URLS"
+else
+      EXCLUDE_URLS='/files/sites,/user/logout';
+      echo "No exclude_urls.txt file found at $INVRT_DIRECTORY/exclude_urls.txt. Default URLs will be excluded from crawling: $EXCLUDE_URLS"
+fi
 
 wget \
       --level=$INVRT_MAX_CRAWL_DEPTH \
@@ -16,11 +23,12 @@ wget \
       --user-agent=invrt/crawler \
       --load-cookies=$INVRT_DATA_DIR/cookies.txt \
       --ignore-length \
-      --exclude-directories='/files,/user/logout' \
+      --exclude-directories="$EXCLUDE_URLS" \
       --ignore-length \
       --no-verbose \
       --no-host-directories \
       --no-directories \
+      --reject=css,js,woff,jpg,png,gif,svg \
       --directory-prefix=$INVRT_DATA_DIR/clones \
       --execute robots=off \
       --domains=$INVRT_DOMAIN \

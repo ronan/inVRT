@@ -18,15 +18,14 @@ echo "
 # This file is used to store configuration settings for InVRT.
 # You can customize the settings below as needed.
 
-project:
-  name: My InVRT Project
-  url: http://example.com
-  description: A description of your project.
+name: My InVRT Project
+url: http://example.com
+description: A description of your project.
 
-  max_crawl_depth: 3
-  max_pages: 100
-  max_concurrent_requests: 5
-  user_agent: InVRT/1.0
+max_crawl_depth: 3
+max_pages: 100
+max_concurrent_requests: 5
+user_agent: InVRT/1.0
 
 environments:
   local:
@@ -42,9 +41,9 @@ environments:
     url: https://prod.example.com
 
 profiles:
-  default:
-    name: Default Profile
-    description: A default profile for testing.
+  anonymous:
+    name: Anonymous Visitor Profile
+    description: Test the site as an anonymous visitor with no special permissions.
 
   admin:
     name: Admin Profile
@@ -68,4 +67,7 @@ devices:
 " > config.yaml
 echo "Initialized InVRT configuration file at $INVRT_DIRECTORY/config.yaml"
 
-echo "/user/logout,/files/*" > ./exclude_urls.txt
+echo "/user/logout
+/files
+/sites
+/core" > ./exclude_urls.txt

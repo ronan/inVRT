@@ -48,19 +48,6 @@ EOT;
     exit(0);
 }
 
-// Helper function to safely get nested array values
-function getConfig($array, $key, $default = '') {
-    $keys = explode('.', $key);
-    $value = $array;
-    foreach ($keys as $k) {
-        if (is_array($value) && isset($value[$k])) {
-            $value = $value[$k];
-        } else {
-            return $default;
-        }
-    }
-    return $value ?: $default;
-}
 
 // Function to convert cookies.json to wget/curl compatible Netscape format
 function convertCookiesForWget($jsonFilePath) {
@@ -169,57 +156,79 @@ function executeShellCmd($cmd, $env) {
 }
 
 // Helper function to execute a shell script
-function executeShellScript($scriptName, $env) {
-    $INVRT_SCRIPTS_DIR = $_ENV['INVRT_SCRIPTS_DIR'] ?: "/app/src";
-    
-    $scriptPath = joinPath($INVRT_SCRIPTS_DIR, $scriptName);
-    
-    if (!file_exists($scriptPath)) {
-        fwrite(STDERR, "❌ Script not found: " . $scriptPath . "\n");
-        exit(1);
-    }
-
+function executeShellScript($scriptName, $env)
+{
     // Execute the bash script
-    $cmd = 'bash ' . escapeshellarg($scriptPath);
+    $cmd = 'bash ' . escapeshellarg(joinPath(__DIR__, $scriptName));
     executeShellCmd($cmd, $env);
-}
-
-// Execute the command
-function executeCommand($command, $env) {
-    // Extract values from environment
-    $INVRT_USERNAME = $env['INVRT_USERNAME'] ?? '';
-    $INVRT_PASSWORD = $env['INVRT_PASSWORD'] ?? '';
-    $INVRT_URL = $env['INVRT_URL'] ?? '';
-    $INVRT_COOKIES_FILE = $env['INVRT_COOKIES_FILE'] ?? '';
-    $INVRT_DIRECTORY = $env['INVRT_DIRECTORY'] ?? '';
-    
-    // Login before executing crawl, reference, or test commands
-    if (($command === 'crawl' || $command === 'reference' || $command === 'test') && ($INVRT_USERNAME || $INVRT_PASSWORD)) {
-        loginIfCredentialsExist($INVRT_USERNAME, $INVRT_PASSWORD, $INVRT_URL, $INVRT_COOKIES_FILE, $INVRT_DIRECTORY);
-    }
-
-    // Execute command
-    switch ($command) {
-        case 'init':
-            executeShellScript('invrt-init.sh', $env);
-            break;
-        case 'crawl':
-            executeShellScript('invrt-crawl.sh', $env);
-            break;
-        case 'reference':
-            executeShellScript('invrt-reference.sh', $env);
-            break;
-        case 'test':
-            executeShellScript('invrt-test.sh', $env);
-            break;
-        default:
-            fwrite(STDERR, "❌ Unknown command: \"" . $command . "\"\n");
-            exit(1);
-    }
 }
 
 // Helper function to join file paths
 function joinPath(...$segments) {
     return join(DIRECTORY_SEPARATOR, $segments);
 }
-?>
+
+function loadConfig($file)
+{
+
+    // Read the config for the current project
+    $CONFIG_FILE = joinPath($_ENV['INVRT_DIRECTORY'], 'config.yaml');
+
+    $config = [];
+    try {
+        $fileContents = file_get_contents($CONFIG_FILE);
+        $config = Yaml::parse($fileContents) ?: [];
+    } catch (Exception $error) {
+        fwrite(STDERR, "❌ Error reading config file: " . $error->getMessage() . "\n");
+        exit(1);
+    }
+
+    $config_keys = [
+        'url' => '',
+        'max_crawl_depth' => 3,
+        'max_pages' => 100,
+        'user_agent' => 'InVRT/1.0',
+        'max_concurrent_requests' => 5,
+        'username' => '',
+        'password' => '',
+        'viewport_width' => 1920,
+        'viewport_height' => 1080,
+    ];
+
+    // Read the config values for the current profile, device and environment
+    $out = [];
+    foreach (
+        [
+            "project",
+            "environments.$_ENV[INVRT_ENVIRONMENT]",
+            "profiles.$_ENV[INVRT_PROFILE]",
+            "devices.$_ENV[INVRT_DEVICE]",
+        ] as $section
+    ) {
+        if (empty(getConfig($config, $section))) {
+            fwrite(STDERR, "#⚠️ Section $section not found in config.yaml, using defaults\n");
+        }
+
+        foreach ($config_keys as $key => $default) {
+            $env_var_name = 'INVRT_' . strtoupper($key);
+            $out[$key] = $_ENV[$env_var_name] = getConfig($config, "$section.$key", $_ENV[$env_var_name] ?? $default);
+        }
+    }
+    return $out;
+}
+
+
+// Helper function to safely get nested array values
+function getConfig($array, $key, $default = '')
+{
+    $keys = explode('.', $key);
+    $value = $array;
+    foreach ($keys as $k) {
+        if (is_array($value) && isset($value[$k])) {
+            $value = $value[$k];
+        } else {
+            return $default;
+        }
+    }
+    return $value ?: $default;
+}
