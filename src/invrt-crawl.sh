@@ -8,6 +8,18 @@ rm -rf $INVRT_DATA_DIR/clones/* $INVRT_DATA_DIR/logs/*
 
 INVRT_DOMAIN=$(echo "$INVRT_URL" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
 
+cookie_option='';
+if [ -n "$INVRT_COOKIE" ]; then
+      echo "Using provided cookie for crawling."
+      cookie_option="--header='Cookie: $INVRT_COOKIE'"
+elif [ -f "$INVRT_COOKIES_FILE.txt" ]; then
+      echo "Using cookies from file: $INVRT_COOKIES_FILE.txt"
+      cookie_option="--load-cookies=$INVRT_COOKIES_FILE.txt"
+else
+      echo "No cookie provided. Crawling without authentication."
+      touch $INVRT_DATA_DIR/cookies.txt
+fi
+
 if [ -f "$INVRT_DIRECTORY/exclude_urls.txt" ]; then
       EXCLUDE_URLS=$(cat $INVRT_DIRECTORY/exclude_urls.txt | grep -v '^\s*#'| tr '\n' ',' | sed 's/,$//')
       echo "Excluding URLs: $EXCLUDE_URLS"
@@ -21,7 +33,7 @@ wget \
       --recursive \
       --max-redirect=3 \
       --user-agent=invrt/crawler \
-      --load-cookies=$INVRT_DATA_DIR/cookies.txt \
+      $cookie_option \
       --ignore-length \
       --exclude-directories="$EXCLUDE_URLS" \
       --ignore-length \

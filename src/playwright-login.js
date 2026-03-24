@@ -1,6 +1,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
+const { match } = require('assert');
 
 /**
  * Logs into a web application and saves cookies to a JSON file
@@ -24,9 +25,9 @@ async function loginAndSaveCookies(
   options = {}
 ) {
   const {
-    usernameSelector = 'input[type="email"], input[name="username"]',
-    passwordSelector = 'input[type="password"]',
-    submitSelector = 'button[type="submit"]',
+    usernameSelector = 'input[name="username"],input[name="name"]',
+    passwordSelector = '[type="password"]',
+    submitSelector = '[type="submit"]',
     waitForSelector = null,
     timeout = 30000,
   } = options;
@@ -41,9 +42,24 @@ async function loginAndSaveCookies(
     const context = await browser.newContext();
     const page = await context.newPage();
 
+    const match = loginUrl.match(/\/\/(.+\.pantheonsite\.io)/);
+    if (match) {
+      console.log('Adding deterrence bypass cookie to skip environment warning...');
+      await context.addCookies([{
+        "name": "Deterrence-Bypass",
+        "value": "1",
+        "domain": `.${match[1]}`,
+        "path": "/",
+        "httpOnly": false,
+        "secure": false,
+        "sameSite": "Lax"
+      }]);
+    }
+
     // Navigate to login page
     console.log(`Navigating to ${loginUrl}...`);
     await page.goto(loginUrl, { waitUntil: 'networkidle', timeout });
+    await page.screenshot({ path: 'screenshot.png' });
 
     // Fill in username
     console.log('Entering username...');
@@ -55,8 +71,9 @@ async function loginAndSaveCookies(
 
     // Submit form
     console.log('Submitting login form...');
-    await page.click(submitSelector, { timeout });
+    await page.locator(passwordSelector).press('Enter');
 
+    
     // Wait for navigation or specific element
     if (waitForSelector) {
       console.log(`Waiting for selector: ${waitForSelector}...`);
@@ -65,21 +82,22 @@ async function loginAndSaveCookies(
       // Wait for network to be idle after login
       await page.waitForLoadState('networkidle', { timeout });
     }
-
+    
     console.log('Login successful!');
 
     // Get all cookies
     const cookies = await context.cookies();
 
     // Create output directory if it doesn't exist
-    const dir = path.dirname(outputFile);
+    jsonFile = outputFile.endsWith('.json') ? outputFile : `${outputFile}.json`;
+    const dir = path.dirname(jsonFile);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
 
     // Save cookies to JSON file
-    fs.writeFileSync(outputFile, JSON.stringify(cookies, null, 2));
-    console.log(`Cookies saved to ${outputFile}`);
+    fs.writeFileSync(jsonFile, JSON.stringify(cookies, null, 2));
+    console.log(`Cookies saved to ${jsonFile}`);
     console.log(`Total cookies: ${cookies.length}`);
 
     // Close browser
@@ -99,15 +117,15 @@ async function loginAndSaveCookies(
 async function main() {
   try {
     const cookies = await loginAndSaveCookies(
-      'https://example.com/login', // Replace with actual login URL
-      'your-username@example.com',  // Replace with username
-      'your-password',               // Replace with password
-      './cookies.json',              // Output file path
+      process.env.INVRT_LOGIN_URL,
+      process.env.INVRT_USERNAME,
+      process.env.INVRT_PASSWORD,
+      process.env.INVRT_COOKIES_FILE,
       {
-        usernameSelector: 'input[type="email"]',
+        usernameSelector: 'input[name="name"]',
         passwordSelector: 'input[type="password"]',
-        submitSelector: 'button[type="submit"]',
-        waitForSelector: '.dashboard', // Wait for dashboard element after login
+        submitSelector: 'input[type="submit"]',
+        waitForSelector: false,
         timeout: 30000,
       }
     );

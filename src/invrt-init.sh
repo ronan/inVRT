@@ -19,13 +19,6 @@ echo "
 # You can customize the settings below as needed.
 
 name: My InVRT Project
-url: http://example.com
-description: A description of your project.
-
-max_crawl_depth: 3
-max_pages: 100
-max_concurrent_requests: 5
-user_agent: InVRT/1.0
 
 environments:
   local:

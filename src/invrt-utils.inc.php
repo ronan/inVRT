@@ -88,53 +88,14 @@ function convertCookiesForWget($jsonFilePath) {
 }
 
 // Function to login if credentials exist
-function loginIfCredentialsExist($INVRT_USERNAME, $INVRT_PASSWORD, $INVRT_URL, $INVRT_COOKIES_FILE, $INVRT_DIRECTORY) {
-    if (!$INVRT_USERNAME || !$INVRT_PASSWORD) {
-        echo "ℹ️  No username/password found in profile. Skipping login.\n";
-        return;
-    }
-
-    if (!$INVRT_URL) {
-        fwrite(STDERR, "❌ Profile has credentials but no URL configured. Cannot login.\n");
-        exit(1);
-    }
-
+function loginIfCredentialsExist($INVRT_USERNAME, $INVRT_PASSWORD, $INVRT_URL, $INVRT_COOKIES_FILE) {
     try {
         echo "🔐 Logging in with provided credentials...\n";
         
-        // Determine login URL
-        $baseUrl = rtrim($INVRT_URL, '/');
-        $loginUrl = $baseUrl . "/user/login";
-        
-        // Ensure data directory exists
-        $cookieDir = dirname($INVRT_COOKIES_FILE);
-        if (!is_dir($cookieDir)) {
-            mkdir($cookieDir, 0755, true);
-        }
-
-        // Note: This calls the Node.js Playwright login since PHP doesn't have native Playwright support
-        // You may need to implement this differently based on your needs
-        $nodeScriptPath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'playwright-login.js';
-        
-        // If Node.js is available and we have the Playwright script, use it
-        if (file_exists($nodeScriptPath)) {
-            $cmd = escapeshellcmd('node ' . $nodeScriptPath);
-            $output = [];
-            $returnVar = 0;
-            exec($cmd, $output, $returnVar);
-            
-            if ($returnVar !== 0) {
-                throw new Exception("Playwright login failed with exit code " . $returnVar);
-            }
-        } else {
-            echo "⚠️  Playwright login script not found. Skipping authentication.\n";
-            return;
-        }
-
-        echo "✅ Login successful!\n";
+        include __DIR__ . '/invert-login.php';
         
         // Convert cookies to wget format
-        convertCookiesForWget($INVRT_COOKIES_FILE);
+        convertCookiesForWget("$INVRT_COOKIES_FILE.json");
     } catch (Exception $error) {
         fwrite(STDERR, "❌ Login failed: " . $error->getMessage() . "\n");
         exit(1);
@@ -184,7 +145,14 @@ function loadConfig($file)
     }
 
     $config_keys = [
+        'profile' => 'default',
+        'device' => 'desktop',
+        'environment' => 'local',
+        'directory' => './.invrt',
+        'data_dir' => 'data',
+        'cookies_file' => joinPath('data', $_ENV['INVRT_PROFILE'], $_ENV['INVRT_ENVIRONMENT'], 'cookies.txt'),
         'url' => '',
+        'login_url' => '',
         'max_crawl_depth' => 3,
         'max_pages' => 100,
         'user_agent' => 'InVRT/1.0',
@@ -199,7 +167,6 @@ function loadConfig($file)
     $out = [];
     foreach (
         [
-            "project",
             "environments.$_ENV[INVRT_ENVIRONMENT]",
             "profiles.$_ENV[INVRT_PROFILE]",
             "devices.$_ENV[INVRT_DEVICE]",

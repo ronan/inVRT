@@ -5,7 +5,6 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/invrt-utils.inc.php';
 
-use Symfony\Component\Yaml\Yaml;
 use League\CLImate\CLImate;
 
 // Initialize CLImate
@@ -88,7 +87,7 @@ if (!in_array($command, ['init', 'crawl', 'reference', 'test', 'config', 'help']
 
 // Set up the data directory and cookies file path
 $_ENV['INVRT_DATA_DIR'] = joinPath($_ENV['INVRT_DIRECTORY'], 'data', $_ENV['INVRT_PROFILE'], $_ENV['INVRT_ENVIRONMENT']);
-$_ENV['INVRT_COOKIES_FILE'] = joinPath($_ENV['INVRT_DATA_DIR'], 'cookies.json');
+$_ENV['INVRT_COOKIES_FILE'] = joinPath($_ENV['INVRT_DATA_DIR'], 'cookies');
 
 // Load profile-specific settings and override defaults
 if ($command != 'init') {
@@ -117,11 +116,10 @@ function executeCommand($command, $env) {
     $INVRT_PASSWORD = $env['INVRT_PASSWORD'] ?? '';
     $INVRT_URL = $env['INVRT_URL'] ?? '';
     $INVRT_COOKIES_FILE = $env['INVRT_COOKIES_FILE'] ?? '';
-    $INVRT_DIRECTORY = $env['INVRT_DIRECTORY'] ?? '';
     
     // Login before executing crawl, reference, or test commands
     if (($command === 'crawl' || $command === 'reference' || $command === 'test') && ($INVRT_USERNAME || $INVRT_PASSWORD)) {
-        loginIfCredentialsExist($INVRT_USERNAME, $INVRT_PASSWORD, $INVRT_URL, $INVRT_COOKIES_FILE, $INVRT_DIRECTORY);
+        loginIfCredentialsExist($INVRT_USERNAME, $INVRT_PASSWORD, $INVRT_URL, $INVRT_COOKIES_FILE);
     }
 
     // Execute command
