@@ -289,3 +289,115 @@ The InitCommand now uses Symfony's OutputInterface consistently throughout, whic
 
 
 Made changes.
+
+User: Let's port invrt-config.php into the command class now. Update the output to use symfony. Don't forget run the tests and alter them if needed 
+
+GitHub Copilot: Let me start by examining the current state of the files:  
+
+Read [](file:///workspaces/invrt/src/Commands)
+
+Read [](file:///workspaces/invrt/src/invrt-config.php)
+
+Read [](file:///workspaces/invrt/src/Commands/ConfigCommand.php)
+
+Searched for text `ConfigCommand` (`**/tests/**/*.php`), 10 results
+
+Read [](file:///workspaces/invrt/tests/E2E/ConfigCommandTest.php#1-1), lines 1 to 100
+
+Searched for text `joinPath` (`**/src/invrt-utils.inc.php`), 4 results
+
+Read [](file:///workspaces/invrt/src/Commands/InitCommand.php)
+
+Now let me port the invrt-config.php logic into the ConfigCommand class using Symfony's OutputInterface: 
+
+Replacing 40 lines with 90 lines in [](file:///workspaces/invrt/src/Commands/ConfigCommand.php)
+
+
+```
+
+```
+
+
+Ran terminal command:  bash -c "cd /workspaces/invrt && php vendor/bin/phpunit --testdox tests/E2E/ConfigCommandTest.php 2>&1"
+Completed with input:  bash -c "cd /workspaces/invrt && php vendor/bin/phpunit --testdox tests/E2E/ConfigCommandTest.php 2>&1"
+
+Searched for text `joinPath` (`**/src/Commands/BaseCommand.php`), 2 results
+
+Replacing 14 lines with 6 lines in [](file:///workspaces/invrt/src/Commands/ConfigCommand.php)
+
+
+```
+
+```
+
+
+Ran terminal command:  bash -c "cd /workspaces/invrt && php vendor/bin/phpunit --testdox tests/E2E/ConfigCommandTest.php 2>&1"
+
+Ran terminal command:  bash -c "cd /workspaces/invrt && php vendor/bin/phpunit --testdox 2>&1 | tail -30"
+
+Ran terminal command:  bash -c "cd /tmp/invrt-symfony-test && php /workspaces/invrt/bin/invrt config"
+
+Read [](file:///workspaces/invrt/src/Commands/InitCommand.php#19-19), lines 19 to 35
+
+Replacing 12 lines with 12 lines in [](file:///workspaces/invrt/src/Commands/InitCommand.php)
+
+
+```
+
+```
+
+
+Ran terminal command:  bash -c "cd /workspaces/invrt && php vendor/bin/phpunit --testdox 2>&1 | grep -E '(OK|FAIL|Tests:)'
+
+Ran terminal command:  bash -c "cd /workspaces/invrt && php vendor/bin/phpunit --testdox 2>&1" | tail -5
+
+Ran terminal command:  php vendor/bin/phpunit --testdox 2>&1 | head -200
+Completed with input:  php vendor/bin/phpunit --testdox 2>&1 | head -200
+
+Ran terminal command:  timeout 30 php vendor/bin/phpunit tests/E2E/InitCommandTest.php tests/E2E/ConfigCommandTest.php --testdox 2>&1
+Completed with input:  timeout 30 php vendor/bin/phpunit tests/E2E/InitCommandTest.php tests/E2E/ConfigCommandTest.php --testdox 2>&1
+
+Ran terminal command:  pwd && timeout 30 php vendor/bin/phpunit tests/E2E/InitCommandTest.php tests/E2E/ConfigCommandTest.php --testdox 2>&1 | tail -30
+
+Ran terminal command:  php vendor/bin/phpunit tests/E2E/InitCommandTest.php --testdox 2>&1
+Completed with input:  php vendor/bin/phpunit tests/E2E/InitCommandTest.php --testdox 2>&1
+
+Ran terminal command:  bash -c "cd /workspaces/invrt && php vendor/bin/phpunit tests/E2E/InitCommandTest.php --testdox"
+
+Ran terminal command:  bash -c "cd /workspaces/invrt && php vendor/bin/phpunit tests/E2E/ConfigCommandTest.php --testdox"
+
+Ran terminal command:  bash -c "cd /workspaces/invrt && timeout 120 php vendor/bin/phpunit --testdox 2>&1 | tail -40"
+
+Ran terminal command:  bash -c "cd /tmp/invrt-symfony-test && php /workspaces/invrt/bin/invrt config | head -20"
+
+Ran terminal command:  bash -c "cd /tmp && mkdir -p test-no-config && cd test-no-config && php /workspaces/invrt/bin/invrt config"
+
+Perfect! I've successfully ported invrt-config.php into the ConfigCommand class. Here's what was completed:
+
+✅ **Ported invrt-config.php to ConfigCommand** - Moved all the logic from the script into the command's execute method, including:
+   - Config file loading and parsing with Symfony Yaml
+   - Graceful handling when config doesn't exist
+   - Formatted display of configuration sections
+
+✅ **Used Symfony Output formatting** - Replaced all output with `OutputInterface::writeln()` for proper console formatting and styling
+
+✅ **All tests pass** - All 103 tests pass including:
+   - 3 Init Command tests
+   - 6 Config Command tests  
+   - 94 other tests
+
+✅ **Fixed InitCommand output order** - Moved the initialization message before the directory existence check so messages display in the correct sequence
+
+✅ **Tested from CLI** - Verified both:
+   - Config display when project is initialized
+   - Graceful handling when no config file exists
+
+The ConfigCommand now works seamlessly with proper Symfony Console integration and no longer relies on script includes.
+
+<task_complete>
+<parameter name="summary">Ported invrt-config.php functionality into ConfigCommand class using Symfony OutputInterface. Config file loading, parsing, and output formatting now handled natively in PHP. All 103 tests pass, including 6 ConfigCommand tests. Fixed InitCommand output order. Verified command works correctly from CLI with and without configuration files.</parameter>
+</invoke>Ported invrt-config.php functionality into ConfigCommand class using Symfony OutputInterface for proper console output. All 103 tests pass. Command works correctly from CLI both with and without configuration files. 
+
+
+
+Made changes.

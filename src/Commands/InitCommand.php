@@ -21,13 +21,13 @@ class InitCommand extends Command
         $initCwd = getenv('INIT_CWD') ?: getcwd();
         $invrtDirectory = $this->joinPath($initCwd, '.invrt');
 
-        
+        $output->writeln('🚀 Initializing InVRT for the project at ' . $initCwd);
+
         // Check if already initialized
         if (is_dir($invrtDirectory)) {
             $output->writeln('<error>⚠️  InVRT is already initialized for this project. Please remove the .invrt directory if you want to re-initialize.</error>');
             return Command::FAILURE;
         }
-        $output->writeln('🚀 Initializing InVRT for the project at ' . $initCwd);
             
         // Create .invrt directory and subdirectories
         if (!mkdir($invrtDirectory, 0755, true)) {
