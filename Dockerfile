@@ -28,7 +28,7 @@ COPY . .
 
 # Install PHP dependencies and Node.js dependencies
 RUN composer install --no-dev --optimize-autoloader
-RUN npm install && npm run install-deps
+RUN npm install && npx playwright install-deps && npx playwright install
 
 WORKDIR /src
 

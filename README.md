@@ -38,22 +38,25 @@ The instance of the project under test.
 
 The project includes a PHPUnit test suite covering utility functions, CLI argument parsing, and configuration handling.
 
-### Run Tests with Composer
+### Run Tests with Task
 
     # Run all tests
-    composer test
+    task test
 
     # Run only unit tests
-    composer test:unit
+    task test:unit
 
     # Run only integration tests
-    composer test:integration
+    task test:integration
+
+    # Run only E2E tests
+    task test:e2e
 
     # Generate code coverage report
-    composer test:coverage
+    task test:coverage
 
     # Generate HTML code coverage report
-    composer test:coverage-html
+    task test:coverage-html
 
 ### Dependencies
 
@@ -72,10 +75,10 @@ The project uses PHPStan for static code analysis to catch potential bugs and ty
 ### Run Static Analysis
 
     # Analyze code
-    composer analyze
+    task analyze
 
     # Generate baseline for tracking error changes
-    composer analyze:baseline
+    task analyze:baseline
 
 The analysis runs at level 5 (strict) and checks the `src/` directory. Configuration is in `phpstan.neon`.
 

@@ -10,11 +10,6 @@
     "test": "test"
   },
   "scripts": {
-    "crawl": "./bin/invrt crawl",
-    "init": "./bin/invrt init",
-    "reference": "./bin/invrt reference",
-    "install-deps": "npx playwright install-deps && npx playwright install",
-    "build-docker": "docker build -t ronan4000/invrt ."
   },
   "repository": {
     "type": "git",
