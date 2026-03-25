@@ -2,14 +2,14 @@
 
 namespace App\Service;
 
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class LoginService
 {
     /**
      * Handle login if credentials exist
-     * 
+     *
      * @return int Command::SUCCESS on success or credentials not provided, Command::FAILURE on error
      */
     public static function loginIfCredentialsExist(
@@ -17,7 +17,7 @@ class LoginService
         string $password,
         string $url,
         string $cookiesFile,
-        OutputInterface $output
+        OutputInterface $output,
     ): int {
         try {
             if (empty($username) && empty($password)) {
@@ -46,16 +46,16 @@ class LoginService
 
             // Execute Playwright login script
             $script = dirname(__DIR__) . "/playwright-login.js";
-            
+
             if (!file_exists($script)) {
                 $output->writeln("<error>❌ Playwright login script not found at $script</error>");
                 return Command::FAILURE;
             }
-            
-            $env = "INVRT_LOGIN_URL=" . escapeshellarg($loginUrl) . " " .
-                   "INVRT_USERNAME=" . escapeshellarg($username) . " " .
-                   "INVRT_PASSWORD=" . escapeshellarg($password) . " " .
-                   "INVRT_COOKIES_FILE=" . escapeshellarg($cookiesFile);
+
+            $env = "INVRT_LOGIN_URL=" . escapeshellarg($loginUrl) . " "
+                   . "INVRT_USERNAME=" . escapeshellarg($username) . " "
+                   . "INVRT_PASSWORD=" . escapeshellarg($password) . " "
+                   . "INVRT_COOKIES_FILE=" . escapeshellarg($cookiesFile);
 
             $exitCode = 0;
             passthru("$env node " . escapeshellarg($script), $exitCode);
@@ -77,4 +77,3 @@ class LoginService
         }
     }
 }
-

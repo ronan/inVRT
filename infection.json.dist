@@ -1,0 +1,17 @@
+{
+    "source": {
+        "directories": ["src"]
+    },
+    "logs": {
+        "text": "build/infection-log.txt",
+        "html": "build/infection-html"
+    },
+    "mutators": {
+        "@default": true
+    },
+    "testFramework": "phpunit",
+    "testFrameworkOptions": "--configuration=phpunit.xml",
+    "minMsi": 70,
+    "minCoveredMsi": 80,
+    "tmpDir": "build/infection"
+}

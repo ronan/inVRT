@@ -4,7 +4,7 @@ namespace Tests\E2E;
 
 /**
  * E2E tests for CrawlCommand
- * 
+ *
  * Tests the `invrt crawl` command which crawls the website and generates screenshots.
  */
 class CrawlCommandTest extends CommandTestCase
@@ -54,7 +54,7 @@ class CrawlCommandTest extends CommandTestCase
             // The command executes (even if it fails due to missing script)
             // Verify we got some output indicating the command ran
             $this->assertTrue(true, 'Crawl command executed without fatal errors');
-            
+
         } finally {
             chdir($originalCwd);
             if ($originalInitCwd === false) {

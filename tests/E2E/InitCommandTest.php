@@ -4,7 +4,7 @@ namespace Tests\E2E;
 
 /**
  * E2E tests for InitCommand
- * 
+ *
  * Tests the `invrt init` command which initializes a new inVRT project.
  */
 class InitCommandTest extends CommandTestCase
@@ -57,8 +57,10 @@ class InitCommandTest extends CommandTestCase
             $this->assertOutputContains('Created invrt directory');
 
             // Assert .invrt directory was created
-            $this->assertTrue(is_dir($this->fixture->getInvrtDir()),
-                '.invrt directory was not created');
+            $this->assertTrue(
+                is_dir($this->fixture->getInvrtDir()),
+                '.invrt directory was not created',
+            );
 
             // Assert config.yaml was created
             $this->assertConfigFileExists();
@@ -100,7 +102,7 @@ class InitCommandTest extends CommandTestCase
 
             // The fixture already created .invrt, so init should fail
             $this->executeCommand('init');
-            
+
             // Must have failed with exit code 1
             $this->assertCommandFailure(1);
 

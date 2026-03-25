@@ -2,12 +2,12 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Service\CookieService;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for CookieService
- * 
+ *
  * Tests cookie conversion to Netscape format for wget/curl compatibility
  */
 class CookieServiceTest extends TestCase
@@ -46,7 +46,7 @@ class CookieServiceTest extends TestCase
                 'domain' => '.example.com',
                 'path' => '/',
                 'secure' => true,
-                'expires' => 1735689600
+                'expires' => 1735689600,
             ],
             [
                 'name' => 'user_id',
@@ -54,8 +54,8 @@ class CookieServiceTest extends TestCase
                 'domain' => '.example.com',
                 'path' => '/',
                 'secure' => false,
-                'expires' => 1735689600
-            ]
+                'expires' => 1735689600,
+            ],
         ];
 
         $jsonFile = $this->tempDir . '/cookies.json';
@@ -64,7 +64,7 @@ class CookieServiceTest extends TestCase
         // Capture output
         ob_start();
         CookieService::convertToNetscapeFormat($jsonFile);
-        $output = ob_get_clean();
+        ob_end_clean();
 
         // Verify output file was created
         $txtFile = $this->tempDir . '/cookies.txt';
@@ -86,8 +86,8 @@ class CookieServiceTest extends TestCase
         $cookies = [
             [
                 'name' => 'test_cookie',
-                'value' => 'test_value'
-            ]
+                'value' => 'test_value',
+            ],
         ];
 
         $jsonFile = $this->tempDir . '/cookies.json';
@@ -138,7 +138,7 @@ class CookieServiceTest extends TestCase
                 'domain' => '.example.com',
                 'path' => '/',
                 'secure' => true,
-                'expires' => 1735689600
+                'expires' => 1735689600,
             ],
             [
                 'name' => 'insecure_cookie',
@@ -146,8 +146,8 @@ class CookieServiceTest extends TestCase
                 'domain' => '.example.com',
                 'path' => '/',
                 'secure' => false,
-                'expires' => 1735689600
-            ]
+                'expires' => 1735689600,
+            ],
         ];
 
         $jsonFile = $this->tempDir . '/cookies.json';
@@ -162,7 +162,7 @@ class CookieServiceTest extends TestCase
         $lines = explode("\n", $content);
 
         // Find cookie lines (skip header)
-        $cookieLines = array_filter($lines, function($line) {
+        $cookieLines = array_filter($lines, function ($line) {
             return !empty($line) && strpos($line, '#') === false;
         });
 
@@ -177,9 +177,9 @@ class CookieServiceTest extends TestCase
         $cookies = [
             [
                 'name' => 'test',
-                'value' => 'value'
+                'value' => 'value',
                 // No domain specified
-            ]
+            ],
         ];
 
         $jsonFile = $this->tempDir . '/cookies.json';
@@ -205,9 +205,9 @@ class CookieServiceTest extends TestCase
             [
                 'name' => 'test',
                 'value' => 'value',
-                'domain' => '.example.com'
+                'domain' => '.example.com',
                 // No path specified
-            ]
+            ],
         ];
 
         $jsonFile = $this->tempDir . '/cookies.json';
@@ -243,7 +243,7 @@ class CookieServiceTest extends TestCase
         // Should have header but no cookie data
         $this->assertStringContainsString('# Netscape HTTP Cookie File', $content);
         $lines = explode("\n", $content);
-        $cookieLines = array_filter($lines, function($line) {
+        $cookieLines = array_filter($lines, function ($line) {
             return !empty($line) && strpos($line, '#') === false;
         });
         $this->assertEmpty($cookieLines);
@@ -259,8 +259,8 @@ class CookieServiceTest extends TestCase
                 'name' => 'special_cookie',
                 'value' => 'value-with_special.chars=123',
                 'domain' => '.example.com',
-                'path' => '/path/with/slashes'
-            ]
+                'path' => '/path/with/slashes',
+            ],
         ];
 
         $jsonFile = $this->tempDir . '/cookies.json';
@@ -278,4 +278,3 @@ class CookieServiceTest extends TestCase
         $this->assertStringContainsString('/path/with/slashes', $content);
     }
 }
-?>

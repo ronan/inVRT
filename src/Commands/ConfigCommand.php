@@ -2,10 +2,10 @@
 
 namespace App\Commands;
 
+use App\Service\EnvironmentService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
-use App\Service\EnvironmentService;
 
 class ConfigCommand extends BaseCommand
 {
@@ -29,7 +29,7 @@ class ConfigCommand extends BaseCommand
         $this->environment->initialize($output, false);
 
         // Get config file path
-        $configFile = $this->joinPath($_ENV['INVRT_DIRECTORY'], 'config.yaml');
+        $configFile = $this->joinPath(getenv('INVRT_DIRECTORY') ?: '.invrt', 'config.yaml');
 
         // Check if config file exists
         if (!file_exists($configFile)) {
@@ -41,36 +41,53 @@ class ConfigCommand extends BaseCommand
         try {
             $fileContents = file_get_contents($configFile);
             $config = Yaml::parse($fileContents) ?: [];
-            
+
             $output->writeln('# Current inVRT Configuration:');
             $output->writeln('# ============================');
             $output->writeln('');
-            
-            // Display the configuration in a readable format (it's Yaml)
-            foreach ($config as $section => $values) {
-                $output->write($section . ':');
-                if (is_array($values)) {
-                    $output->writeln('');
-                    foreach ($values as $key => $value) {
-                        if (is_array($value)) {
-                            $output->writeln('  ' . $key . ':');
-                            foreach ($value as $subkey => $subvalue) {
-                                $outputValue = is_array($subvalue) ? json_encode($subvalue) : $subvalue;
-                                $output->writeln('    ' . $subkey . ': ' . $outputValue);
-                            }
-                        } else {
-                            $output->writeln('  ' . $key . ': ' . $value);
-                        }
-                    }
-                }
-                $output->writeln('');
-            }
+
+            $this->displayConfiguration($config, $output);
         } catch (\Exception $error) {
             $output->writeln('<error>Error reading config file: ' . $error->getMessage() . '</error>');
             return 1;
         }
 
         return 0;
+    }
+
+    /**
+     * Display configuration sections in readable format
+     */
+    private function displayConfiguration(array $config, OutputInterface $output): void
+    {
+        foreach ($config as $section => $values) {
+            if (!is_array($values)) {
+                $output->writeln($section . ': ' . $values);
+                continue;
+            }
+
+            $output->writeln($section . ':');
+            foreach ($values as $key => $value) {
+                $this->displayConfigValue($key, $value, $output);
+            }
+            $output->writeln('');
+        }
+    }
+
+    /**
+     * Display a single config value
+     */
+    private function displayConfigValue(string $key, mixed $value, OutputInterface $output): void
+    {
+        if (is_array($value)) {
+            $output->writeln('  ' . $key . ':');
+            foreach ($value as $subkey => $subvalue) {
+                $formatted = is_array($subvalue) ? json_encode($subvalue) : $subvalue;
+                $output->writeln('    ' . $subkey . ': ' . $formatted);
+            }
+        } else {
+            $output->writeln('  ' . $key . ': ' . $value);
+        }
     }
 
     protected function getScriptName(): string

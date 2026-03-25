@@ -4,6 +4,10 @@ namespace App\Service;
 
 class CookieService
 {
+    private const NETSCAPE_HEADER = "# Netscape HTTP Cookie File\n"
+        . "# http://curl.haxx.se/rfc/cookie_spec.html\n"
+        . "# This is a generated file!  Do not edit.\n\n";
+
     /**
      * Convert cookies.json to wget/curl compatible Netscape format
      */
@@ -15,33 +19,62 @@ class CookieService
                 return;
             }
 
-            $cookiesJson = json_decode(file_get_contents($jsonFilePath), true);
-            $txtFilePath = str_replace('.json', '.txt', $jsonFilePath);
+            $cookies = self::loadCookies($jsonFilePath);
+            $txtFilePath = self::getTxtFilePath($jsonFilePath);
+            $content = self::formatNetscapeContent($cookies);
 
-            // Netscape format header
-            $netscapeFormat = "# Netscape HTTP Cookie File\n";
-            $netscapeFormat .= "# http://curl.haxx.se/rfc/cookie_spec.html\n";
-            $netscapeFormat .= "# This is a generated file!  Do not edit.\n\n";
-
-            // Convert each cookie
-            if (is_array($cookiesJson)) {
-                foreach ($cookiesJson as $cookie) {
-                    $domain = isset($cookie['domain']) ? $cookie['domain'] : '.localhost';
-                    $flag = (isset($cookie['secure']) && $cookie['secure']) ? 'TRUE' : 'FALSE';
-                    $path = isset($cookie['path']) ? $cookie['path'] : '/';
-                    $secure = (isset($cookie['secure']) && $cookie['secure']) ? 'TRUE' : 'FALSE';
-                    $expiration = isset($cookie['expires']) ? $cookie['expires'] : '0';
-                    $name = isset($cookie['name']) ? $cookie['name'] : '';
-                    $value = isset($cookie['value']) ? $cookie['value'] : '';
-
-                    $netscapeFormat .= "{$domain}\t{$flag}\t{$path}\t{$secure}\t{$expiration}\t{$name}\t{$value}\n";
-                }
-            }
-
-            file_put_contents($txtFilePath, $netscapeFormat);
+            file_put_contents($txtFilePath, $content);
             echo "📄 Cookies converted to wget format: " . $txtFilePath . "\n";
         } catch (\Exception $error) {
             fwrite(STDERR, "⚠️  Warning: Could not convert cookies to wget format: " . $error->getMessage() . "\n");
         }
+    }
+
+    /**
+     * Load cookies from JSON file
+     */
+    private static function loadCookies(string $jsonFilePath): array
+    {
+        $content = file_get_contents($jsonFilePath);
+        $cookies = json_decode($content, true);
+
+        return is_array($cookies) ? $cookies : [];
+    }
+
+    /**
+     * Get the txt file path from json path
+     */
+    private static function getTxtFilePath(string $jsonFilePath): string
+    {
+        return str_replace('.json', '.txt', $jsonFilePath);
+    }
+
+    /**
+     * Format cookies in Netscape format
+     */
+    private static function formatNetscapeContent(array $cookies): string
+    {
+        $content = self::NETSCAPE_HEADER;
+
+        foreach ($cookies as $cookie) {
+            $content .= self::formatCookie($cookie);
+        }
+
+        return $content;
+    }
+
+    /**
+     * Format a single cookie in Netscape format
+     */
+    private static function formatCookie(array $cookie): string
+    {
+        $domain = $cookie['domain'] ?? '.localhost';
+        $secure = ($cookie['secure'] ?? false) ? 'TRUE' : 'FALSE';
+        $path = $cookie['path'] ?? '/';
+        $expires = $cookie['expires'] ?? '0';
+        $name = $cookie['name'] ?? '';
+        $value = $cookie['value'] ?? '';
+
+        return "{$domain}\t{$secure}\t{$path}\t{$secure}\t{$expires}\t{$name}\t{$value}\n";
     }
 }

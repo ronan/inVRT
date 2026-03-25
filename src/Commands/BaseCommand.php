@@ -2,12 +2,12 @@
 
 namespace App\Commands;
 
+use App\Service\EnvironmentService;
+use App\Service\LoginService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use App\Service\EnvironmentService;
-use App\Service\LoginService;
 
 abstract class BaseCommand extends Command
 {
@@ -47,7 +47,7 @@ abstract class BaseCommand extends Command
 
     /**
      * Handle login if credentials are configured
-     * 
+     *
      * @return int Command::SUCCESS on success, Command::FAILURE on error
      */
     protected function handleLogin(OutputInterface $output, array $env): int
@@ -70,7 +70,7 @@ abstract class BaseCommand extends Command
         // Prepare environment variables for subprocess
         $envStr = '';
         foreach ($env as $key => $value) {
-            $envStr .= $key . '=' . escapeshellarg((string)$value) . ' ';
+            $envStr .= $key . '=' . escapeshellarg((string) $value) . ' ';
         }
 
         $exitCode = null;

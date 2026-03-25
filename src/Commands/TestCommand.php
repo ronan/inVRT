@@ -18,4 +18,3 @@ class TestCommand extends BaseCommand
         return 'invrt-test.sh';
     }
 }
-

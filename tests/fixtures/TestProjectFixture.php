@@ -9,6 +9,7 @@ use Symfony\Component\Yaml\Yaml;
  * 
  * Provides helpers for creating realistic test project structures with fixture config files.
  * Automatically cleans up temporary directories after tests.
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class TestProjectFixture
 {
@@ -312,7 +313,6 @@ class TestProjectFixture
     public function setEnvironmentVariable(): self
     {
         putenv('INVRT_DIRECTORY=' . $this->invrtDir);
-        $_ENV['INVRT_DIRECTORY'] = $this->invrtDir;
         return $this;
     }
 
@@ -321,8 +321,7 @@ class TestProjectFixture
      */
     public function unsetEnvironmentVariable(): self
     {
-        putenv('INVRT_DIRECTORY');
-        unset($_ENV['INVRT_DIRECTORY']);
+        putenv('INVRT_DIRECTORY=');
         return $this;
     }
 }

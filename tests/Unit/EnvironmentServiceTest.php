@@ -2,15 +2,16 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Service\EnvironmentService;
-use Tests\Fixtures\TestProjectFixture;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\NullOutput;
+use Tests\Fixtures\TestProjectFixture;
 
 /**
  * Tests for EnvironmentService
- * 
+ *
  * Tests profile resolution, environment merging, credential loading, and path construction.
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class EnvironmentServiceTest extends TestCase
 {
@@ -71,8 +72,8 @@ class EnvironmentServiceTest extends TestCase
             'project' => ['url' => 'https://example.com'],
             'settings' => ['max_crawl_depth' => 5],
             'profiles' => [
-                'mobile' => ['url' => 'https://mobile.example.com']
-            ]
+                'mobile' => ['url' => 'https://mobile.example.com'],
+            ],
         ];
         $this->fixture->writeConfig($config);
 
@@ -96,11 +97,11 @@ class EnvironmentServiceTest extends TestCase
             'project' => ['url' => 'https://example.com'],
             'settings' => [],
             'profiles' => [
-                'default' => ['url' => 'https://profile.example.com']
+                'default' => ['url' => 'https://profile.example.com'],
             ],
             'environments' => [
-                'dev' => ['url' => 'https://dev.example.com']
-            ]
+                'dev' => ['url' => 'https://dev.example.com'],
+            ],
         ];
         $this->fixture->writeConfig($config);
 
@@ -123,7 +124,7 @@ class EnvironmentServiceTest extends TestCase
 
         $config = [
             'project' => ['url' => 'https://example.com'],
-            'settings' => []
+            'settings' => [],
         ];
         $this->fixture->writeConfig($config);
 
@@ -149,8 +150,8 @@ class EnvironmentServiceTest extends TestCase
             'environments' => [
                 'local' => ['url' => 'http://localhost:8000'],
                 'dev' => ['url' => 'https://dev.example.com'],
-                'prod' => ['url' => 'https://example.com']
-            ]
+                'prod' => ['url' => 'https://example.com'],
+            ],
         ];
         $this->fixture->writeConfig($config);
 
@@ -176,10 +177,10 @@ class EnvironmentServiceTest extends TestCase
                 'admin' => [
                     'auth' => [
                         'username' => 'admin_user',
-                        'password' => 'admin_pass'
-                    ]
-                ]
-            ]
+                        'password' => 'admin_pass',
+                    ],
+                ],
+            ],
         ];
         $this->fixture->writeConfig($config);
 
@@ -207,10 +208,10 @@ class EnvironmentServiceTest extends TestCase
                     'url' => 'https://dev.example.com',
                     'auth' => [
                         'username' => 'dev_user',
-                        'password' => 'dev_pass'
-                    ]
-                ]
-            ]
+                        'password' => 'dev_pass',
+                    ],
+                ],
+            ],
         ];
         $this->fixture->writeConfig($config);
 
@@ -237,18 +238,18 @@ class EnvironmentServiceTest extends TestCase
                 'default' => [
                     'auth' => [
                         'username' => 'profile_user',
-                        'password' => 'profile_pass'
-                    ]
-                ]
+                        'password' => 'profile_pass',
+                    ],
+                ],
             ],
             'environments' => [
                 'dev' => [
                     'auth' => [
                         'username' => 'env_user',
-                        'password' => 'env_pass'
-                    ]
-                ]
-            ]
+                        'password' => 'env_pass',
+                    ],
+                ],
+            ],
         ];
         $this->fixture->writeConfig($config);
 
@@ -274,14 +275,14 @@ class EnvironmentServiceTest extends TestCase
             'settings' => [],
             'profiles' => [
                 'tester' => [
-                    'auth' => ['username' => 'tester', 'password' => 'testerpass']
-                ]
+                    'auth' => ['username' => 'tester', 'password' => 'testerpass'],
+                ],
             ],
             'environments' => [
                 'staging' => [
-                    'url' => 'https://staging.example.com'
-                ]
-            ]
+                    'url' => 'https://staging.example.com',
+                ],
+            ],
         ];
         $this->fixture->writeConfig($config);
 
@@ -357,26 +358,26 @@ class EnvironmentServiceTest extends TestCase
         $config = [
             'project' => [
                 'url' => 'https://example.com',
-                'name' => 'Complex Project'
+                'name' => 'Complex Project',
             ],
             'settings' => [],
             'profiles' => [
                 'advanced' => [
                     'auth' => [
                         'username' => 'advanced_user',
-                        'password' => 'complex_pass_123!@#'
-                    ]
-                ]
+                        'password' => 'complex_pass_123!@#',
+                    ],
+                ],
             ],
             'environments' => [
                 'production' => [
                     'url' => 'https://prod.example.com',
                     'auth' => [
                         'username' => 'prod_user',
-                        'password' => 'prod_pass'
-                    ]
-                ]
-            ]
+                        'password' => 'prod_pass',
+                    ],
+                ],
+            ],
         ];
         $this->fixture->writeConfig($config);
 

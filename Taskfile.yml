@@ -10,38 +10,88 @@ tasks:
   test:
     desc: Run all tests with PHPUnit
     cmds:
-      - ./vendor/bin/phpunit --testdox
+      - cd /tmp && php /workspaces/invrt/vendor/bin/phpunit --testdox /workspaces/invrt/tests
 
   test:unit:
     desc: Run unit tests only
     cmds:
-      - ./vendor/bin/phpunit --testdox tests/Unit
+      - cd /tmp && php /workspaces/invrt/vendor/bin/phpunit --testdox /workspaces/invrt/tests/Unit
 
   test:e2e:
     desc: Run E2E tests only
     cmds:
-      - ./vendor/bin/phpunit --testdox tests/E2E
+      - cd /tmp && php /workspaces/invrt/vendor/bin/phpunit --testdox /workspaces/invrt/tests/E2E
 
   test:coverage:
     desc: Run tests with code coverage report
     cmds:
-      - sh -c 'XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-text'
+      - cd /tmp && sh -c 'XDEBUG_MODE=coverage php /workspaces/invrt/vendor/bin/phpunit --coverage-text /workspaces/invrt'
 
   test:coverage-html:
     desc: Generate HTML code coverage report
     cmds:
-      - sh -c 'XDEBUG_MODE=coverage ./vendor/bin/phpunit --coverage-html=coverage/'
+      - cd /tmp && sh -c 'XDEBUG_MODE=coverage php /workspaces/invrt/vendor/bin/phpunit --coverage-html=/workspaces/invrt/coverage/ /workspaces/invrt'
 
   # PHPStan analysis
   analyze:
     desc: Run PHPStan static analysis
     cmds:
-      - ./vendor/bin/phpstan analyse
+      - php ./vendor/bin/phpstan analyse
 
   analyze:baseline:
     desc: Generate PHPStan baseline for current violations
     cmds:
-      - ./vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline
+      - php ./vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline
+
+  # PHP CS Fixer - Code style
+  lint:
+    desc: Check code style with PHP CS Fixer
+    cmds:
+      - php ./vendor/bin/php-cs-fixer check --diff
+
+  lint:fix:
+    desc: Auto-fix code style with PHP CS Fixer
+    cmds:
+      - php ./vendor/bin/php-cs-fixer fix
+
+  # PHP Mess Detector - Code quality
+  mess:
+    desc: Check code quality with PHP Mess Detector
+    cmds:
+      - php ./vendor/bin/phpmd src,tests xml phpmd.xml --reportfile build/phpmd-report.xml || true
+      - php ./vendor/bin/phpmd src,tests text phpmd.xml
+
+  # Rector - Code modernization
+  analyze:fix:
+    desc: Dry-run Rector code modernization
+    cmds:
+      - php ./vendor/bin/rector process --dry-run
+
+  analyze:modernize:
+    desc: Run Rector code modernization (applies safe rules)
+    cmds:
+      - php ./vendor/bin/rector process
+
+  # Security - Dependency scanning
+  security:
+    desc: Check for security vulnerabilities in dependencies
+    cmds:
+      - composer audit
+
+  # Infection - Mutation testing
+  test:mutation:
+    desc: Run mutation testing with Infection
+    cmds:
+      - php ./vendor/bin/infection --only-covered --show-progress=progress
+
+  # Combined check task
+  check:
+    desc: Run all code quality checks (lint, mess, analyze, security)
+    cmds:
+      - task: lint
+      - task: mess
+      - task: analyze
+      - task: security
 
   # Utility tasks
   help:

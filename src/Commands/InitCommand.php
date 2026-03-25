@@ -16,6 +16,9 @@ class InitCommand extends Command
         $this->setHelp('Initializes a new inVRT project with the default configuration structure.');
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $initCwd = getenv('INIT_CWD') ?: getcwd();
@@ -28,7 +31,7 @@ class InitCommand extends Command
             $output->writeln('<error>⚠️  InVRT is already initialized for this project. Please remove the .invrt directory if you want to re-initialize.</error>');
             return Command::FAILURE;
         }
-            
+
         // Create .invrt directory and subdirectories
         if (!mkdir($invrtDirectory, 0755, true)) {
             $output->writeln('<error>Failed to create invrt directory at ' . $invrtDirectory . '</error>');

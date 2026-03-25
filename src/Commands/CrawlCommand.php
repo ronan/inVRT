@@ -18,4 +18,3 @@ class CrawlCommand extends BaseCommand
         return 'invrt-crawl.sh';
     }
 }
-

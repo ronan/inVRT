@@ -7,10 +7,11 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * Tests for the main invrt CLI script
- * 
+ *
  * Note: This test file validates the logic and structure of invrt.php
  * without executing the full CLI entry point directly (which uses exit() calls).
  * It tests helper functions and configurations instead.
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class InvrtCliTest extends TestCase
 {
@@ -43,13 +44,13 @@ class InvrtCliTest extends TestCase
     {
         $config = [
             'project' => [
-                'url' => 'https://example.com'
+                'url' => 'https://example.com',
             ],
             'settings' => [
                 'max_crawl_depth' => 3,
                 'max_pages' => 50,
-                'user_agent' => 'Mozilla/5.0'
-            ]
+                'user_agent' => 'Mozilla/5.0',
+            ],
         ];
 
         // Convert to YAML and save
@@ -72,7 +73,7 @@ class InvrtCliTest extends TestCase
     {
         $config = [
             'project' => [
-                'url' => 'https://example.com'
+                'url' => 'https://example.com',
             ],
             'profiles' => [
                 'default' => [
@@ -80,14 +81,14 @@ class InvrtCliTest extends TestCase
                     'max_crawl_depth' => 2,
                     'auth' => [
                         'username' => 'user1',
-                        'password' => 'pass1'
-                    ]
+                        'password' => 'pass1',
+                    ],
                 ],
                 'mobile' => [
                     'url' => 'https://mobile.example.com',
-                    'max_crawl_depth' => 1
-                ]
-            ]
+                    'max_crawl_depth' => 1,
+                ],
+            ],
         ];
 
         $yaml = Yaml::dump($config);
@@ -112,23 +113,23 @@ class InvrtCliTest extends TestCase
     {
         $config = [
             'project' => [
-                'url' => 'https://example.com'
+                'url' => 'https://example.com',
             ],
             'environments' => [
                 'dev' => [
                     'url' => 'https://dev.example.com',
                     'auth' => [
                         'username' => 'dev_user',
-                        'password' => 'dev_pass'
-                    ]
+                        'password' => 'dev_pass',
+                    ],
                 ],
                 'staging' => [
-                    'url' => 'https://staging.example.com'
+                    'url' => 'https://staging.example.com',
                 ],
                 'prod' => [
-                    'url' => 'https://example.com'
-                ]
-            ]
+                    'url' => 'https://example.com',
+                ],
+            ],
         ];
 
         $yaml = Yaml::dump($config);
@@ -151,7 +152,7 @@ class InvrtCliTest extends TestCase
         file_put_contents($this->testConfigFile, "invalid: yaml: syntax:");
 
         $fileContents = file_get_contents($this->testConfigFile);
-        
+
         $this->expectException(\Exception::class);
         Yaml::parse($fileContents);
     }
@@ -178,13 +179,13 @@ class InvrtCliTest extends TestCase
         $config = [
             'project' => [
                 'url' => 'https://example.com',
-                'name' => 'Example Project'
+                'name' => 'Example Project',
             ],
             'settings' => [
                 'max_crawl_depth' => 5,
                 'max_pages' => 200,
                 'user_agent' => 'Mozilla/5.0',
-                'max_concurrent_requests' => 10
+                'max_concurrent_requests' => 10,
             ],
             'profiles' => [
                 'desktop' => [
@@ -192,28 +193,28 @@ class InvrtCliTest extends TestCase
                     'auth' => [
                         'username' => 'desktop_user',
                         'password' => 'desktop_pass',
-                        'cookie' => 'session_token=abc123'
-                    ]
+                        'cookie' => 'session_token=abc123',
+                    ],
                 ],
                 'mobile' => [
                     'max_crawl_depth' => 2,
-                    'user_agent' => 'Mobile Safari'
-                ]
+                    'user_agent' => 'Mobile Safari',
+                ],
             ],
             'environments' => [
                 'local' => [
-                    'url' => 'http://localhost:8000'
+                    'url' => 'http://localhost:8000',
                 ],
                 'dev' => [
                     'url' => 'https://dev.example.com',
                     'auth' => [
-                        'username' => 'dev_user'
-                    ]
+                        'username' => 'dev_user',
+                    ],
                 ],
                 'prod' => [
-                    'url' => 'https://example.com'
-                ]
-            ]
+                    'url' => 'https://example.com',
+                ],
+            ],
         ];
 
         $yaml = Yaml::dump($config);
@@ -238,8 +239,8 @@ class InvrtCliTest extends TestCase
         $testCommands = ['init', 'crawl', 'reference', 'test', 'help', '--help', '-h'];
 
         foreach ($testCommands as $command) {
-            if (in_array($command, $validCommands)) {
-                $this->assertTrue(in_array($command, $validCommands));
+            if (in_array($command, $validCommands, true)) {
+                $this->assertTrue(in_array($command, $validCommands, true));
             }
         }
     }
@@ -252,7 +253,7 @@ class InvrtCliTest extends TestCase
         $validCommands = ['init', 'crawl', 'reference', 'test'];
         $invalidCommand = 'invalid';
 
-        $this->assertFalse(in_array($invalidCommand, $validCommands));
+        $this->assertFalse(in_array($invalidCommand, $validCommands, true));
     }
 
     /**
@@ -267,7 +268,7 @@ class InvrtCliTest extends TestCase
             'INVRT_URL' => 'https://example.com',
             'INVRT_PROFILE' => 'default',
             'INVRT_DEVICE' => 'desktop',
-            'INVRT_ENVIRONMENT' => 'local'
+            'INVRT_ENVIRONMENT' => 'local',
         ];
 
         foreach ($testEnv as $key => $value) {
@@ -282,12 +283,12 @@ class InvrtCliTest extends TestCase
     {
         $baseEnv = [
             'INVRT_PROFILE' => 'default',
-            'INVRT_DEVICE' => 'desktop'
+            'INVRT_DEVICE' => 'desktop',
         ];
 
         $additionalEnv = [
             'INVRT_ENVIRONMENT' => 'dev',
-            'INVRT_URL' => 'https://dev.example.com'
+            'INVRT_URL' => 'https://dev.example.com',
         ];
 
         $merged = array_merge($baseEnv, $additionalEnv);
@@ -325,4 +326,3 @@ class InvrtCliTest extends TestCase
         $this->assertStringContainsString('data', $cookiesFile);
     }
 }
-?>

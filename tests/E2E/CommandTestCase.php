@@ -2,21 +2,19 @@
 
 namespace Tests\E2E;
 
+use App\Commands\ConfigCommand;
+use App\Commands\CrawlCommand;
+use App\Commands\InitCommand;
+use App\Commands\ReferenceCommand;
+use App\Commands\TestCommand;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Tests\Fixtures\TestProjectFixture;
-use App\Commands\InitCommand;
-use App\Commands\CrawlCommand;
-use App\Commands\ReferenceCommand;
-use App\Commands\TestCommand;
-use App\Commands\ConfigCommand;
 
 /**
  * Base class for E2E command tests
- * 
+ *
  * Provides common infrastructure for testing invrt CLI commands:
  * - Fixture management (temp project directories)
  * - Command application setup
@@ -45,7 +43,7 @@ abstract class CommandTestCase extends TestCase
         $this->app->add(new ReferenceCommand());
         $this->app->add(new TestCommand());
         $this->app->add(new ConfigCommand());
-        
+
         // Make application not exit on exception
         $this->app->setCatchExceptions(false);
 
@@ -64,7 +62,7 @@ abstract class CommandTestCase extends TestCase
 
     /**
      * Execute a command and return the output
-     * 
+     *
      * @param string $commandName The command to run (e.g., 'init', 'crawl')
      * @param array $input Additional arguments/options
      * @return CommandTester The tester with the command result
@@ -106,8 +104,11 @@ abstract class CommandTestCase extends TestCase
      */
     protected function assertCommandSuccess(): void
     {
-        $this->assertEquals(0, $this->getExitCode(), 
-            "Command failed with exit code {$this->getExitCode()}\n\nOutput:\n" . $this->getOutput());
+        $this->assertEquals(
+            0,
+            $this->getExitCode(),
+            "Command failed with exit code {$this->getExitCode()}\n\nOutput:\n" . $this->getOutput(),
+        );
     }
 
     /**
@@ -117,11 +118,17 @@ abstract class CommandTestCase extends TestCase
     {
         $exitCode = $this->getExitCode();
         if ($expectedCode === null) {
-            $this->assertNotEquals(0, $exitCode, 
-                "Command succeeded but was expected to fail\n\nOutput:\n" . $this->getOutput());
+            $this->assertNotEquals(
+                0,
+                $exitCode,
+                "Command succeeded but was expected to fail\n\nOutput:\n" . $this->getOutput(),
+            );
         } else {
-            $this->assertEquals($expectedCode, $exitCode, 
-                "Command failed with exit code $exitCode but expected $expectedCode\n\nOutput:\n" . $this->getOutput());
+            $this->assertEquals(
+                $expectedCode,
+                $exitCode,
+                "Command failed with exit code $exitCode but expected $expectedCode\n\nOutput:\n" . $this->getOutput(),
+            );
         }
     }
 
@@ -131,8 +138,11 @@ abstract class CommandTestCase extends TestCase
     protected function assertOutputContains(string $expected): void
     {
         $output = $this->getOutput();
-        $this->assertStringContainsString($expected, $output, 
-            "Output does not contain expected string:\n$expected\n\nActual output:\n$output");
+        $this->assertStringContainsString(
+            $expected,
+            $output,
+            "Output does not contain expected string:\n$expected\n\nActual output:\n$output",
+        );
     }
 
     /**
@@ -141,8 +151,11 @@ abstract class CommandTestCase extends TestCase
     protected function assertOutputNotContains(string $notExpected): void
     {
         $output = $this->getOutput();
-        $this->assertStringNotContainsString($notExpected, $output, 
-            "Output contains unexpected string:\n$notExpected\n\nActual output:\n$output");
+        $this->assertStringNotContainsString(
+            $notExpected,
+            $output,
+            "Output contains unexpected string:\n$notExpected\n\nActual output:\n$output",
+        );
     }
 
     /**
@@ -150,8 +163,10 @@ abstract class CommandTestCase extends TestCase
      */
     protected function assertConfigFileExists(): void
     {
-        $this->assertTrue($this->fixture->hasConfig(),
-            'Config file does not exist at ' . $this->fixture->getConfigPath());
+        $this->assertTrue(
+            $this->fixture->hasConfig(),
+            'Config file does not exist at ' . $this->fixture->getConfigPath(),
+        );
     }
 
     /**
@@ -159,8 +174,10 @@ abstract class CommandTestCase extends TestCase
      */
     protected function assertConfigFileNotExists(): void
     {
-        $this->assertFalse($this->fixture->hasConfig(),
-            'Config file exists but was not expected at ' . $this->fixture->getConfigPath());
+        $this->assertFalse(
+            $this->fixture->hasConfig(),
+            'Config file exists but was not expected at ' . $this->fixture->getConfigPath(),
+        );
     }
 
     /**
@@ -177,8 +194,11 @@ abstract class CommandTestCase extends TestCase
             $value = $value[$k];
         }
 
-        $this->assertEquals($expectedValue, $value,
-            "Config value mismatch at $key. Expected: $expectedValue, Got: $value");
+        $this->assertEquals(
+            $expectedValue,
+            $value,
+            "Config value mismatch at $key. Expected: $expectedValue, Got: $value",
+        );
     }
 
     /**
@@ -199,10 +219,10 @@ abstract class CommandTestCase extends TestCase
 
     /**
      * Execute a command and capture stray subprocess output (from passthru, etc)
-     * 
+     *
      * This uses output buffering to capture output that bypasses Symfony's output interface,
      * such as output from bash subprocesses called via passthru().
-     * 
+     *
      * @param string $commandName The command to run
      * @param array $input Additional arguments/options
      * @return CommandTester The tester with the command result
@@ -211,7 +231,7 @@ abstract class CommandTestCase extends TestCase
     {
         // Start buffering stray output
         ob_start();
-        
+
         try {
             // Execute the command normally
             $this->executeCommand($commandName, $input);
@@ -219,7 +239,7 @@ abstract class CommandTestCase extends TestCase
             // Capture any stray output and store it
             $this->strayOutput = ob_get_clean();
         }
-        
+
         return $this->commandTester;
     }
 
@@ -236,8 +256,11 @@ abstract class CommandTestCase extends TestCase
      */
     protected function assertStrayOutputContains(string $expected): void
     {
-        $this->assertStringContainsString($expected, $this->strayOutput,
-            "Stray output does not contain expected string:\n$expected\n\nActual stray output:\n" . substr($this->strayOutput, 0, 500));
+        $this->assertStringContainsString(
+            $expected,
+            $this->strayOutput,
+            "Stray output does not contain expected string:\n$expected\n\nActual stray output:\n" . substr($this->strayOutput, 0, 500),
+        );
     }
 
     /**
@@ -245,8 +268,11 @@ abstract class CommandTestCase extends TestCase
      */
     protected function assertStrayOutputNotContains(string $notExpected): void
     {
-        $this->assertStringNotContainsString($notExpected, $this->strayOutput,
-            "Stray output contains unexpected string:\n$notExpected");
+        $this->assertStringNotContainsString(
+            $notExpected,
+            $this->strayOutput,
+            "Stray output contains unexpected string:\n$notExpected",
+        );
     }
 
     /**

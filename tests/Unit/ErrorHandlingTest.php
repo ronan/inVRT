@@ -2,15 +2,16 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Service\EnvironmentService;
-use Tests\Fixtures\TestProjectFixture;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\NullOutput;
+use Tests\Fixtures\TestProjectFixture;
 
 /**
  * Tests for error handling and edge cases
- * 
+ *
  * Tests configuration errors, missing values, and error scenarios.
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
  */
 class ErrorHandlingTest extends TestCase
 {
@@ -102,11 +103,11 @@ class ErrorHandlingTest extends TestCase
     public function testMissingProjectUrl(): void
     {
         $this->fixture->setEnvironmentVariable();
-        
+
         // Create config without project.url
         $config = [
             'project' => ['name' => 'Test'],
-            'settings' => ['max_crawl_depth' => 2]
+            'settings' => ['max_crawl_depth' => 2],
         ];
         $this->fixture->writeConfig($config);
 
@@ -171,10 +172,10 @@ class ErrorHandlingTest extends TestCase
                 'default' => [
                     'auth' => [
                         'username' => '',
-                        'password' => ''
-                    ]
-                ]
-            ]
+                        'password' => '',
+                    ],
+                ],
+            ],
         ];
         $this->fixture->writeConfig($config);
 
@@ -229,11 +230,11 @@ class ErrorHandlingTest extends TestCase
                     'version' => '1.0',
                     'author' => [
                         'name' => 'Test Author',
-                        'email' => 'test@example.com'
-                    ]
-                ]
+                        'email' => 'test@example.com',
+                    ],
+                ],
             ],
-            'settings' => []
+            'settings' => [],
         ];
         $this->fixture->writeConfig($config);
 
@@ -269,7 +270,7 @@ class ErrorHandlingTest extends TestCase
             'INVRT_DIRECTORY',
             'INVRT_DATA_DIR',
             'INVRT_COOKIES_FILE',
-            'INVRT_CONFIG_FILE'
+            'INVRT_CONFIG_FILE',
         ];
 
         foreach ($requiredVars as $var) {
@@ -287,11 +288,11 @@ class ErrorHandlingTest extends TestCase
         $config = [
             'project' => [
                 'url' => 'https://example.com/path?query=value&other=123',
-                'name' => 'Test "Project" with Special Chars'
+                'name' => 'Test "Project" with Special Chars',
             ],
             'settings' => [
-                'user_agent' => 'Mozilla/5.0 (Test) & More "Stuff"'
-            ]
+                'user_agent' => 'Mozilla/5.0 (Test) & More "Stuff"',
+            ],
         ];
         $this->fixture->writeConfig($config);
 

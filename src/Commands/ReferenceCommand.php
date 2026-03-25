@@ -18,4 +18,3 @@ class ReferenceCommand extends BaseCommand
         return 'invrt-reference.sh';
     }
 }
-

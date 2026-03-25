@@ -2,15 +2,14 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
 use App\Service\LoginService;
-use App\Service\CookieService;
-use Symfony\Component\Console\Output\BufferedOutput;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * Tests for LoginService
- * 
+ *
  * Tests credential handling and login orchestration with error handling
  */
 class LoginServiceTest extends TestCase
@@ -49,7 +48,7 @@ class LoginServiceTest extends TestCase
             '',
             'https://example.com',
             $this->tempDir . '/cookies',
-            $output
+            $output,
         );
 
         $this->assertEquals(Command::SUCCESS, $result);
@@ -68,7 +67,7 @@ class LoginServiceTest extends TestCase
             '',
             'https://example.com',
             $this->tempDir . '/cookies',
-            $output
+            $output,
         );
 
         $this->assertEquals(Command::SUCCESS, $result);
@@ -87,7 +86,7 @@ class LoginServiceTest extends TestCase
             '',
             'https://example.com',
             $this->tempDir . '/cookies',
-            $output
+            $output,
         );
 
         $this->assertEquals(Command::SUCCESS, $result);
@@ -111,7 +110,7 @@ class LoginServiceTest extends TestCase
             'password',
             'https://example.com',
             $this->tempDir . '/cookies',
-            $output
+            $output,
         );
 
         $this->assertEquals(Command::SUCCESS, $result);

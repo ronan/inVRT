@@ -17,7 +17,7 @@ class EnvironmentService
     public function __construct(
         string $profile = 'anonymous',
         string $device = 'desktop',
-        string $environment = 'local'
+        string $environment = 'local',
     ) {
         $this->profile = $profile;
         $this->device = $device;
@@ -28,7 +28,7 @@ class EnvironmentService
     /**
      * Initialize environment variables and load configuration
      * Should be called before executing a command that needs configuration
-     * 
+     *
      * @param bool $requireConfig If true, throws when config file is missing
      *                           If false, just sets up defaults
      * @throws \RuntimeException When $requireConfig is true and file doesn't exist
@@ -36,7 +36,7 @@ class EnvironmentService
     public function initialize(OutputInterface $output, bool $requireConfig = true): array
     {
         $this->setupDirectories();
-        
+
         if ($requireConfig) {
             $this->loadConfigFile($output);
         } else {
@@ -69,13 +69,7 @@ class EnvironmentService
             $this->invrtDirectory = $this->joinPath($currentDir, '.invrt');
         }
 
-        // Set environment variables in both $_ENV and putenv for subprocess access
-        $_ENV['INVRT_DIRECTORY'] = $this->invrtDirectory;
-        $_ENV['INVRT_SCRIPTS_DIR'] = $this->scriptsDir;
-        $_ENV['INVRT_PROFILE'] = $this->profile;
-        $_ENV['INVRT_DEVICE'] = $this->device;
-        $_ENV['INVRT_ENVIRONMENT'] = $this->environment;
-
+        // Set environment variables for subprocess access
         putenv('INVRT_DIRECTORY=' . $this->invrtDirectory);
         putenv('INVRT_SCRIPTS_DIR=' . $this->scriptsDir);
         putenv('INVRT_PROFILE=' . $this->profile);
@@ -92,7 +86,7 @@ class EnvironmentService
 
         if (!file_exists($configFile)) {
             throw new \RuntimeException(
-                "Configuration file not found at $configFile. Please run 'invrt init' to initialize the project."
+                "Configuration file not found at $configFile. Please run 'invrt init' to initialize the project.",
             );
         }
 
@@ -100,7 +94,7 @@ class EnvironmentService
             "<comment>#  Loading project settings for profile: {$this->profile} "
             . "device: {$this->device} "
             . "environment: {$this->environment}</comment>",
-            OutputInterface::VERBOSITY_VERBOSE
+            OutputInterface::VERBOSITY_VERBOSE,
         );
 
         try {
@@ -110,6 +104,14 @@ class EnvironmentService
             throw new \RuntimeException("Error reading config file: " . $error->getMessage());
         }
 
+        $this->applyConfigValues($output);
+    }
+
+    /**
+     * Apply config values and set environment variables
+     */
+    private function applyConfigValues(OutputInterface $output): void
+    {
         // Load config values and set environment variables
         $configKeys = [
             'profile' => 'anonymous',
@@ -142,23 +144,7 @@ class EnvironmentService
         ];
 
         foreach ($sections as $section) {
-            $sectionValue = $this->getConfigValueRaw($section);
-            if (!is_array($sectionValue) || empty($sectionValue)) {
-                $output->writeln("#⚠️ Section $section not found in config.yaml, using defaults\n",
-                OutputInterface::VERBOSITY_VERBOSE
-                );
-                continue;
-            }
-
-            foreach ($configKeys as $key => $default) {
-                $value = $this->getConfigValue("$section.$key", null);
-                
-                // Only set if we got a non-null value from the config
-                // This allows environment settings to override profile/device settings
-                if ($value !== null) {
-                    $accumulatedConfig[$key] = $value;
-                }
-            }
+            $this->processSectionConfig($section, $configKeys, $accumulatedConfig, $output);
         }
 
         // Now set environment variables for all accumulated values, using defaults for missing ones
@@ -166,7 +152,31 @@ class EnvironmentService
             $envVarName = 'INVRT_' . strtoupper($key);
             $value = $accumulatedConfig[$key] ?? $default;
             putenv("$envVarName=$value");
-            $_ENV[$envVarName] = $value;
+        }
+    }
+
+    /**
+     * Process a single section of config
+     */
+    private function processSectionConfig(string $section, array $configKeys, array &$accumulatedConfig, OutputInterface $output): void
+    {
+        $sectionValue = $this->getConfigValueRaw($section);
+        if (!is_array($sectionValue) || empty($sectionValue)) {
+            $output->writeln(
+                "#⚠️ Section $section not found in config.yaml, using defaults\n",
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
+            return;
+        }
+
+        foreach (array_keys($configKeys) as $key) {
+            $value = $this->getConfigValue("$section.$key", null);
+
+            // Only set if we got a non-null value from the config
+            // This allows environment settings to override profile/device settings
+            if ($value !== null) {
+                $accumulatedConfig[$key] = $value;
+            }
         }
     }
 
@@ -206,12 +216,12 @@ class EnvironmentService
             }
         }
 
-        // Return null for missing values so we can use it as a signal
-        if ($value === null || $value === false) {
+        // Return default for false values (but allow 0, empty strings, empty arrays, etc.)
+        if ($value === false) {
             return $default;
         }
-        
-        return (string)$value;
+
+        return (string) $value;
     }
 
     /**

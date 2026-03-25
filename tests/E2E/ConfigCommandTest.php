@@ -4,7 +4,7 @@ namespace Tests\E2E;
 
 /**
  * E2E tests for ConfigCommand
- * 
+ *
  * Tests the `invrt config` command which displays project configuration.
  */
 class ConfigCommandTest extends CommandTestCase
