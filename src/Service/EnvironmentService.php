@@ -99,7 +99,8 @@ class EnvironmentService
         $output->writeln(
             "<comment>#  Loading project settings for profile: {$this->profile} "
             . "device: {$this->device} "
-            . "environment: {$this->environment}</comment>"
+            . "environment: {$this->environment}</comment>",
+            OutputInterface::VERBOSITY_VERBOSE
         );
 
         try {
@@ -110,16 +111,8 @@ class EnvironmentService
         }
 
         // Load config values and set environment variables
-        $this->applyConfigToEnvironment();
-    }
-
-    /**
-     * Apply configuration from YAML to environment variables
-     */
-    private function applyConfigToEnvironment(): void
-    {
         $configKeys = [
-            'profile' => 'default',
+            'profile' => 'anonymous',
             'device' => 'desktop',
             'environment' => 'local',
             'directory' => './.invrt',
@@ -151,7 +144,10 @@ class EnvironmentService
         foreach ($sections as $section) {
             $sectionValue = $this->getConfigValueRaw($section);
             if (!is_array($sectionValue) || empty($sectionValue)) {
-                fwrite(STDERR, "#⚠️ Section $section not found in config.yaml, using defaults\n");
+                $output->writeln("#⚠️ Section $section not found in config.yaml, using defaults\n",
+                OutputInterface::VERBOSITY_VERBOSE
+                );
+                continue;
             }
 
             foreach ($configKeys as $key => $default) {

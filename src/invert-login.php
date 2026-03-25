@@ -2,7 +2,7 @@
 <?php
 
 if (!$INVRT_USERNAME || !$INVRT_PASSWORD) {
-    echo "⚠️ No username/password found in profile. Skipping login.\n";
+    fwrite(STDERR, "⚠️ No username/password found in profile. Skipping login.\n");
     return;
 }
 
@@ -12,7 +12,7 @@ if (!$INVRT_URL) {
 }
 
 if (file_exists($INVRT_COOKIES_FILE)) {
-    echo "⚠️ Cookies file already exists at $INVRT_COOKIES_FILE. Skipping login to avoid overwriting existing cookies.\n";
+    fwrite(STDERR, "⚠️ Cookies file already exists at $INVRT_COOKIES_FILE. Skipping login to avoid overwriting existing cookies.\n");
     return;
 }
 
