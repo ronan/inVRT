@@ -46,15 +46,15 @@ class InitCommandTest extends CommandTestCase
             chdir($this->fixture->getProjectDir());
             putenv('INIT_CWD=' . $this->fixture->getProjectDir());
 
-            // Execute init command with output capture
-            $this->executeCommandWithOutputCapture('init');
+            // Execute init command
+            $this->executeCommand('init');
 
             // Assert command succeeded
             $this->assertCommandSuccess();
 
-            // Verify subprocess output contains initialization messages
-            $this->assertStrayOutputHasInitMessages();
-            $this->assertStrayOutputContains('Created invrt directory');
+            // Verify output contains initialization messages
+            $this->assertOutputContains('Initializing InVRT');
+            $this->assertOutputContains('Created invrt directory');
 
             // Assert .invrt directory was created
             $this->assertTrue(is_dir($this->fixture->getInvrtDir()),
