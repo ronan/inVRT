@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use App\Service\EnvironmentService;
+use App\Service\LoginService;
 
 abstract class BaseCommand extends Command
 {
@@ -35,7 +36,10 @@ abstract class BaseCommand extends Command
         $env = $this->environment->initialize($output, true);
 
         // Handle login if credentials exist
-        $this->handleLogin($output, $env);
+        $loginResult = $this->handleLogin($output, $env);
+        if ($loginResult !== Command::SUCCESS) {
+            return $loginResult;
+        }
 
         // Execute the script
         return $this->executeScript($this->getScriptName(), $env);
@@ -43,16 +47,17 @@ abstract class BaseCommand extends Command
 
     /**
      * Handle login if credentials are configured
+     * 
+     * @return int Command::SUCCESS on success, Command::FAILURE on error
      */
-    protected function handleLogin(OutputInterface $output, array $env): void
+    protected function handleLogin(OutputInterface $output, array $env): int
     {
         $username = $env['INVRT_USERNAME'] ?? '';
         $password = $env['INVRT_PASSWORD'] ?? '';
         $url = $env['INVRT_URL'] ?? '';
+        $cookiesFile = $env['INVRT_COOKIES_FILE'] ?? '';
 
-        if ($username || $password) {
-            loginIfCredentialsExist($username, $password, $url, $env['INVRT_COOKIES_FILE']);
-        }
+        return LoginService::loginIfCredentialsExist($username, $password, $url, $cookiesFile, $output);
     }
 
     /**

@@ -8,31 +8,12 @@ The test suite is organized into two main categories:
 
 ### Unit Tests (`tests/Unit`)
 
-- **InvrtUtilsTest.php**: Tests for utility functions in `invrt-utils.inc.php`
-  - `getConfig()`: Safely accessing nested configuration values
-  - `joinPath()`: Cross-platform path joining
-  - `convertCookiesForWget()`: Converting JSON cookies to Netscape format
 
 - **InvrtCliTest.php**: Tests for the main CLI script logic
   - YAML configuration file parsing
   - Configuration parsing with profiles and environments
   - Environment variable handling
   - Directory and file path construction
-
-### Integration Tests (`tests/Integration`)
-
-- **ConfigurationIntegrationTest.php**: Tests using fixture files
-  - Loading and parsing real configuration files
-  - Config value extraction and overrides
-  - Profile and environment behavior
-  - Authentication credential handling
-  - Complete scenario testing
-
-- **ArgumentParsingTest.php**: Tests for CLI argument parsing
-  - Parsing various argument formats (`--profile=`, `-p=`, etc.)
-  - Command extraction and validation
-  - Default value handling
-  - Real-world argument sequences
 
 ## Test Fixtures
 
@@ -129,7 +110,7 @@ composer install
 
 The phpunit.xml configuration file includes:
 
-- Test suite definitions for Unit and Integration tests
+- Test suite definitions for Unit and E2E tests
 - Code coverage configuration (excluding vendor and test directories)
 - Display error settings for debugging
 

@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Service;
+
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Command\Command;
+
+class LoginService
+{
+    /**
+     * Handle login if credentials exist
+     * 
+     * @return int Command::SUCCESS on success or credentials not provided, Command::FAILURE on error
+     */
+    public static function loginIfCredentialsExist(
+        string $username,
+        string $password,
+        string $url,
+        string $cookiesFile,
+        OutputInterface $output
+    ): int {
+        try {
+            if (empty($username) && empty($password)) {
+                return Command::SUCCESS;
+            }
+
+            // Check if URL is configured
+            if (empty($url)) {
+                $output->writeln("<error>❌ Profile has credentials but no URL configured. Cannot login.</error>");
+                return Command::FAILURE;
+            }
+
+            // Check if cookies file already exists
+            if (file_exists("$cookiesFile.json")) {
+                $output->writeln("<comment>⚠️ Cookies file already exists at $cookiesFile.json. Skipping login to avoid overwriting existing cookies.</comment>");
+                return Command::SUCCESS;
+            }
+
+            // Set default login URL if not provided
+            $loginUrl = getenv('INVRT_LOGIN_URL');
+            if (!$loginUrl) {
+                $loginUrl = $url . "/user/login";
+            }
+
+            $output->writeln("🔐 Logging in with provided credentials...");
+
+            // Execute Playwright login script
+            $script = dirname(__DIR__) . "/playwright-login.js";
+            
+            if (!file_exists($script)) {
+                $output->writeln("<error>❌ Playwright login script not found at $script</error>");
+                return Command::FAILURE;
+            }
+            
+            $env = "INVRT_LOGIN_URL=" . escapeshellarg($loginUrl) . " " .
+                   "INVRT_USERNAME=" . escapeshellarg($username) . " " .
+                   "INVRT_PASSWORD=" . escapeshellarg($password) . " " .
+                   "INVRT_COOKIES_FILE=" . escapeshellarg($cookiesFile);
+
+            $exitCode = 0;
+            passthru("$env node " . escapeshellarg($script), $exitCode);
+
+            if ($exitCode !== 0) {
+                $output->writeln("<error>❌ Playwright login failed with exit code $exitCode</error>");
+                return Command::FAILURE;
+            }
+
+            $output->writeln("<info>✅ Login successful!</info>");
+
+            // Convert cookies to wget format
+            CookieService::convertToNetscapeFormat("$cookiesFile.json");
+
+            return Command::SUCCESS;
+        } catch (\Exception $error) {
+            $output->writeln("<error>❌ Login failed: " . $error->getMessage() . "</error>");
+            return Command::FAILURE;
+        }
+    }
+}
+

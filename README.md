@@ -46,9 +46,6 @@ The project includes a PHPUnit test suite covering utility functions, CLI argume
     # Run only unit tests
     task test:unit
 
-    # Run only integration tests
-    task test:integration
-
     # Run only E2E tests
     task test:e2e
 

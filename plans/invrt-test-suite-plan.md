@@ -4,7 +4,7 @@
 Expand test coverage from 52 tests to ~100 tests across 4 test categories. Add comprehensive E2E command tests, error handling, and service layer tests. Use real bash script execution to test actual CLI workflows end-to-end.
 
 ## Current State
-- **Tests:** 52 tests across Unit/ and Integration/ directories
+- **Tests:** 52 tests across Unit/ and E2E/ directories
 - **Coverage:** Utility functions (getConfig, joinPath, convertCookies), argument parsing, YAML config loading
 - **Gaps:** CLI commands (init, crawl, reference, test, config), error scenarios, real bash script execution, Environment variables, service interactions
 

@@ -17,11 +17,6 @@ tasks:
     cmds:
       - ./vendor/bin/phpunit --testdox tests/Unit
 
-  test:integration:
-    desc: Run integration tests only
-    cmds:
-      - ./vendor/bin/phpunit --testdox tests/Integration
-
   test:e2e:
     desc: Run E2E tests only
     cmds:
