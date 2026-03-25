@@ -9,21 +9,21 @@ $configFile = joinPath($_ENV['INVRT_DIRECTORY'], 'config.yaml');
 
 // Check if config file exists
 if (!file_exists($configFile)) {
-    echo "Configuration file not found at: $configFile\n";
-    echo "Run 'invrt init' to create a new configuration.\n";
-    exit(0);
+    echo "# Configuration file not found at: $configFile\n";
+    echo "# Run 'invrt init' to create a new configuration.\n";
+    return;
 }
 
 try {
     $fileContents = file_get_contents($configFile);
     $config = Yaml::parse($fileContents) ?: [];
     
-    echo "Current inVRT Configuration:\n";
-    echo "============================\n\n";
+    echo "# Current inVRT Configuration:\n";
+    echo "# ============================\n\n";
     
     // Display the configuration in a readable format
     foreach ($config as $section => $values) {
-        echo "[$section]\n";
+        echo "$section:\n";
         if (is_array($values)) {
             foreach ($values as $key => $value) {
                 if (is_array($value)) {
@@ -40,5 +40,5 @@ try {
     }
 } catch (Exception $error) {
     fwrite(STDERR, "Error reading config file: " . $error->getMessage() . "\n");
-    exit(1);
+    return;
 }

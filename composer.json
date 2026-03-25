@@ -22,11 +22,17 @@
             "App\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "bin": ["src/invrt.php"],
     "scripts": {
         "test": "phpunit --testdox",
         "test:unit": "phpunit --testdox tests/Unit",
         "test:integration": "phpunit --testdox tests/Integration",
+        "test:e2e": "phpunit --testdox tests/E2E",
         "test:coverage": "XDEBUG_MODE=coverage phpunit --coverage-text",
         "test:coverage-html": "XDEBUG_MODE=coverage phpunit --coverage-html=coverage/",
         "analyze": "phpstan analyse",

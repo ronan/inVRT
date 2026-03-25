@@ -12,6 +12,9 @@
         <testsuite name="Integration Tests">
             <directory suffix="Test.php">tests/Integration</directory>
         </testsuite>
+        <testsuite name="E2E Tests">
+            <directory suffix="Test.php">tests/E2E</directory>
+        </testsuite>
     </testsuites>
 
     <source>
