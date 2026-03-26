@@ -4,10 +4,10 @@ includes:
 parameters:
     level: 5
     paths:
-        - src
+        - ../src
     excludePaths:
-        - src/*.sh
-        - src/*.js
+        - ../src/*.sh
+        - ../src/*.js
     treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:

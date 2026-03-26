@@ -8,12 +8,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class InitCommand extends Command
 {
-    protected static $defaultName = 'init';
-    protected static $defaultDescription = 'Initialize a new inVRT project in the current directory';
-
     protected function configure(): void
     {
-        $this->setHelp('Initializes a new inVRT project with the default configuration structure.');
+        $this
+            ->setName('init')
+            ->setDescription('Initialize a new inVRT project in the current directory')
+            ->setHelp('Initializes a new inVRT project with the default configuration structure.');
     }
 
     /**

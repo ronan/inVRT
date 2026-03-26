@@ -4,13 +4,13 @@ namespace App\Commands;
 
 class TestCommand extends BaseCommand
 {
-    protected static $defaultName = 'test';
-    protected static $defaultDescription = 'Run visual regression tests';
-
     protected function configure(): void
     {
+        $this
+            ->setName('test')
+            ->setDescription('Run visual regression tests')
+            ->setHelp('Runs visual regression tests comparing current screenshots against reference screenshots.');
         parent::configure();
-        $this->setHelp('Runs visual regression tests comparing current screenshots against reference screenshots.');
     }
 
     protected function getScriptName(): string

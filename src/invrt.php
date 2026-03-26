@@ -18,11 +18,11 @@ $app = new Application('inVRT CLI', '1.0.0');
 $app->setName('📖 inVRT CLI - Visual Regression Testing Tool');
 
 // Register commands
-$app->add(new InitCommand());
-$app->add(new CrawlCommand());
-$app->add(new ReferenceCommand());
-$app->add(new TestCommand());
-$app->add(new ConfigCommand());
+$app->addCommand(new InitCommand());
+$app->addCommand(new CrawlCommand());
+$app->addCommand(new ReferenceCommand());
+$app->addCommand(new TestCommand());
+$app->addCommand(new ConfigCommand());
 
 // Run the application
 $app->run();

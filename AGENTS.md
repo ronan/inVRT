@@ -10,7 +10,19 @@ The tool is built of composable parts and uses environment variables internally 
 
 The codebase is somewhat language agnostic. Use the right language for job at hand. We favor using PHP since the target testable platforms are PHP-based CMSs, but we also use bash and Node.js where appropriate.
 
-Follow best practive modern code style and architecture principles, and write clean, maintainable code. Use modern PHP features and Symfony Console conventions. Use convenience features such as maps and the spread operator to maintain code readability, reduce boilerplate. Use short clear variable names. Keep flow simple. Code should pass linting: `task check`
+Write clean, maintainable and modern code.
+
+Use modern PHP features and Symfony Console conventions.
+
+Use convenience features such as maps, shorthand lambda functions and the spread operator to maintain code readability.
+
+Reduce boilerplate.
+
+Use short clear variable names.
+
+Write clear, concise comments where needed to explain non-obvious code.
+
+Code should pass tests and linting: `task test`
 
 Write tests with PHPUnit, including end-to-end tests that execute real bash scripts. Don't test at too fine a detail. Focus on testing the overall behavior and integration of components, not implementation details. Use mocks/stubs for external dependencies in unit tests, but use real subprocess execution in E2E tests to verify actual CLI workflows.
 
@@ -19,7 +31,6 @@ Write tests with PHPUnit, including end-to-end tests that execute real bash scri
 ```bash
 # Testing
 task test                   # Run full PHPUnit suite (--testdox output)
-task test:unit              # Unit tests only
 task test:e2e               # E2E tests only
 task test:coverage          # Coverage report (text)
 
@@ -30,8 +41,8 @@ vendor/bin/phpunit tests/Unit/CookieServiceTest.php
 vendor/bin/phpunit --filter testMethodName tests/Unit/CookieServiceTest.php
 
 # Static analysis
-task analyze                # PHPStan level 5
-task analyze:baseline       # Regenerate phpstan-baseline.neon
+task test:phpstan                # PHPStan level 5
+task test:phpstan:baseline       # Regenerate phpstan-baseline.neon
 ```
 
 ## Architecture

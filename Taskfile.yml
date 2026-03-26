@@ -8,90 +8,90 @@ tasks:
 
   # PHP/PHPUnit test scripts
   test:
-    desc: Run all tests with PHPUnit
+    desc: Run all tests and quality checks
     cmds:
-      - cd /tmp && php /workspaces/invrt/vendor/bin/phpunit --testdox /workspaces/invrt/tests
+      - task: test:php
+      - task: test:phpstan
+      - task: test:modernize
+      - task: test:lint
+      - task: test:security
+
+  test:php:
+    desc: Run all tests with PHPUnit
+    dir: /tmp
+    cmds:
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --testdox {{.TASKFILE_DIR}}/tests
 
   test:unit:
     desc: Run unit tests only
     cmds:
-      - cd /tmp && php /workspaces/invrt/vendor/bin/phpunit --testdox /workspaces/invrt/tests/Unit
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --testdox {{.TASKFILE_DIR}}/tests/Unit
 
   test:e2e:
     desc: Run E2E tests only
+    dir: /tmp
     cmds:
-      - cd /tmp && php /workspaces/invrt/vendor/bin/phpunit --testdox /workspaces/invrt/tests/E2E
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --testdox {{.TASKFILE_DIR}}/tests/E2E
 
   test:coverage:
     desc: Run tests with code coverage report
     cmds:
-      - cd /tmp && sh -c 'XDEBUG_MODE=coverage php /workspaces/invrt/vendor/bin/phpunit --coverage-text /workspaces/invrt'
+      - sh -c 'XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-text /workspaces/invrt'
 
-  test:coverage-html:
+  test:coverage:
     desc: Generate HTML code coverage report
     cmds:
-      - cd /tmp && sh -c 'XDEBUG_MODE=coverage php /workspaces/invrt/vendor/bin/phpunit --coverage-html=/workspaces/invrt/coverage/ /workspaces/invrt'
+      - sh -c 'XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-html=tooling/coverage/ /workspaces/invrt'
 
-  # PHPStan analysis
-  analyze:
-    desc: Run PHPStan static analysis
-    cmds:
-      - php ./vendor/bin/phpstan analyse
 
-  analyze:baseline:
-    desc: Generate PHPStan baseline for current violations
-    cmds:
-      - php ./vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline
-
-  # PHP CS Fixer - Code style
-  lint:
-    desc: Check code style with PHP CS Fixer
-    cmds:
-      - php ./vendor/bin/php-cs-fixer check --diff
-
-  lint:fix:
-    desc: Auto-fix code style with PHP CS Fixer
-    cmds:
-      - php ./vendor/bin/php-cs-fixer fix
-
-  # PHP Mess Detector - Code quality
-  mess:
-    desc: Check code quality with PHP Mess Detector
-    cmds:
-      - php ./vendor/bin/phpmd src,tests xml phpmd.xml --reportfile build/phpmd-report.xml || true
-      - php ./vendor/bin/phpmd src,tests text phpmd.xml
-
-  # Rector - Code modernization
-  analyze:fix:
+  test:modernize:
     desc: Dry-run Rector code modernization
     cmds:
-      - php ./vendor/bin/rector process --dry-run
+      - vendor/bin/rector process src --config=tooling/rector.php --dry-run
 
-  analyze:modernize:
+  fix:modernize:
     desc: Run Rector code modernization (applies safe rules)
     cmds:
-      - php ./vendor/bin/rector process
+      - vendor/bin/rector process src --config=tooling/rector.php
 
-  # Security - Dependency scanning
-  security:
+  test:phpstan:
+    desc: Run PHPStan static analysis
+    cmds:
+      - vendor/bin/phpstan analyse --configuration=tooling/phpstan.neon
+
+  baseline:phpstan:
+    desc: Generate PHPStan baseline for current violations
+    cmds:
+      - vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline --configuration=tooling/phpstan.neon
+
+  test:lint:
+    desc: Check code style with PHP CS Fixer
+    cmds:
+      - php ./vendor/bin/php-cs-fixer check --diff --config=tooling/.php-cs-fixer.php
+
+  fix:lint:
+    desc: Auto-fix code style with PHP CS Fixer
+    cmds:
+      - php ./vendor/bin/php-cs-fixer fix --config=tooling/.php-cs-fixer.php
+
+  test:security:
     desc: Check for security vulnerabilities in dependencies
     cmds:
       - composer audit
 
-  # Infection - Mutation testing
-  test:mutation:
-    desc: Run mutation testing with Infection
-    cmds:
-      - php ./vendor/bin/infection --only-covered --show-progress=progress
-
   # Combined check task
   check:
-    desc: Run all code quality checks (lint, mess, analyze, security)
+    desc: Run all code quality checks (lint, analyze, security)
     cmds:
-      - task: lint
-      - task: mess
-      - task: analyze
-      - task: security
+      - task: check:lint
+      - task: check:stan
+      - task: check:security
+
+  fix:
+    desc: Run all code fixes (modernize, lint)
+    cmds:
+      - task: fix:modernize
+      - task: fix:lint
 
   # Utility tasks
   help:

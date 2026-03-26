@@ -7,10 +7,8 @@ This guide outlines the code quality standards and build/test toolchain for the 
 | Tool | Purpose | Config File | Command |
 |------|---------|-------------|---------|
 | PHP CS Fixer | Auto-format code to PSR-12 | `.php-cs-fixer.dist.php` | `task lint:fix` |
-| PHP Mess Detector | Detect code smells | `phpmd.xml` | `task mess` |
 | PHPStan | Static type analysis | `phpstan.neon` | `task analyze` |
 | Rector | Code modernization | `rector.php` | `task analyze:fix` |
-| Infection | Mutation testing | `infection.json.dist` | `task test:mutation` |
 | Composer Audit | Security scanning | (native) | `task security` |
 
 ## Local Development
@@ -29,8 +27,8 @@ task analyze:fix
 
 ### Before pushing:
 ```bash
-# Full mutation testing ensures tests catch real bugs
-task test:mutation
+# Run full test suite
+task test
 ```
 
 ## CI/CD Integration
@@ -43,9 +41,7 @@ All checks run automatically:
 
 - **PSR-12** — PHP coding standard (auto-enforced)
 - **Type safety** — PHPStan Level 5 (no violations)
-- **Code health** — PHPMD, no violations
 - **Security** — Composer audit passes
-- **Test quality** — Infection MSI ≥ 70%, Covered MSI ≥ 80%
 
 ## Fixing Issues
 
@@ -53,9 +49,6 @@ All checks run automatically:
 ```bash
 task lint:fix
 ```
-
-### Code smells (usually manual):
-Review `task mess` output and refactor
 
 ### Type hints (auto-fixable):
 ```bash

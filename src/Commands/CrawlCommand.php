@@ -4,13 +4,13 @@ namespace App\Commands;
 
 class CrawlCommand extends BaseCommand
 {
-    protected static $defaultName = 'crawl';
-    protected static $defaultDescription = 'Crawl the website and generate screenshots';
-
     protected function configure(): void
     {
+        $this
+            ->setName('crawl')
+            ->setDescription('Crawl the website and generate screenshots')
+            ->setHelp('Crawls the configured website and generates screenshots for the specified profile, device, and environment.');
         parent::configure();
-        $this->setHelp('Crawls the configured website and generates screenshots for the specified profile, device, and environment.');
     }
 
     protected function getScriptName(): string

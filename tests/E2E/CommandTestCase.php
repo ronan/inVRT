@@ -38,11 +38,11 @@ abstract class CommandTestCase extends TestCase
 
         // Create application with all commands
         $this->app = new Application('inVRT CLI', '1.0.0');
-        $this->app->add(new InitCommand());
-        $this->app->add(new CrawlCommand());
-        $this->app->add(new ReferenceCommand());
-        $this->app->add(new TestCommand());
-        $this->app->add(new ConfigCommand());
+        $this->app->addCommand(new InitCommand());
+        $this->app->addCommand(new CrawlCommand());
+        $this->app->addCommand(new ReferenceCommand());
+        $this->app->addCommand(new TestCommand());
+        $this->app->addCommand(new ConfigCommand());
 
         // Make application not exit on exception
         $this->app->setCatchExceptions(false);

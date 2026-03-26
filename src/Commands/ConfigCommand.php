@@ -9,13 +9,13 @@ use Symfony\Component\Yaml\Yaml;
 
 class ConfigCommand extends BaseCommand
 {
-    protected static $defaultName = 'config';
-    protected static $defaultDescription = 'View the inVRT configuration';
-
     protected function configure(): void
     {
+        $this
+            ->setName('config')
+            ->setDescription('View the inVRT configuration')
+            ->setHelp('Displays the current inVRT project configuration.');
         parent::configure();
-        $this->setHelp('Displays the current inVRT project configuration.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

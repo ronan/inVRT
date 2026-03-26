@@ -162,9 +162,7 @@ class CookieServiceTest extends TestCase
         $lines = explode("\n", $content);
 
         // Find cookie lines (skip header)
-        $cookieLines = array_filter($lines, function ($line) {
-            return !empty($line) && strpos($line, '#') === false;
-        });
+        $cookieLines = array_filter($lines, fn($line) => !empty($line) && strpos($line, '#') === false);
 
         $this->assertCount(2, $cookieLines);
     }
@@ -243,9 +241,7 @@ class CookieServiceTest extends TestCase
         // Should have header but no cookie data
         $this->assertStringContainsString('# Netscape HTTP Cookie File', $content);
         $lines = explode("\n", $content);
-        $cookieLines = array_filter($lines, function ($line) {
-            return !empty($line) && strpos($line, '#') === false;
-        });
+        $cookieLines = array_filter($lines, fn($line) => !empty($line) && strpos($line, '#') === false);
         $this->assertEmpty($cookieLines);
     }
 
