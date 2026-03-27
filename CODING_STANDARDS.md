@@ -1,62 +1,28 @@
 # inVRT PHP Coding Standards
 
-This guide outlines the code quality standards and build/test toolchain for the inVRT PHP/Symfony codebase.
+Standards enforced in this project:
 
-## Tools Overview
+- **PSR-12** — auto-enforced by PHP CS Fixer (`.php-cs-fixer.dist.php`)
+- **Type safety** — PHPStan Level 5 (`phpstan.neon`)
+- **Code modernization** — Rector (`rector.php`)
+- **Security** — Composer Audit
 
-| Tool | Purpose | Config File | Command |
-|------|---------|-------------|---------|
-| PHP CS Fixer | Auto-format code to PSR-12 | `.php-cs-fixer.dist.php` | `task fix:lint` |
-| PHPStan | Static type analysis | `phpstan.neon` | `task test:phpstan` |
-| Rector | Code modernization | `rector.php` | `task fix:modernize` |
-| Composer Audit | Security scanning | (native) | `task security` |
+For all task commands, see `.github/copilot-instructions.md`.
 
-## Local Development
+## Workflow
 
-### Before committing:
-```bash
-# Auto-fix style issues
-task fix:lint
+**Before committing:** `task fix` then `task check`
 
-# Run all checks
-task check
-
-# Fix type hints and modernize code
-task fix:modernize
-```
-
-### Before pushing:
-```bash
-# Run full test suite
-task test
-```
-
-## CI/CD Integration
-
-All checks run automatically:
-1. **Pre-commit hook** — Runs on every commit locally
-2. **CI pipeline** — Runs full suite including mutation testing
-
-## Enforced Standards
-
-- **PSR-12** — PHP coding standard (auto-enforced)
-- **Type safety** — PHPStan Level 5 (no violations)
-- **Security** — Composer audit passes
+**Before pushing:** `task test`
 
 ## Fixing Issues
 
-### Style issues (auto-fixable):
-```bash
-task fix:lint
-```
+**Style:** `task fix:lint`
 
-### Type hints (auto-fixable):
-```bash
-task fix:modernize
-```
+**Types / modernization:** `task fix:modernize`
 
-### Security issues:
+**Security:**
 ```bash
-composer update [package]  # Update vulnerable dependency
-composer audit  # Verify fix
+composer update [package]
+composer audit
 ```
