@@ -16,9 +16,6 @@ class InitCommand extends Command
             ->setHelp('Initializes a new inVRT project with the default configuration structure.');
     }
 
-    /**
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $initCwd = getenv('INIT_CWD') ?: getcwd();

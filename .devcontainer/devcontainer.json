@@ -19,5 +19,11 @@
   	},
 
 	// Configure tool-specific properties.
-	"customizations": {}
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"bierner.markdown-checkbox"
+			]
+		}
+	}
 }
