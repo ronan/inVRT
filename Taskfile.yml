@@ -14,35 +14,19 @@ tasks:
       - task: test:phpstan
       - task: test:modernize
       - task: test:lint
+      - task: test:coverage
       - task: test:security
 
   test:php:
     desc: Run all tests with PHPUnit
     dir: /tmp
     cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --testdox {{.TASKFILE_DIR}}/tests
-
-  test:unit:
-    desc: Run unit tests only
-    cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --testdox {{.TASKFILE_DIR}}/tests/Unit
-
-  test:e2e:
-    desc: Run E2E tests only
-    dir: /tmp
-    cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --testdox {{.TASKFILE_DIR}}/tests/E2E
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests
 
   test:coverage:
     desc: Run tests with code coverage report
     cmds:
-      - sh -c 'XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-text /workspaces/invrt'
-
-  test:coverage:
-    desc: Generate HTML code coverage report
-    cmds:
-      - sh -c 'XDEBUG_MODE=coverage php vendor/bin/phpunit --coverage-html=tooling/coverage/ /workspaces/invrt'
-
+      - XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=tooling/phpunit.xml --coverage-text --coverage-html=reports/coverage/
 
   test:modernize:
     desc: Dry-run Rector code modernization

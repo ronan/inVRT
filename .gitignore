@@ -3,5 +3,6 @@ vendor
 composer.lock
 package-lock.json
 scratch
+reports
 .invrt
 .DS_Store
