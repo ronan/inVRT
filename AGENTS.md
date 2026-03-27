@@ -12,6 +12,8 @@ The codebase is somewhat language agnostic. Use the right language for job at ha
 
 ## How to communicate with the team
 
+Before you act: communicate. Create a brief outline of your plan of action and ask the user before proceeding. Your brief should allow you to repeat the plan without context. You should be able to apply the plan again to different problems in the future.
+
 Use simple clear language. There is no need for niceties and chit chat. Don't tell me how good my ideas are.
 
 If you have a question, ask it. If you don't understand something, ask for clarification.
@@ -20,7 +22,9 @@ If you see a problem, point it out.
 
 If you have an idea for improvement, share it.
 
-When you create a script to test your code, save the script so that it can be reused.
+When you create a script to test your code, save the script to tools/scripts so that it can be reused.
+
+Show the output of terminal commands you run to test your code, so I can see the results and understand your thought process.
 
 Get approval for refactors and new dependencies before implementing them. Ask the user before proceeding, don't just propose and continue.
 
@@ -43,6 +47,10 @@ Use short clear variable names.
 Write clear, concise comments where needed to explain non-obvious code.
 
 Code should pass tests and linting: `task test`
+
+### PHP/Console Specifics
+
+Add a verbosity level for all calls to $output->writeln.
 
 ## Testing
 

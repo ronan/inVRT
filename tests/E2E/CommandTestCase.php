@@ -65,9 +65,10 @@ abstract class CommandTestCase extends TestCase
      *
      * @param string $commandName The command to run (e.g., 'init', 'crawl')
      * @param array $input Additional arguments/options
+     * @param array<string, mixed> $options  CommandTester options (e.g. ['verbosity' => OutputInterface::VERBOSITY_VERBOSE])
      * @return CommandTester The tester with the command result
      */
-    protected function executeCommand(string $commandName, array $input = []): CommandTester
+    protected function executeCommand(string $commandName, array $input = [], array $options = []): CommandTester
     {
         $command = $this->app->find($commandName);
         $this->commandTester = new CommandTester($command);
@@ -76,7 +77,7 @@ abstract class CommandTestCase extends TestCase
         $testInput = array_merge(['command' => $commandName], $input);
 
         // Execute the command
-        $this->commandTester->execute($testInput);
+        $this->commandTester->execute($testInput, $options);
 
         return $this->commandTester;
     }

@@ -99,9 +99,7 @@ class LoginServiceTest extends TestCase
      */
     public function testSkipsLoginWhenCookiesFileExists(): void
     {
-        $output = new BufferedOutput();
-
-        // Pre-create the cookies file
+        $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
         $cookiesJsonFile = $this->tempDir . '/cookies.json';
         file_put_contents($cookiesJsonFile, json_encode([]));
 

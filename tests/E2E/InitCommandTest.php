@@ -2,6 +2,8 @@
 
 namespace Tests\E2E;
 
+use Symfony\Component\Console\Output\OutputInterface;
+
 /**
  * E2E tests for InitCommand
  *
@@ -46,8 +48,8 @@ class InitCommandTest extends CommandTestCase
             chdir($this->fixture->getProjectDir());
             putenv('INIT_CWD=' . $this->fixture->getProjectDir());
 
-            // Execute init command
-            $this->executeCommand('init');
+            // Execute init command with verbose output to capture detail messages
+            $this->executeCommand('init', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
 
             // Assert command succeeded
             $this->assertCommandSuccess();

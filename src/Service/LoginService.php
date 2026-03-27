@@ -32,7 +32,7 @@ class LoginService
 
             // Check if cookies file already exists
             if (file_exists("$cookiesFile.json")) {
-                $output->writeln("<comment>⚠️ Cookies file already exists at $cookiesFile.json. Skipping login to avoid overwriting existing cookies.</comment>");
+                $output->writeln("<comment>⚠️ Cookies file already exists at $cookiesFile.json. Skipping login to avoid overwriting existing cookies.</comment>", OutputInterface::VERBOSITY_VERBOSE);
                 return Command::SUCCESS;
             }
 

@@ -37,7 +37,7 @@ class InitCommand extends Command
             $output->writeln('<error>Failed to create invrt directory at ' . $invrtDirectory . '</error>');
             return Command::FAILURE;
         }
-        $output->writeln('<info>✓ Created invrt directory at ' . $invrtDirectory . '</info>');
+        $output->writeln('<info>✓ Created invrt directory at ' . $invrtDirectory . '</info>', OutputInterface::VERBOSITY_VERBOSE);
 
         if (!mkdir($this->joinPath($invrtDirectory, 'data'), 0755, true)) {
             $output->writeln('<error>Failed to create data directory</error>');
@@ -48,7 +48,7 @@ class InitCommand extends Command
             $output->writeln('<error>Failed to create scripts directory</error>');
             return Command::FAILURE;
         }
-        $output->writeln('<info>✓ Created data directories for generated data, and user scripts.</info>');
+        $output->writeln('<info>✓ Created data directories for generated data, and user scripts.</info>', OutputInterface::VERBOSITY_VERBOSE);
 
         // Create config.yaml
         $configContent = <<<'YAML'
@@ -101,7 +101,7 @@ YAML;
             $output->writeln('<error>Failed to create config.yaml</error>');
             return Command::FAILURE;
         }
-        $output->writeln('<info>✓ Initialized InVRT configuration file at ' . $configPath . '</info>');
+        $output->writeln('<info>✓ Initialized InVRT configuration file at ' . $configPath . '</info>', OutputInterface::VERBOSITY_VERBOSE);
 
         // Create exclude_urls.txt
         $excludeUrls = "/user/logout\n/files\n/sites\n/core\n";

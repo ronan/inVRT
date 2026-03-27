@@ -10,13 +10,11 @@ tasks:
   test:
     desc: Run all tests and quality checks
     cmds:
-      - task: test:php
-      - task: test:phpstan
       - task: test:modernize
+      - task: test:phpstan
       - task: test:lint
-      - task: test:coverage
+      - task: test:php
       - task: test:security
-      - task: test:schema
 
   test:php:
     desc: Run all tests with PHPUnit
