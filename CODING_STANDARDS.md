@@ -6,9 +6,9 @@ This guide outlines the code quality standards and build/test toolchain for the 
 
 | Tool | Purpose | Config File | Command |
 |------|---------|-------------|---------|
-| PHP CS Fixer | Auto-format code to PSR-12 | `.php-cs-fixer.dist.php` | `task lint:fix` |
-| PHPStan | Static type analysis | `phpstan.neon` | `task analyze` |
-| Rector | Code modernization | `rector.php` | `task analyze:fix` |
+| PHP CS Fixer | Auto-format code to PSR-12 | `.php-cs-fixer.dist.php` | `task fix:lint` |
+| PHPStan | Static type analysis | `phpstan.neon` | `task test:phpstan` |
+| Rector | Code modernization | `rector.php` | `task fix:modernize` |
 | Composer Audit | Security scanning | (native) | `task security` |
 
 ## Local Development
@@ -16,13 +16,13 @@ This guide outlines the code quality standards and build/test toolchain for the 
 ### Before committing:
 ```bash
 # Auto-fix style issues
-task lint:fix
+task fix:lint
 
 # Run all checks
 task check
 
 # Fix type hints and modernize code
-task analyze:fix
+task fix:modernize
 ```
 
 ### Before pushing:
@@ -47,13 +47,12 @@ All checks run automatically:
 
 ### Style issues (auto-fixable):
 ```bash
-task lint:fix
+task fix:lint
 ```
 
 ### Type hints (auto-fixable):
 ```bash
-task analyze:fix
-task analyze:modernize  # If safe
+task fix:modernize
 ```
 
 ### Security issues:
