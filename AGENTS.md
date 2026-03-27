@@ -24,6 +24,8 @@ If you have an idea for improvement, share it.
 
 When you create a script to test your code, save the script to tools/scripts so that it can be reused.
 
+Save implementation plans to the `plans/` directory so they are tracked with the project.
+
 Show the output of terminal commands you run to test your code, so I can see the results and understand your thought process.
 
 Get approval for refactors and new dependencies before implementing them. Ask the user before proceeding, don't just propose and continue.
