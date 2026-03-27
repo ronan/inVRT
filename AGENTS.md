@@ -20,6 +20,8 @@ If you see a problem, point it out.
 
 If you have an idea for improvement, share it.
 
+When you create a script to test your code, save the script so that it can be reused.
+
 Get approval for refactors and new dependencies before implementing them. Ask the user before proceeding, don't just propose and continue.
 
 ## How to Write Code for This Project

@@ -1,0 +1,182 @@
+# JSON Schema for .invrt/config.yaml
+# https://json-schema.org/draft/2020-12
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://github.com/ronan/invrt/docs/config.schema.yaml"
+title: inVRT Configuration
+description: Configuration file for an inVRT Visual Regression Testing project (.invrt/config.yaml)
+type: object
+
+properties:
+
+  name:
+    type: string
+    description: Display name for this inVRT project.
+    examples:
+      - My inVRT Project
+
+  environments:
+    type: object
+    description: >
+      Named deployment environments (e.g. local, dev, staging, prod).
+      Each key becomes selectable via --environment.
+    additionalProperties:
+      $ref: "#/$defs/environment"
+
+  profiles:
+    type: object
+    description: >
+      Named user profiles (e.g. anonymous, editor, admin).
+      Each key becomes selectable via --profile.
+      Profiles with username+password trigger an authenticated browser session.
+    additionalProperties:
+      $ref: "#/$defs/profile"
+
+  devices:
+    type: object
+    description: >
+      Named viewport configurations (e.g. desktop, tablet, mobile).
+      Each key becomes selectable via --device.
+    additionalProperties:
+      $ref: "#/$defs/device"
+
+additionalProperties: false
+
+$defs:
+
+  # ------------------------------------------------------------------
+  # Shared config keys — any of these can appear in any section and
+  # will be merged at runtime (devices take highest precedence, then
+  # profiles, then environments). See docs/usage.md for merge details.
+  # ------------------------------------------------------------------
+
+  configKeys:
+    type: object
+    properties:
+      url:
+        type: string
+        format: uri
+        description: Base URL to crawl and screenshot.
+        examples:
+          - https://example.com
+          - http://localhost
+      login_url:
+        type: string
+        description: >
+          URL of the login page. Defaults to <url>/user/login when not set.
+          Can be a full URL or a path relative to url.
+        examples:
+          - https://example.com/user/login
+          - user/login
+      username:
+        type: string
+        description: Login username. Setting this (with password) enables authenticated crawl and screenshots.
+      password:
+        type: string
+        description: Login password.
+      viewport_width:
+        type: integer
+        minimum: 1
+        description: Browser viewport width in pixels.
+        default: 1920
+        examples:
+          - 1920
+          - 375
+      viewport_height:
+        type: integer
+        minimum: 1
+        description: Browser viewport height in pixels.
+        default: 1080
+        examples:
+          - 1080
+          - 667
+      max_crawl_depth:
+        type: integer
+        minimum: 1
+        description: Recursion depth passed to wget during crawl.
+        default: 3
+      max_pages:
+        type: integer
+        minimum: 1
+        description: Maximum number of pages to crawl.
+        default: 100
+      user_agent:
+        type: string
+        description: HTTP User-Agent header sent by the crawler.
+        default: InVRT/1.0
+      max_concurrent_requests:
+        type: integer
+        minimum: 1
+        description: Number of parallel screenshot captures.
+        default: 5
+
+  # ------------------------------------------------------------------
+  # Section definitions — each extends configKeys with its own fields
+  # ------------------------------------------------------------------
+
+  environment:
+    description: A deployment environment entry (e.g. local, dev, prod).
+    type: object
+    allOf:
+      - $ref: "#/$defs/configKeys"
+    properties:
+      name:
+        type: string
+        description: Human-readable display name for this environment.
+        examples:
+          - Local
+          - Development
+          - Production
+    examples:
+      - name: Local
+        url: http://localhost
+      - name: Production
+        url: https://prod.example.com
+
+  profile:
+    description: >
+      A user profile entry (e.g. anonymous, editor, admin).
+      Profiles without credentials are tested as anonymous visitors.
+    type: object
+    allOf:
+      - $ref: "#/$defs/configKeys"
+    properties:
+      name:
+        type: string
+        description: Human-readable display name for this profile.
+        examples:
+          - Anonymous Visitor Profile
+          - Admin Profile
+      description:
+        type: string
+        description: Optional description of this profile's role or access level.
+    examples:
+      - name: Anonymous Visitor Profile
+        description: Test the site as an anonymous visitor with no special permissions.
+      - name: Admin Profile
+        description: A profile with admin privileges.
+        username: admin
+        password: password123
+
+  device:
+    description: A viewport/device entry (e.g. desktop, tablet, mobile).
+    type: object
+    allOf:
+      - $ref: "#/$defs/configKeys"
+    properties:
+      name:
+        type: string
+        description: Human-readable display name for this device.
+        examples:
+          - Desktop Viewport
+          - Mobile Viewport
+      description:
+        type: string
+        description: Optional description of this device configuration.
+    examples:
+      - name: Desktop Viewport
+        viewport_width: 1920
+        viewport_height: 1080
+      - name: Mobile Viewport
+        viewport_width: 375
+        viewport_height: 667

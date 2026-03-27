@@ -16,6 +16,7 @@ tasks:
       - task: test:lint
       - task: test:coverage
       - task: test:security
+      - task: test:schema
 
   test:php:
     desc: Run all tests with PHPUnit
@@ -63,6 +64,11 @@ tasks:
     cmds:
       - composer audit
       - npm audit
+
+  test:schema:
+    desc: Validate config JSON Schema and example config file
+    cmds:
+      - node tooling/validate-schema.mjs
 
   # Combined check task
   check:
