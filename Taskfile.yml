@@ -62,6 +62,7 @@ tasks:
     desc: Check for security vulnerabilities in dependencies
     cmds:
       - composer audit
+      - npm audit
 
   # Combined check task
   check:

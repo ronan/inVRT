@@ -1,86 +1,64 @@
 # inVRT
 
-A web VRT tool to continuously check for visual changes in a website or web app.
+A CLI tool for Visual Regression Testing (VRT) of CMS-driven websites as an authenticated or anonymous user.
 
-### Usage:
+Configure a url, username and password for one or more user profiles and site environments and inVRT will crawl the site, capture reference images and can be used to check for any visual changes on any page of the site.
 
-    $ invrt init
+Supports Drupal, Backdrop, and WordPress (FUTURE FEATURE).
 
-    $ invrt crawl
+## Quick Start
 
-    $ invert test
+### Run with Docker (no install required):
 
-### Options:
+```bash
+# 1. Go to your project repository root
+cd ~/my-project
 
-#### --profile
+# 2. Initialise a project in the current directory
+docker run -it --volume .:/dir ronan4000/invrt init
 
-Select one or more user profiles to test with. The 'default' profile is an anonymous user. Separate multiple profiles with a comma (,). Regex expressions are accepted. Defaults to '.*' or all profiles.
+# 2. Edit .invrt/config.yaml — set your URL and any credentials
 
-    invrt crawl --profile=default
-    invrt crawl --profile=author,admin,robot
-    invrt test  --profile=.*
+# 3. Crawl the site, generate the reference images and run a test
+docker run -it --volume .:/dir ronan4000/invrt test --profile=authenticated
+```
 
-#### --device
+---
 
-Select one or more simulated devices to test with. The default viewport is a desktop browser with a 1920x1080 resolution. This affects the window capture size only. Tests are run in the desktop version of Chrome.
+## Commands
 
-    invert test --device=desktop
-    invert test --device=mobile,desktop
+| Command | Description |
+|---|---|
+| `invrt init` | Scaffold `.invrt/` directory and `config.yaml` |
+| `invrt crawl` | Crawl the site and build a URL list |
+| `invrt reference` | Capture baseline screenshots |
+| `invrt test` | Compare current screenshots against the baseline |
+| `invrt config` | Display the resolved configuration |
 
-#### --environments
+Use the `--profile`, `--device`, and `--environment` options to target a specific combination of user, viewport, and deployment:
 
-The instance of the project under test.
+```bash
+invrt test --profile=authenticated --device=mobile --environment=production
+```
 
-    invrt crawl --environment=local
-    invrt test --environment=prod,stage
+For full documentation including all commands, options, configuration reference, and examples see **[docs/usage.md](docs/usage.md)**.
 
-## Testing
+---
 
-The project includes a PHPUnit test suite covering utility functions, CLI argument parsing, and configuration handling.
+## Development
 
-### Run Tests with Task
+Primarily coded using agentic methods. For more information see [AGENTS.md](AGENTS.md).
 
-    # Run all tests
-    task test
-
-    # Run only unit tests
-    task test:unit
-
-    # Run only E2E tests
-    task test:e2e
-
-    # Generate code coverage report
-    task test:coverage
-
-    # Generate HTML code coverage report
-    task test:coverage-html
 
 ### Dependencies
 
-Test dependencies are installed with:
+PHP 8.5, Composer, Node, npm, playwrite, Taskfile.dev.
 
-    composer install
+For more details see the [Dockerfile](./Dockerfile)
 
-The test suite requires PHPUnit (installed as a dev dependency) and Symfony YAML.
+### Testing
 
-For more information about the test suite, see [tests/README.md](tests/README.md).
+```bash
+task test
+```
 
-## Static Analysis
-
-The project uses PHPStan for static code analysis to catch potential bugs and type errors.
-
-### Run Static Analysis
-
-    # Analyze code
-    task analyze
-
-    # Generate baseline for tracking error changes
-    task analyze:baseline
-
-The analysis runs at level 5 (strict) and checks the `src/` directory. Configuration is in `phpstan.neon`.
-
-## Run Using Docker
-
-You can run inVRT using the docker container without installing it.
-
-     docker run -it --volume .:/dir ronan4000/invrt init

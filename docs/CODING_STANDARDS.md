@@ -5,24 +5,22 @@ Standards enforced in this project:
 - **PSR-12** — auto-enforced by PHP CS Fixer (`.php-cs-fixer.dist.php`)
 - **Type safety** — PHPStan Level 5 (`phpstan.neon`)
 - **Code modernization** — Rector (`rector.php`)
-- **Security** — Composer Audit
+- **Security** — Composer/npm Audit
 
-For all task commands, see `.github/copilot-instructions.md`.
+For all task commands, see `AGENTS.md`.
 
 ## Workflow
 
-**Before committing:** `task fix` then `task check`
-
-**Before pushing:** `task test`
+**Before committing:** `task fix` then `task test`
 
 ## Fixing Issues
 
-**Style:** `task fix:lint`
-
-**Types / modernization:** `task fix:modernize`
+**Style & Types:** `task fix`
 
 **Security:**
+
+Run package manager audits to check for vulnerable dependencies.
+
 ```bash
-composer update [package]
-composer audit
+task test:security
 ```

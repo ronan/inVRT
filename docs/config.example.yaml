@@ -1,0 +1,37 @@
+name: My inVRT Project
+
+environments:
+  local:
+    name: Local
+    url: http://localhost
+
+  dev:
+    name: Development
+    url: https://dev.example.com
+
+  prod:
+    name: Production
+    url: https://prod.example.com
+
+profiles:
+  anonymous:
+    name: Anonymous Visitor Profile
+    description: Test the site as an anonymous visitor with no special permissions.
+
+  admin:
+    name: Admin Profile
+    description: A profile with admin privileges.
+    username: admin
+    password: password123
+    login_url: user/login
+
+devices:
+  desktop:
+    name: Desktop Viewport
+    viewport_width: 1920
+    viewport_height: 1080
+
+  mobile:
+    name: Mobile Viewport
+    viewport_width: 375
+    viewport_height: 667

@@ -24,6 +24,8 @@ Get approval for refactors and new dependencies before implementing them. Ask th
 
 ## How to Write Code for This Project
 
+Follow the [Coding Standards](docs/CODING_STANDARDS.md)
+
 Write clean, maintainable and modern code. Favor terse and readable code.
 
 Use well regarded third party libraries where it can reduce lines of code.
@@ -58,35 +60,21 @@ Use real subprocess execution in E2E tests to verify that the bash scripts work 
 
 Clean up after testing. E2E tests should use temporary directories and remove them after tests run.
 
-## Commands
+### Testing Tools
 
-```bash
-# Testing
-task test                   # Run full test + quality suite
-task test:unit              # Unit tests only
-task test:e2e               # E2E tests only
-task test:coverage          # Coverage report (text)
+Run `task test` in the terminal to test and lint code.
 
-# Run a single test file
-vendor/bin/phpunit tests/Unit/CookieServiceTest.php
 
-# Run a single test method
-vendor/bin/phpunit --filter testMethodName tests/Unit/CookieServiceTest.php
+## The Usage Docs (documentation first development)
 
-# Static analysis & linting
-task test:phpstan           # PHPStan level 5
-task test:lint              # Check code style (PHP CS Fixer, dry-run)
-task test:security          # Composer dependency audit
-task check                  # Run all quality checks (lint, phpstan, security)
+The functionality of the inVRT app is described in the [usage docs](docs/usage.md).
 
-# Auto-fix
-task fix:lint               # Auto-fix code style with PHP CS Fixer
-task fix:modernize          # Apply safe Rector code modernizations
-task fix                    # Run all auto-fixes (modernize + lint)
+Document new features in the usage docs before building them. Explain all inputs, give examples, show outputs.
 
-# PHPStan baseline — only after intentional type changes, not to hide new issues
-task baseline:phpstan       # Regenerate phpstan-baseline.neon
-```
+Mark incomplete functionality in the usage docs as "FUTURE FEATURE" until it is implemented. Remove the "FUTURE FEATURE" tag once a feature is implemented and passes end to end tests.
+
+Defer to usage docs for business logic and behavior and suggest updates where there are gaps.
+
 
 ## Architecture
 
@@ -98,54 +86,17 @@ Symfony Console Commands (src/Commands/)
   Bash scripts (src/*.sh)  ←→  Node.js (src/*.js, Playwright, BackstopJS)
 ```
 
-Commands and what they do:
-- `init` — scaffold a new `.invrt/` directory and `config.yaml` (extends `Command` directly, not `BaseCommand`)
-- `crawl` — crawl the site with wget to build a URL list
-- `reference` — capture reference screenshots with Playwright
-- `test` — run BackstopJS comparison against reference screenshots
-- `config` — display resolved configuration (extends `Command` directly, no script executed)
-
 Most commands extend `BaseCommand`, which initialises `EnvironmentService`, optionally invokes `LoginService`, then calls `passthru()` on a bash script. Each such command returns a bash script filename via the abstract `getScriptName(): string` method.
 
 **Exceptions:** `InitCommand` and `ConfigCommand` extend `Command` directly and override `execute()` themselves. `InitCommand` has no `EnvironmentService` dependency. `ConfigCommand` returns `''` from `getScriptName()`.
 
-**Configuration merging** in `EnvironmentService` applies overrides in this priority order (highest to lowest):
+**Configuration merging** in `EnvironmentService` processes sections in this order — later sections overwrite earlier ones (highest precedence last):
 
-1. `environments.<name>` block
-2. `profiles.<name>` block
-3. `devices.<name>` block
-4. Base config
+1. `environments.<name>` block — applied first
+2. `profiles.<name>` block — overwrites environment values
+3. `devices.<name>` block — applied last, highest precedence
 
 Resolved values are exported as `putenv()` environment variables so bash and Node scripts can read them.
-
-**Supported config keys** (the fixed set `EnvironmentService` recognises — keys outside this list are ignored):
-
-| Config key | `INVRT_` variable | Default |
-|---|---|---|
-| `url` | `INVRT_URL` | `''` |
-| `login_url` | `INVRT_LOGIN_URL` | `''` |
-| `username` | `INVRT_USERNAME` | `''` |
-| `password` | `INVRT_PASSWORD` | `''` |
-| `viewport_width` | `INVRT_VIEWPORT_WIDTH` | `1920` |
-| `viewport_height` | `INVRT_VIEWPORT_HEIGHT` | `1080` |
-| `max_crawl_depth` | `INVRT_MAX_CRAWL_DEPTH` | `3` |
-| `max_pages` | `INVRT_MAX_PAGES` | `100` |
-| `user_agent` | `INVRT_USER_AGENT` | `'InVRT/1.0'` |
-| `max_concurrent_requests` | `INVRT_MAX_CONCURRENT_REQUESTS` | `5` |
-
-Additionally, these structural variables are always set regardless of config:
-
-| Variable | Description |
-|---|---|
-| `INVRT_PROFILE` | Active profile name |
-| `INVRT_DEVICE` | Active device name |
-| `INVRT_ENVIRONMENT` | Active environment name |
-| `INVRT_DIRECTORY` | Path to `.invrt/` directory |
-| `INVRT_DATA_DIR` | `.invrt/data/<profile>/<env>/` |
-| `INVRT_COOKIES_FILE` | `.invrt/data/<profile>/<env>/cookies` |
-| `INVRT_CONFIG_FILE` | Path to `config.yaml` |
-| `INVRT_SCRIPTS_DIR` | Path to `src/` (bash/JS scripts) |
-| `INIT_CWD` | Working directory where invrt was invoked |
 
 ## Key Conventions
 
@@ -194,17 +145,6 @@ Additionally, these structural variables are always set regardless of config:
 - `setEnvironmentVariable()` / `unsetEnvironmentVariable()` — set/clear `INVRT_DIRECTORY`
 
 When writing E2E tests, do not manually set `INVRT_DIRECTORY` or `INIT_CWD` — `CommandTestCase.setUp()` handles this via `$this->fixture->setEnvironmentVariable()`.
-
-### `.invrt/` Directory Structure
-
-`invrt init` creates:
-```
-.invrt/
-  config.yaml        # Main configuration
-  exclude_urls.txt   # URLs to exclude from crawling
-  data/              # Generated data (cookies, screenshots, reports)
-  scripts/           # User-defined hook scripts
-```
 
 ### PHPStan
 Level 5, strict. A baseline file (`phpstan-baseline.neon`) tracks accepted violations. Run `task baseline:phpstan` after intentional type changes, not to hide new issues.
