@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+# TODO: Take the section from here to the wget command and move it into the php app.
 echo "🕸️ Crawling '$INVRT_ENVIRONMENT' environment ($INVRT_URL) with profile: '$INVRT_PROFILE' to depth: $INVRT_MAX_CRAWL_DEPTH, max pages: $INVRT_MAX_PAGES"
 
 mkdir -p $INVRT_DATA_DIR/clone $INVRT_DATA_DIR/logs
