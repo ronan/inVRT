@@ -6,40 +6,18 @@ inVRT is a CLI tool for running Visual Regression Testing (VRT) against CMS-driv
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Workflow Overview](#workflow-overview)
-- [Commands](#commands)
-  - [init](#init)
-  - [crawl](#crawl)
-  - [reference](#reference)
-  - [test](#test)
-  - [config](#config)
-- [Common Options](#common-options)
-- [Configuration](#configuration)
-  - [Config File Structure](#config-file-structure)
-  - [Environments](#environments)
-  - [Profiles](#profiles)
-  - [Devices](#devices)
-  - [How Config Merging Works](#how-config-merging-works)
-- [Authentication](#authentication)
-- [Data Layout](#data-layout)
-
----
-
-## Installation
-
-**Via Composer (global):**
-
-```bash
-composer global require ronan/invrt
-invrt --version
-```
-
-**Via Docker (no install required):**
-
-```bash
-docker run -it --volume .:/dir ronan4000/invrt <command>
-```
+- [inVRT Usage Guide](#invrt-usage-guide)
+  - [Table of Contents](#table-of-contents)
+  - [Workflow Overview](#workflow-overview)
+  - [Commands](#commands)
+    - [`init`](#init)
+    - [`crawl`](#crawl)
+    - [`reference`](#reference)
+    - [`test`](#test)
+    - [`config`](#config)
+  - [Options](#options)
+  - [Authentication](#authentication)
+  - [Data Layout](#data-layout)
 
 ---
 
@@ -52,7 +30,13 @@ invrt reference   # Capture baseline screenshots
 invrt test        # Compare current screenshots against the baseline
 ```
 
-A typical CI pipeline runs `crawl → test` on every build, using pre-captured `reference` screenshots as the baseline. Re-run `reference` whenever intentional visual changes are made.
+Run `invrt crawl && invrt reference` to discover the site structure  and establish a visual baseline.
+
+Run `invty test` on every build to discover visual chanegs.
+
+Re-run `invrt reference` whenever intentional visual changes are made.
+
+Re-run `invrt crawl && invrt reference` whenever intentional site structire changes are made.
 
 ---
 
@@ -258,17 +242,14 @@ devices:
 name: Test Project
 environments:
   local:
-    name: Local
     url: https://vrt-postdocs-idp-bd.pantheonsite.io
 
 profiles:
   anonymous:
-    name: Anonymous Visitor Profile
     description: Test the site as an anonymous visitor
 
 devices:
   desktop:
-    name: Desktop Viewport
     description: Desktop (1920x1080)
     width: 1920
     height: 1080
@@ -278,13 +259,13 @@ devices:
 
 ## Options
 
-All commands except `init` accept these options:
+All commands except `init` accept these options to alter which config values are used during the command run:
 
-| Option | Shortcut | Default | Description |
-|---|---|---|---|
-| `--profile` | `-p` | `anonymous` | Profile name defined in `profiles:` |
-| `--device` | `-d` | `desktop` | Device name defined in `devices:` |
-| `--environment` | `-e` | `local` | Environment name defined in `environments:` |
+| Option          | Shortcut | Default     | Description                                 |
+| --------------- | -------- | ----------- | ------------------------------------------- |
+| `--profile`     | `-p`     | `anonymous` | Profile name defined in `profiles:`         |
+| `--device`      | `-d`     | `desktop`   | Device name defined in `devices:`           |
+| `--environment` | `-e`     | `local`     | Environment name defined in `environments:` |
 
 ```bash
 invrt crawl -p admin -d mobile -e staging
@@ -294,218 +275,9 @@ invrt crawl --profile=admin --device=mobile --environment=staging
 
 ---
 
-## Configuration
-
-### Config File Structure
-
-`.invrt/config.yaml` is the single source of truth for all inVRT settings. The full structure:
-
-```yaml
-# .invrt/config.yaml
-
-name: My inVRT Project         # Optional display name
-
-environments:
-  local:
-    name: Local
-    url: http://localhost
-
-  dev:
-    name: Development
-    url: https://dev.example.com
-
-  prod:
-    name: Production
-    url: https://prod.example.com
-
-profiles:
-  anonymous:
-    name: Anonymous Visitor Profile
-    description: Test the site as an anonymous visitor with no special permissions.
-
-  admin:
-    name: Admin Profile
-    description: A profile with admin privileges.
-    username: admin
-    password: password123
-    login_url: https://dev.example.com/user/login   # Optional — defaults to <url>/user/login
-
-devices:
-  desktop:
-    name: Desktop Viewport
-    viewport_width: 1920
-    viewport_height: 1080
-
-  mobile:
-    name: Mobile Viewport
-    viewport_width: 375
-    viewport_height: 667
-```
-
-### Supported Configuration Keys
-
-Any of these keys can appear under an `environments.<name>`, `profiles.<name>`, or `devices.<name>` block:
-
-| Key | Default | Description |
-|---|---|---|
-| `url` | _(empty)_ | Base URL to crawl and test |
-| `login_url` | `<url>/user/login` | Login page URL (only needed when different from default) |
-| `username` | _(empty)_ | Login username — triggers authenticated flow when set |
-| `password` | _(empty)_ | Login password |
-| `viewport_width` | `1920` | Browser viewport width in pixels |
-| `viewport_height` | `1080` | Browser viewport height in pixels |
-| `max_crawl_depth` | `3` | Recursion depth for `wget` crawl |
-| `max_pages` | `100` | Maximum number of pages to crawl |
-| `user_agent` | `InVRT/1.0` | HTTP User-Agent header sent by the crawler |
-| `max_concurrent_requests` | `5` | Parallel screenshot captures |
-
-### Environments
-
-Environments represent different deployments of the same site (local, dev, staging, prod). Each typically sets a different `url`.
-
-```yaml
-environments:
-  local:
-    url: http://localhost
-  staging:
-    url: https://staging.example.com
-    username: ci_user
-    password: ci_pass
-  prod:
-    url: https://www.example.com
-```
-
-Select with `--environment`:
-
-```bash
-invrt crawl --environment=staging
-invrt test  --environment=prod
-```
-
-### Profiles
-
-Profiles represent different user states — anonymous visitors, editors, admins, etc. A profile with `username` and `password` triggers an authenticated browser session before crawling and screenshotting.
-
-```yaml
-profiles:
-  anonymous:
-    name: Anonymous Visitor
-
-  editor:
-    name: Content Editor
-    username: editor
-    password: editorpass
-
-  admin:
-    name: Site Administrator
-    username: admin
-    password: adminpass
-```
-
-Select with `--profile`:
-
-```bash
-invrt crawl --profile=editor
-invrt test  --profile=admin
-```
-
-### Devices
-
-Devices set the browser viewport size, letting you test responsive layouts.
-
-```yaml
-devices:
-  desktop:
-    viewport_width: 1920
-    viewport_height: 1080
-
-  tablet:
-    viewport_width: 768
-    viewport_height: 1024
-
-  mobile:
-    viewport_width: 375
-    viewport_height: 667
-```
-
-Select with `--device`:
-
-```bash
-invrt reference --device=mobile
-invrt test      --device=mobile
-```
-
-### How Config Merging Works
-
-When you run a command, inVRT loads the three named blocks (`environments.<env>`, `profiles.<profile>`, `devices.<device>`) and merges their values. The sections are processed in this order — later sections overwrite earlier ones:
-
-1. `environments.<name>` — applied first (lowest precedence)
-2. `profiles.<name>` — applied second, overwrites environment values
-3. `devices.<name>` — applied last (highest precedence), overwrites both
-
-Values not present in any block fall back to the defaults in the table above.
-
-**Example:**
-
-```yaml
-environments:
-  prod:
-    url: https://prod.example.com
-    viewport_width: 1440
-
-profiles:
-  admin:
-    username: admin
-    password: secret
-    viewport_width: 1280
-
-devices:
-  mobile:
-    viewport_width: 375
-    viewport_height: 667
-```
-
-Running `invrt test --profile=admin --device=mobile --environment=prod` resolves to:
-
-| Variable | Value | Source |
-|---|---|---|
-| `INVRT_URL` | `https://prod.example.com` | environment |
-| `INVRT_USERNAME` | `admin` | profile |
-| `INVRT_PASSWORD` | `secret` | profile |
-| `INVRT_VIEWPORT_WIDTH` | `375` | device (overwrites profile's 1280 and environment's 1440) |
-| `INVRT_VIEWPORT_HEIGHT` | `667` | device |
-
-All resolved values are exported as `INVRT_*` environment variables and are available to bash and Node.js scripts. If you set any of these in the environment you run the tool in (eg: docker run -e INVRT_DIRECTORY=~/invrt/myapp/.invrt invrt crawl)
-
-#### Full list of exported variables
-
-| Variable | Description |
-|---|---|
-| `INVRT_PROFILE` | Active profile name |
-| `INVRT_DEVICE` | Active device name |
-| `INVRT_ENVIRONMENT` | Active environment name |
-| `INVRT_DIRECTORY` | Path to `.invrt/` directory |
-| `INVRT_DATA_DIR` | `.invrt/data/<profile>/<env>/` |
-| `INVRT_COOKIES_FILE` | `.invrt/data/<profile>/<env>/cookies` |
-| `INVRT_CONFIG_FILE` | Path to `config.yaml` |
-| `INVRT_SCRIPTS_DIR` | Path to the inVRT `src/` scripts directory |
-| `INIT_CWD` | Working directory where invrt was invoked |
-| `INVRT_URL` | Resolved base URL |
-| `INVRT_LOGIN_URL` | Resolved login URL |
-| `INVRT_USERNAME` | Resolved username |
-| `INVRT_PASSWORD` | Resolved password |
-| `INVRT_VIEWPORT_WIDTH` | Resolved viewport width |
-| `INVRT_VIEWPORT_HEIGHT` | Resolved viewport height |
-| `INVRT_MAX_CRAWL_DEPTH` | Resolved crawl depth |
-| `INVRT_MAX_PAGES` | Resolved max pages |
-| `INVRT_USER_AGENT` | Resolved User-Agent string |
-| `INVRT_MAX_CONCURRENT_REQUESTS` | Resolved concurrency limit |
-
----
-
 ## Authentication
 
-When a profile has `username` and `password` set, inVRT runs an authenticated flow before crawling or screenshotting:
+When a configured project has `username` and `password` set, inVRT runs an authenticated flow before crawling or screenshotting:
 
 1. A Playwright browser session navigates to `login_url` (defaults to `<url>/user/login`).
 2. Credentials are submitted. Session cookies are saved to `<INVRT_COOKIES_FILE>.json`.
@@ -553,3 +325,7 @@ inVRT stores all generated data under `.invrt/data/`, namespaced by profile and 
 ```
 
 Add `.invrt/data/` to `.gitignore` to keep generated artifacts out of version control.
+
+---
+
+For a full list of configuration options see [InVRT Configuration](./configuration.md)

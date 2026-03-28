@@ -1,5 +1,15 @@
 name: My inVRT Project
 
+settings:
+  project_type: drupal11
+  viewport_width: 1920
+  viewport_height: 1080
+  max_crawl_depth: 3
+  max_pages: 100
+  max_concurrent_requests: 5
+  login_path: user/login
+  user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
+
 environments:
   local:
     name: Local
