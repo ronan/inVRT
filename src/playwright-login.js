@@ -73,7 +73,6 @@ async function loginAndSaveCookies(
     console.log('Submitting login form...');
     await page.locator(passwordSelector).press('Enter');
 
-    
     // Wait for navigation or specific element
     if (waitForSelector) {
       console.log(`Waiting for selector: ${waitForSelector}...`);
@@ -82,11 +81,15 @@ async function loginAndSaveCookies(
       // Wait for network to be idle after login
       await page.waitForLoadState('networkidle', { timeout });
     }
-    
+
     console.log('Login successful!');
 
     // Get all cookies
     const cookies = await context.cookies();
+
+    if (!cookies || cookies.length === 0) {
+      throw new Error('No cookies were retrieved after login');
+    }
 
     // Create output directory if it doesn't exist
     jsonFile = outputFile.endsWith('.json') ? outputFile : `${outputFile}.json`;
@@ -102,7 +105,7 @@ async function loginAndSaveCookies(
 
     // Close browser
     await browser.close();
-    
+
     return cookies;
   } catch (error) {
     console.error('Error during login:', error.message);
