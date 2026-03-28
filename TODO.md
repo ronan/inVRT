@@ -30,7 +30,16 @@ _(none yet)_
         Use the same test fixture website that are used in tests/E2E/ReferenceCommandTest.php
         and tests/E2E/TestCommandTest.php. Expand the test website to include 5 web pages to crawl.
 
+- [x] Slim down test suite
+
+         Reduce the number of PHP tests in tests/. Leave only the tests of the core functionality. Don't test error handling. Don't test yaml parsing ot cookie handling. Simplify the config handling. Look for other ways to simplify and improve tests.
+
+- [ ] Clean up tests
+
+- [ ] Test drupal auth support
+
+- [ ] Test backdrop support
 
 ## Features
 
-- [ ] **WordPress support**
+- [ ] **Add WordPress support**
