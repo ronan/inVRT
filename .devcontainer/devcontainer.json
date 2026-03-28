@@ -10,7 +10,9 @@
 		"ghcr.io/devcontainers-extra/features/zsh-plugins:0": {},
 		"ghcr.io/larsnieuwenhuizen/features/jqyq:0": {},
 		"ghcr.io/schlich/devcontainer-features/playwright:0": {},
-		"ghcr.io/devcontainers/features/php:1": {}
+		"ghcr.io/devcontainers/features/php:1": {},
+		"ghcr.io/devcontainers-extra/features/go-task:1": {},
+		"ghcr.io/devcontainers/features/copilot-cli:1": {}
 	},
 	"postCreateCommand": "npm install",
 	"remoteEnv": {

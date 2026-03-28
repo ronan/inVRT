@@ -23,12 +23,12 @@ _(none yet)_
 
         There is a lot of repeated code.
 
-- [-] Refactor config handling to use symfony/congig
+- [x] Refactor config handling to use symfony/congig
  
   - [x] Rewrite config handling documentation `docs/configuration.yml`
-  - [ ] Check the documentation against code and tests to find any inconsistencies or ambiguities
-  - [ ] Rewrite the config handling tests for clarity and brevity
-  - [ ] Rewrite the app config handling
+  - [x] Check the documentation against code and tests to find any inconsistencies or ambiguities
+  - [x] Rewrite the config handling tests for clarity and brevity
+  - [x] Rewrite the app config handling
 
         Use the [symfony config component](https://symfony.com/doc/current/components/config.html) to rewrite and simplify config handling
 

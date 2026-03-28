@@ -93,15 +93,12 @@ class TestProjectFixture
     public function writeMinimalConfig(): self
     {
         $config = [
-            'project' => [
-                'url' => 'https://example.com',
-                'name' => 'Test Project'
-            ],
             'settings' => [
+                'url' => 'https://example.com',
                 'max_crawl_depth' => 2,
                 'max_pages' => 50,
-                'user_agent' => 'Mozilla/5.0 (Test)'
-            ]
+                'user_agent' => 'Mozilla/5.0 (Test)',
+            ],
         ];
 
         return $this->writeConfig($config);
@@ -113,29 +110,24 @@ class TestProjectFixture
     public function writeConfigWithProfiles(): self
     {
         $config = [
-            'project' => [
-                'url' => 'https://example.com',
-                'name' => 'Test Project'
-            ],
             'settings' => [
+                'url' => 'https://example.com',
                 'max_crawl_depth' => 3,
                 'max_pages' => 100,
-                'user_agent' => 'Mozilla/5.0'
+                'user_agent' => 'Mozilla/5.0',
             ],
             'profiles' => [
                 'default' => [
                     'url' => 'https://example.com',
                     'max_crawl_depth' => 2,
-                    'auth' => [
-                        'username' => 'testuser',
-                        'password' => 'testpass'
-                    ]
+                    'username' => 'testuser',
+                    'password' => 'testpass',
                 ],
                 'mobile' => [
                     'url' => 'https://mobile.example.com',
-                    'max_crawl_depth' => 1
-                ]
-            ]
+                    'max_crawl_depth' => 1,
+                ],
+            ],
         ];
 
         return $this->writeConfig($config);
@@ -147,32 +139,27 @@ class TestProjectFixture
     public function writeConfigWithEnvironments(): self
     {
         $config = [
-            'project' => [
-                'url' => 'https://example.com',
-                'name' => 'Test Project'
-            ],
             'settings' => [
+                'url' => 'https://example.com',
                 'max_crawl_depth' => 3,
-                'max_pages' => 100
+                'max_pages' => 100,
             ],
             'environments' => [
                 'local' => [
-                    'url' => 'http://localhost:8000'
+                    'url' => 'http://localhost:8000',
                 ],
                 'dev' => [
                     'url' => 'https://dev.example.com',
-                    'auth' => [
-                        'username' => 'dev_user',
-                        'password' => 'dev_pass'
-                    ]
+                    'username' => 'dev_user',
+                    'password' => 'dev_pass',
                 ],
                 'staging' => [
-                    'url' => 'https://staging.example.com'
+                    'url' => 'https://staging.example.com',
                 ],
                 'prod' => [
-                    'url' => 'https://example.com'
-                ]
-            ]
+                    'url' => 'https://example.com',
+                ],
+            ],
         ];
 
         return $this->writeConfig($config);
@@ -184,29 +171,27 @@ class TestProjectFixture
     public function writeConfigWithDevices(): self
     {
         $config = [
-            'project' => [
-                'url' => 'https://example.com'
-            ],
             'settings' => [
+                'url' => 'https://example.com',
                 'max_crawl_depth' => 3,
                 'max_pages' => 100,
                 'viewport_width' => 1920,
-                'viewport_height' => 1080
+                'viewport_height' => 1080,
             ],
             'devices' => [
                 'desktop' => [
                     'viewport_width' => 1920,
-                    'viewport_height' => 1080
+                    'viewport_height' => 1080,
                 ],
                 'mobile' => [
                     'viewport_width' => 375,
-                    'viewport_height' => 667
+                    'viewport_height' => 667,
                 ],
                 'tablet' => [
                     'viewport_width' => 768,
-                    'viewport_height' => 1024
-                ]
-            ]
+                    'viewport_height' => 1024,
+                ],
+            ],
         ];
 
         return $this->writeConfig($config);

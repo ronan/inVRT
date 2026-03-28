@@ -1,8 +1,7 @@
-project:
-  url: https://example.com
-  name: Example Project
+name: Example Project
 
 settings:
+  url: https://example.com
   max_crawl_depth: 5
   max_pages: 200
   user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
@@ -12,9 +11,8 @@ profiles:
   default:
     url: https://example.com
     max_crawl_depth: 3
-    auth:
-      username: default_user
-      password: default_pass
+    username: default_user
+    password: default_pass
 
   mobile:
     url: https://example.com
@@ -27,9 +25,8 @@ environments:
 
   dev:
     url: https://dev.example.com
-    auth:
-      username: dev_user
-      password: dev_pass
+    username: dev_user
+    password: dev_pass
 
   staging:
     url: https://staging.example.com

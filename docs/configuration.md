@@ -4,9 +4,9 @@
 
 Configuration for a given project is stored in a yaml file the INVRT_DIRECTORY:
 
-    `{CWD}/.invrt/config.yml`
+    `{CWD}/.invrt/config.yaml`
 
-### Example config.yml File
+### Example config.yaml File
 
 ```yaml
 # .invrt/config.yaml
@@ -15,8 +15,8 @@ name: My inVRT Project
 
 settings:
   project_type: drupal11
-  viewport_width: 1920
-  viewport_height: 1080
+  viewport_width: 1024
+  viewport_height: 768
   max_crawl_depth: 3
   max_pages: 100
   max_concurrent_requests: 5
@@ -29,7 +29,7 @@ environments:
 
   stage:
     url: https://dev.example.com
-     max_pages: 20
+    max_pages: 20
 
   prod:
     url: https://prod.example.com
@@ -47,8 +47,8 @@ profiles:
 
 devices:
   desktop:
-    viewport_width: 1920
-    viewport_height: 1080
+    viewport_width: 1024
+    viewport_height: 768
 
   mobile:
     viewport_width: 375
@@ -130,10 +130,6 @@ Devices set the browser viewport size and user agent, letting you test responsiv
 ```yaml
 devices:
   desktop:
-    viewport_width: 1920
-    viewport_height: 1080
-
-  tablet:
     viewport_width: 768
     viewport_height: 1024
 
@@ -184,22 +180,23 @@ max_pages: 90
 
 ## Configuration Options Reference
 
-| Config Key        | Environment Variable     | Default Value                  | Section      | Commands Affected      | Description                                |
-| ----------------- | ------------------------ | ------------------------------ | ------------ | ---------------------- | ------------------------------------------ |
-| `cwd`             | `$INIT_CWD`              | './'                           | -            | all                    | Working directory where invrt was invoked  |
-| `directory`       | `$INVRT_DIRECTORY`       | `{INIT_CWD}/.invrt`            | -            | all                    | Path to `.invrt/` directory                |
-| `config_file`     | `$INVRT_CONFIG_FILE`     | `{INVRT_DIRECTORY}/config.yml` | -            | all                    | Path to `config.yaml`                      |
-| `data_dir`        | `$INVRT_DATA_DIR`        | _(varies)_                     | -            | all                    | `.invrt/data/<profile>/<env>/`             |
-| `cookies_file`    | `$INVRT_COOKIES_FILE`    | _(varies)_                     | -            | all                    | `.invrt/data/<profile>/<env>/cookies`      |
-| `scripts_dir`     | `$INVRT_SCRIPTS_DIR`     | _(varies)_                     | -            | all                    | Path to the user scripts                   |
-| `url`             | `$INVRT_URL`             | _(empty)_                      | environments | crawl, reference, test | Base URL to crawl and test                 |
-| `login_url`       | `$INVRT_LOGIN_URL`       | `{INVRT_URL}/user/login`       | profiles     | crawl, reference, test | Login page URL                             |
-| `username`        | `$INVRT_USERNAME`        | _(empty)_                      | profiles     | crawl, reference, test | Login username                             |
-| `password`        | `$INVRT_PASSWORD`        | _(empty)_                      | profiles     | crawl, reference, test | Login password                             |
-| `viewport_width`  | `$INVRT_VIEWPORT_WIDTH`  | `1024`                         | devices      | reference, test        | Browser viewport width in pixels           |
-| `viewport_height` | `$INVRT_VIEWPORT_HEIGHT` | `768`                          | devices      | reference, test        | Browser viewport height in pixels          |
-| `max_crawl_depth` | `$INVRT_MAX_CRAWL_DEPTH` | `3`                            | settings     | crawl                  | Recursion depth for wget crawl             |
-| `max_pages`       | `$INVRT_MAX_PAGES`       | `100`                          | settings     | crawl                  | Maximum number of pages to crawl           |
-| `user_agent`      | `$INVRT_USER_AGENT`      | `InVRT/1.0`                    | settings     | crawl, reference, test | HTTP User-Agent header sent by the crawler |
+| Config Key                | Environment Variable             | Default Value                   | Section  | Commands Affected      | Description                                |
+| ------------------------- | -------------------------------- | ------------------------------- | -------- | ---------------------- | ------------------------------------------ |
+| `cwd`                     | `$INIT_CWD`                      | './'                            | -        | all                    | Working directory where invrt was invoked  |
+| `directory`               | `$INVRT_DIRECTORY`               | `{INIT_CWD}/.invrt`             | -        | all                    | Path to `.invrt/` directory                |
+| `config_file`             | `$INVRT_CONFIG_FILE`             | `{INVRT_DIRECTORY}/config.yaml` | -        | all                    | Path to `config.yaml`                      |
+| `data_dir`                | `$INVRT_DATA_DIR`                | _(varies)_                      | -        | all                    | `.invrt/data/<profile>/<env>/`             |
+| `cookies_file`            | `$INVRT_COOKIES_FILE`            | _(varies)_                      | -        | all                    | `.invrt/data/<profile>/<env>/cookies`      |
+| `scripts_dir`             | `$INVRT_SCRIPTS_DIR`             | _(varies)_                      | -        | all                    | Path to the user scripts                   |
+| `url`                     | `$INVRT_URL`                     | _(empty)_                       | settings | crawl, reference, test | Base URL to crawl and test                 |
+| `login_url`               | `$INVRT_LOGIN_URL`               | _(empty)_                       | settings | crawl, reference, test | Login page URL                             |
+| `username`                | `$INVRT_USERNAME`                | _(empty)_                       | settings | crawl, reference, test | Login username                             |
+| `password`                | `$INVRT_PASSWORD`                | _(empty)_                       | settings | crawl, reference, test | Login password                             |
+| `viewport_width`          | `$INVRT_VIEWPORT_WIDTH`          | `1024`                          | settings | reference, test        | Browser viewport width in pixels           |
+| `viewport_height`         | `$INVRT_VIEWPORT_HEIGHT`         | `768`                           | settings | reference, test        | Browser viewport height in pixels          |
+| `max_crawl_depth`         | `$INVRT_MAX_CRAWL_DEPTH`         | `3`                             | settings | crawl                  | Recursion depth for wget crawl             |
+| `max_pages`               | `$INVRT_MAX_PAGES`               | `100`                           | settings | crawl                  | Maximum number of pages to crawl           |
+| `user_agent`              | `$INVRT_USER_AGENT`              | `InVRT/1.0`                     | settings | crawl, reference, test | HTTP User-Agent header sent by the crawler |
+| `max_concurrent_requests` | `$INVRT_MAX_CONCURRENT_REQUESTS` | `5`                             | settings | reference, test        | Number of parallel screenshot captures     |
 
 For usage see [InVRT Usage](./usage.md)

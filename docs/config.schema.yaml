@@ -15,6 +15,13 @@ properties:
     examples:
       - My inVRT Project
 
+  settings:
+    description: Base-layer defaults. Values here are overridden by environments, profiles, and devices.
+    type: object
+    allOf:
+      - $ref: "#/$defs/configKeys"
+    additionalProperties: false
+
   environments:
     type: object
     description: >
@@ -78,7 +85,7 @@ $defs:
         type: integer
         minimum: 1
         description: Browser viewport width in pixels.
-        default: 1920
+        default: 1024
         examples:
           - 1920
           - 375
@@ -86,7 +93,7 @@ $defs:
         type: integer
         minimum: 1
         description: Browser viewport height in pixels.
-        default: 1080
+        default: 768
         examples:
           - 1080
           - 667

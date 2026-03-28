@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -13,6 +14,7 @@ class EnvironmentService
     private string $scriptsDir;
     private string $invrtDirectory;
     private array $config = [];
+    private array $resolved = ConfigDefinition::DEFAULTS;
 
     public function __construct(
         string $profile = 'anonymous',
@@ -26,50 +28,32 @@ class EnvironmentService
     }
 
     /**
-     * Initialize environment variables and load configuration
-     * Should be called before executing a command that needs configuration
+     * Initialize environment variables and load configuration.
      *
-     * @param bool $requireConfig If true, throws when config file is missing
-     *                           If false, just sets up defaults
-     * @throws \RuntimeException When $requireConfig is true and file doesn't exist
+     * @throws \RuntimeException when $requireConfig is true and file is missing/invalid
      */
     public function initialize(OutputInterface $output, bool $requireConfig = true): array
     {
         $this->setupDirectories();
 
         if ($requireConfig) {
-            $this->loadConfigFile($output);
+            $this->config = $this->loadConfig($output);
         } else {
-            // Still try to load config if it exists, but don't print loading message
-            $configFile = $this->joinPath($this->invrtDirectory, 'config.yaml');
-            if (file_exists($configFile)) {
-                try {
-                    $fileContents = file_get_contents($configFile);
-                    $this->config = Yaml::parse($fileContents) ?: [];
-                } catch (\Exception $error) {
-                    // Silently ignore parsing errors when requireConfig is false
-                    $this->config = [];
-                }
-            }
+            $this->config = $this->tryLoadConfig();
         }
+
+        $this->resolveConfig();
 
         return $this->getEnvironmentArray();
     }
 
-    /**
-     * Set up all directory paths
-     */
     private function setupDirectories(): void
     {
-        // Get INVRT_DIRECTORY from env or set to .invrt in current directory
-        if (getenv('INVRT_DIRECTORY')) {
-            $this->invrtDirectory = getenv('INVRT_DIRECTORY');
-        } else {
-            $currentDir = getenv('INIT_CWD') ?: getcwd();
-            $this->invrtDirectory = $this->joinPath($currentDir, '.invrt');
-        }
+        $this->invrtDirectory = getenv('INVRT_DIRECTORY') ?: $this->joinPath(
+            getenv('INIT_CWD') ?: (string) getcwd(),
+            '.invrt',
+        );
 
-        // Set environment variables for subprocess access
         putenv('INVRT_DIRECTORY=' . $this->invrtDirectory);
         putenv('INVRT_SCRIPTS_DIR=' . $this->scriptsDir);
         putenv('INVRT_PROFILE=' . $this->profile);
@@ -77,10 +61,8 @@ class EnvironmentService
         putenv('INVRT_ENVIRONMENT=' . $this->environment);
     }
 
-    /**
-     * Load and parse the config.yaml file
-     */
-    private function loadConfigFile(OutputInterface $output): void
+    /** Load and validate config; throw on missing file or parse error. */
+    private function loadConfig(OutputInterface $output): array
     {
         $configFile = $this->joinPath($this->invrtDirectory, 'config.yaml');
 
@@ -98,165 +80,105 @@ class EnvironmentService
         );
 
         try {
-            $fileContents = file_get_contents($configFile);
-            $this->config = Yaml::parse($fileContents) ?: [];
-        } catch (\Exception $error) {
-            throw new \RuntimeException("Error reading config file: " . $error->getMessage());
+            $raw = Yaml::parse((string) file_get_contents($configFile)) ?: [];
+            // Validate structure — throws on unknown keys or invalid types
+            (new Processor())->processConfiguration(new ConfigDefinition(), [$raw]);
+            return $raw;
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Error reading config file: ' . $e->getMessage());
+        }
+    }
+
+    /** Attempt to load config silently; return empty array on any failure. */
+    private function tryLoadConfig(): array
+    {
+        $configFile = $this->joinPath($this->invrtDirectory, 'config.yaml');
+
+        if (!file_exists($configFile)) {
+            return [];
         }
 
-        $this->applyConfigValues($output);
+        try {
+            $raw = Yaml::parse((string) file_get_contents($configFile)) ?: [];
+            (new Processor())->processConfiguration(new ConfigDefinition(), [$raw]);
+            return $raw;
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     /**
-     * Apply config values and set environment variables
+     * Merge settings → environment → profile → device, then export env vars.
+     * Uses raw YAML array so only explicitly set keys override earlier values.
      */
-    private function applyConfigValues(OutputInterface $output): void
+    private function resolveConfig(): void
     {
-        // Load config values and set environment variables
-        $configKeys = [
-            'profile' => 'anonymous',
-            'device' => 'desktop',
-            'environment' => 'local',
-            'directory' => $this->invrtDirectory,  // use already-resolved path, not a hardcoded default
-            'data_dir' => 'data',
-            'cookies_file' => $this->joinPath('data', $this->profile, $this->environment, 'cookies.txt'),
-            'url' => '',
-            'login_url' => '',
-            'max_crawl_depth' => 3,
-            'max_pages' => 100,
-            'user_agent' => 'InVRT/1.0',
-            'max_concurrent_requests' => 5,
-            'username' => '',
-            'password' => '',
-            'viewport_width' => 1920,
-            'viewport_height' => 1080,
-        ];
+        $this->resolved = ConfigDefinition::DEFAULTS;
 
-        // Initialize accumulated config values
-        $accumulatedConfig = array_fill_keys($configKeys, null);
-
-        // Load config values for the current profile, device, and environment
-        // Process in order of precedence: environment > profile > device
         $sections = [
-            "environments.{$this->environment}",
-            "profiles.{$this->profile}",
-            "devices.{$this->device}",
+            $this->config['settings'] ?? [],
+            $this->config['environments'][$this->environment] ?? [],
+            $this->config['profiles'][$this->profile] ?? [],
+            $this->config['devices'][$this->device] ?? [],
         ];
 
         foreach ($sections as $section) {
-            $this->processSectionConfig($section, $configKeys, $accumulatedConfig, $output);
-        }
-
-        // Now set environment variables for all accumulated values, using defaults for missing ones
-        foreach ($configKeys as $key => $default) {
-            $envVarName = 'INVRT_' . strtoupper($key);
-            $value = $accumulatedConfig[$key] ?? $default;
-            putenv("$envVarName=$value");
-        }
-    }
-
-    /**
-     * Process a single section of config
-     */
-    private function processSectionConfig(string $section, array $configKeys, array &$accumulatedConfig, OutputInterface $output): void
-    {
-        $sectionValue = $this->getConfigValueRaw($section);
-        if (!is_array($sectionValue) || empty($sectionValue)) {
-            $output->writeln(
-                "#⚠️ Section $section not found in config.yaml, using defaults\n",
-                OutputInterface::VERBOSITY_VERBOSE,
-            );
-            return;
-        }
-
-        foreach (array_keys($configKeys) as $key) {
-            $value = $this->getConfigValue("$section.$key", null);
-
-            // Only set if we got a non-null value from the config
-            // This allows environment settings to override profile/device settings
-            if ($value !== null) {
-                $accumulatedConfig[$key] = $value;
-            }
-        }
-    }
-
-    /**
-     * Get a nested config value without converting to string
-     */
-    private function getConfigValueRaw(string $key)
-    {
-        $keys = explode('.', $key);
-        $value = $this->config;
-
-        foreach ($keys as $k) {
-            if (is_array($value) && isset($value[$k])) {
-                $value = $value[$k];
-            } else {
-                return null;
+            foreach (ConfigDefinition::CONFIG_KEYS as $key) {
+                if (array_key_exists($key, $section)) {
+                    $this->resolved[$key] = $section[$key];
+                }
             }
         }
 
-        return $value;
-    }
-
-    /**
-     * Get a nested config value using dot notation
-     * Returns string when found, null when not found
-     */
-    private function getConfigValue(string $key, $default = null)
-    {
-        $keys = explode('.', $key);
-        $value = $this->config;
-
-        foreach ($keys as $k) {
-            if (is_array($value) && isset($value[$k])) {
-                $value = $value[$k];
-            } else {
-                return $default;
+        // Env var overrides for credentials (highest precedence)
+        foreach (['username', 'password'] as $cred) {
+            $envVal = getenv('INVRT_' . strtoupper($cred));
+            if ($envVal !== false && $envVal !== '') {
+                $this->resolved[$cred] = $envVal;
             }
         }
 
-        // Return default for false values (but allow 0, empty strings, empty arrays, etc.)
-        if ($value === false) {
-            return $default;
+        // Export all resolved values for subprocess access
+        foreach ($this->resolved as $key => $value) {
+            putenv('INVRT_' . strtoupper($key) . '=' . $value);
         }
-
-        return (string) $value;
     }
 
     /**
-     * Get all environment variables as an array for passing to shell scripts
+     * Return all environment variables as an array for passing to shell scripts.
      */
     public function getEnvironmentArray(): array
     {
+        $dataDir = $this->joinPath($this->invrtDirectory, 'data', $this->profile, $this->environment);
+
         return [
-            'INVRT_PROFILE' => $this->profile,
-            'INVRT_DEVICE' => $this->device,
-            'INVRT_ENVIRONMENT' => $this->environment,
-            'INVRT_SCRIPTS_DIR' => $this->scriptsDir,
-            'INVRT_DIRECTORY' => $this->invrtDirectory,
-            'INVRT_DATA_DIR' => $this->joinPath($this->invrtDirectory, 'data', $this->profile, $this->environment),
-            'INVRT_COOKIES_FILE' => $this->joinPath($this->invrtDirectory, 'data', $this->profile, $this->environment, 'cookies'),
-            'INVRT_CONFIG_FILE' => $this->joinPath($this->invrtDirectory, 'config.yaml'),
-            'INVRT_USERNAME' => getenv('INVRT_USERNAME') ?: '',
-            'INVRT_PASSWORD' => getenv('INVRT_PASSWORD') ?: '',
-            'INVRT_URL' => getenv('INVRT_URL') ?: '',
+            'INVRT_PROFILE'                 => $this->profile,
+            'INVRT_DEVICE'                  => $this->device,
+            'INVRT_ENVIRONMENT'             => $this->environment,
+            'INVRT_SCRIPTS_DIR'             => $this->scriptsDir,
+            'INVRT_DIRECTORY'               => $this->invrtDirectory,
+            'INVRT_DATA_DIR'                => $dataDir,
+            'INVRT_COOKIES_FILE'            => $this->joinPath($dataDir, 'cookies'),
+            'INVRT_CONFIG_FILE'             => $this->joinPath($this->invrtDirectory, 'config.yaml'),
+            'INVRT_URL'                     => (string) $this->resolved['url'],
+            'INVRT_LOGIN_URL'               => (string) $this->resolved['login_url'],
+            'INVRT_USERNAME'                => (string) $this->resolved['username'],
+            'INVRT_PASSWORD'                => (string) $this->resolved['password'],
+            'INVRT_VIEWPORT_WIDTH'          => (string) $this->resolved['viewport_width'],
+            'INVRT_VIEWPORT_HEIGHT'         => (string) $this->resolved['viewport_height'],
+            'INVRT_MAX_CRAWL_DEPTH'         => (string) $this->resolved['max_crawl_depth'],
+            'INVRT_MAX_PAGES'               => (string) $this->resolved['max_pages'],
+            'INVRT_USER_AGENT'              => (string) $this->resolved['user_agent'],
+            'INVRT_MAX_CONCURRENT_REQUESTS' => (string) $this->resolved['max_concurrent_requests'],
         ];
     }
 
-    /**
-     * Get a specific environment variable
-     */
     public function getEnv(string $key): string
     {
-        $env = $this->getEnvironmentArray();
-        return $env[$key] ?? '';
+        return $this->getEnvironmentArray()[$key] ?? '';
     }
 
-    /**
-     * Join file path segments
-     */
-    private function joinPath(...$segments): string
+    private function joinPath(string ...$segments): string
     {
         return implode(DIRECTORY_SEPARATOR, $segments);
     }

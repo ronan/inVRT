@@ -2,15 +2,14 @@
 
 namespace Tests\Unit;
 
+use App\Service\ConfigDefinition;
 use App\Service\EnvironmentService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\NullOutput;
 use Tests\Fixtures\TestProjectFixture;
 
 /**
- * Tests for EnvironmentService
- *
- * Tests profile/environment/device merging and path construction.
+ * Tests for EnvironmentService — config merging and env-var construction.
  */
 class EnvironmentServiceTest extends TestCase
 {
@@ -21,12 +20,16 @@ class EnvironmentServiceTest extends TestCase
         $this->fixture = new TestProjectFixture();
         $this->fixture->create();
         $this->fixture->setEnvironmentVariable();
+        putenv('INVRT_USERNAME=');
+        putenv('INVRT_PASSWORD=');
     }
 
     protected function tearDown(): void
     {
         $this->fixture->unsetEnvironmentVariable();
         $this->fixture->cleanup();
+        putenv('INVRT_USERNAME=');
+        putenv('INVRT_PASSWORD=');
     }
 
     private function init(string $profile = 'anonymous', string $device = 'desktop', string $env = 'local'): array
@@ -34,28 +37,45 @@ class EnvironmentServiceTest extends TestCase
         return (new EnvironmentService($profile, $device, $env))->initialize(new NullOutput(), true);
     }
 
-    public function testProfileOverridesBaseUrl(): void
+    // ── Settings section ──────────────────────────────────────────────────────
+
+    public function testSettingsSectionValuesAreUsedAsBase(): void
     {
         $this->fixture->writeConfig([
-            'project' => ['url' => 'https://example.com'],
-            'profiles' => ['mobile' => ['url' => 'https://mobile.example.com']],
+            'settings' => ['url' => 'https://settings.example.com', 'max_pages' => 42],
         ]);
 
-        $env = $this->init('mobile');
+        $env = $this->init();
 
-        $this->assertEquals('https://mobile.example.com', $env['INVRT_URL']);
+        $this->assertEquals('https://settings.example.com', $env['INVRT_URL']);
+        $this->assertEquals('42', $env['INVRT_MAX_PAGES']);
     }
 
-    public function testProfileUrlOverridesEnvironmentUrl(): void
+    // ── Environment section ───────────────────────────────────────────────────
+
+    public function testEnvironmentOverridesSettings(): void
     {
         $this->fixture->writeConfig([
-            'project' => ['url' => 'https://example.com'],
-            'profiles' => ['default' => ['url' => 'https://profile.example.com']],
-            'environments' => ['dev' => ['url' => 'https://dev.example.com']],
+            'settings' => ['url' => 'https://settings.example.com'],
+            'environments' => ['local' => ['url' => 'http://localhost']],
         ]);
 
-        // Profile is applied after environment, so profile URL wins
-        $env = $this->init('default', 'desktop', 'dev');
+        $env = $this->init();
+
+        $this->assertEquals('http://localhost', $env['INVRT_URL']);
+    }
+
+    // ── Profile section ───────────────────────────────────────────────────────
+
+    public function testProfileOverridesEnvironment(): void
+    {
+        $this->fixture->writeConfig([
+            'settings' => ['url' => 'https://settings.example.com'],
+            'environments' => ['dev' => ['url' => 'https://dev.example.com']],
+            'profiles' => ['admin' => ['url' => 'https://profile.example.com']],
+        ]);
+
+        $env = $this->init('admin', 'desktop', 'dev');
 
         $this->assertEquals('https://profile.example.com', $env['INVRT_URL']);
     }
@@ -63,7 +83,7 @@ class EnvironmentServiceTest extends TestCase
     public function testProfileCredentialsAreResolved(): void
     {
         $this->fixture->writeConfig([
-            'project' => ['url' => 'https://example.com'],
+            'settings' => ['url' => 'https://example.com'],
             'profiles' => ['admin' => ['username' => 'admin_user', 'password' => 'admin_pass']],
         ]);
 
@@ -76,26 +96,107 @@ class EnvironmentServiceTest extends TestCase
     public function testProfileCredentialsOverrideEnvironment(): void
     {
         $this->fixture->writeConfig([
-            'project' => ['url' => 'https://example.com'],
+            'settings' => ['url' => 'https://example.com'],
             'profiles' => ['default' => ['username' => 'profile_user', 'password' => 'profile_pass']],
             'environments' => ['dev' => ['username' => 'env_user', 'password' => 'env_pass']],
         ]);
 
-        // Profile is applied after environment, so profile credentials win
         $env = $this->init('default', 'desktop', 'dev');
 
         $this->assertEquals('profile_user', $env['INVRT_USERNAME']);
         $this->assertEquals('profile_pass', $env['INVRT_PASSWORD']);
     }
 
+    // ── Device section ────────────────────────────────────────────────────────
+
+    public function testDeviceOverridesProfile(): void
+    {
+        $this->fixture->writeConfig([
+            'settings' => ['viewport_width' => 1920],
+            'profiles' => ['mobile' => ['viewport_width' => 500]],
+            'devices' => ['mobile' => ['viewport_width' => 375, 'viewport_height' => 667]],
+        ]);
+
+        $env = $this->init('mobile', 'mobile');
+
+        $this->assertEquals('375', $env['INVRT_VIEWPORT_WIDTH']);
+    }
+
     public function testDeviceIsStored(): void
     {
-        $this->fixture->writeConfig(['project' => ['url' => 'https://example.com']]);
+        $this->fixture->writeConfig(['settings' => ['url' => 'https://example.com']]);
 
         $env = $this->init('anonymous', 'mobile');
 
         $this->assertEquals('mobile', $env['INVRT_DEVICE']);
     }
+
+    // ── Full precedence chain ─────────────────────────────────────────────────
+
+    public function testFullPrecedenceChain(): void
+    {
+        $this->fixture->writeConfig([
+            'settings' => ['max_pages' => 10],
+            'environments' => ['local' => ['max_pages' => 20]],
+            'profiles' => ['admin' => ['max_pages' => 30]],
+            'devices' => ['mobile' => ['max_pages' => 40]],
+        ]);
+
+        $env = $this->init('admin', 'mobile', 'local');
+
+        $this->assertEquals('40', $env['INVRT_MAX_PAGES']);
+    }
+
+    // ── All documented env vars present ──────────────────────────────────────
+
+    public function testAllDocumentedEnvVarsPresent(): void
+    {
+        $this->fixture->writeMinimalConfig();
+
+        $env = $this->init();
+
+        $expected = [
+            'INVRT_PROFILE', 'INVRT_DEVICE', 'INVRT_ENVIRONMENT',
+            'INVRT_SCRIPTS_DIR', 'INVRT_DIRECTORY', 'INVRT_DATA_DIR',
+            'INVRT_COOKIES_FILE', 'INVRT_CONFIG_FILE',
+            'INVRT_URL', 'INVRT_LOGIN_URL', 'INVRT_USERNAME', 'INVRT_PASSWORD',
+            'INVRT_VIEWPORT_WIDTH', 'INVRT_VIEWPORT_HEIGHT',
+            'INVRT_MAX_CRAWL_DEPTH', 'INVRT_MAX_PAGES',
+            'INVRT_USER_AGENT', 'INVRT_MAX_CONCURRENT_REQUESTS',
+        ];
+
+        foreach ($expected as $var) {
+            $this->assertArrayHasKey($var, $env, "Missing: $var");
+        }
+    }
+
+    public function testReturnedVarsMatchConfigKeys(): void
+    {
+        $this->fixture->writeMinimalConfig();
+
+        $env = $this->init();
+
+        foreach (ConfigDefinition::CONFIG_KEYS as $key) {
+            $envKey = 'INVRT_' . strtoupper($key);
+            $this->assertArrayHasKey($envKey, $env, "Missing env var for config key: $key");
+        }
+    }
+
+    // ── Missing sections fall back to defaults ────────────────────────────────
+
+    public function testMissingSectionsFallBackToDefaults(): void
+    {
+        // Config with no environments/profiles/devices
+        $this->fixture->writeConfig(['name' => 'Test']);
+
+        $env = $this->init();
+
+        $this->assertEquals((string) ConfigDefinition::DEFAULTS['viewport_width'], $env['INVRT_VIEWPORT_WIDTH']);
+        $this->assertEquals((string) ConfigDefinition::DEFAULTS['max_crawl_depth'], $env['INVRT_MAX_CRAWL_DEPTH']);
+        $this->assertEquals(ConfigDefinition::DEFAULTS['user_agent'], $env['INVRT_USER_AGENT']);
+    }
+
+    // ── Path construction ─────────────────────────────────────────────────────
 
     public function testDataDirectoryPathContainsProfileAndEnv(): void
     {
@@ -128,4 +229,3 @@ class EnvironmentServiceTest extends TestCase
         $this->assertStringContainsString('production', $env['INVRT_COOKIES_FILE']);
     }
 }
-

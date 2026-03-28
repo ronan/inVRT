@@ -224,9 +224,9 @@ profiles:
 devices:
   desktop:
     name: Desktop Viewport
-    description: Desktop (1920x1080)
-    width: 1920
-    height: 1080
+    description: Small Desktop/Tablet (1024x768)
+    viewport_width: 1024
+    viewport_height: 768
 ```
 
 ```bash
@@ -250,9 +250,9 @@ profiles:
 
 devices:
   desktop:
-    description: Desktop (1920x1080)
-    width: 1920
-    height: 1080
+    description: Small Desktop/Tablet (1024x768)
+    viewport_width: 1024
+    viewport_height: 768
 ```
 
 ---
