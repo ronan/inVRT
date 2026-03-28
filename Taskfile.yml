@@ -6,7 +6,6 @@ tasks:
     cmds:
       - docker build -t ronan4000/invrt .
 
-  # PHP/PHPUnit test scripts
   test:
     desc: Run all tests and quality checks
     cmds:
@@ -68,21 +67,12 @@ tasks:
     cmds:
       - node tooling/validate-schema.mjs
 
-  # Combined check task
-  check:
-    desc: Run all code quality checks (lint, analyze, security)
-    cmds:
-      - task: check:lint
-      - task: check:stan
-      - task: check:security
-
   fix:
     desc: Run all code fixes (modernize, lint)
     cmds:
       - task: fix:modernize
       - task: fix:lint
 
-  # Utility tasks
   help:
     desc: Show all available tasks
     cmds:

@@ -10,19 +10,30 @@ The tool is built of composable parts and uses environment variables internally 
 
 The codebase is somewhat language agnostic. Use the right language for job at hand. We favor using PHP since the target testable platforms are PHP-based CMSs, but we also use bash and Node.js where appropriate.
 
+## Track tasks with the todo file
+
+Track larger objectives in the [todo file](TODO.md). 
+
+The todo file is a markdown file with checkbox syntax.
+
+Further instructions and requirements for a particular todo item may be indented underneath the item. When creating todo's keep these brief.
+
+If you complete a task you can put an 'x' between the square brackets on that line to indicate a checked box in markdown.
+
+Don't track todo's or task progress in any other system
+
+
 ## How to communicate with the team
 
-Before you act: communicate. Create a brief outline of your plan of action and ask the user before proceeding. Your brief should allow you to repeat the plan without context. You should be able to apply the plan again to different problems in the future.
-
 Use simple clear language. There is no need for niceties and chit chat. Don't tell me how good my ideas are.
+
+Before you act: communicate. Create a brief outline of your plan of action and ask the user before proceeding.
 
 If you have a question, ask it. If you don't understand something, ask for clarification.
 
 If you see a problem, point it out. 
 
 If you have an idea for improvement, share it.
-
-When you create a script to test your code, save the script to tools/scripts so that it can be reused.
 
 Save implementation plans to the `plans/` directory so they are tracked with the project.
 
