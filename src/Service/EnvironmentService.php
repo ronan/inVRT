@@ -4,6 +4,7 @@ namespace App\Service;
 
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Yaml\Yaml;
 
 class EnvironmentService
@@ -49,7 +50,7 @@ class EnvironmentService
 
     private function setupDirectories(): void
     {
-        $this->invrtDirectory = getenv('INVRT_DIRECTORY') ?: $this->joinPath(
+        $this->invrtDirectory = getenv('INVRT_DIRECTORY') ?: Path::join(
             getenv('INIT_CWD') ?: (string) getcwd(),
             '.invrt',
         );
@@ -64,7 +65,7 @@ class EnvironmentService
     /** Load and validate config; throw on missing file or parse error. */
     private function loadConfig(OutputInterface $output): array
     {
-        $configFile = $this->joinPath($this->invrtDirectory, 'config.yaml');
+        $configFile = Path::join($this->invrtDirectory, 'config.yaml');
 
         if (!file_exists($configFile)) {
             throw new \RuntimeException(
@@ -92,7 +93,7 @@ class EnvironmentService
     /** Attempt to load config silently; return empty array on any failure. */
     private function tryLoadConfig(): array
     {
-        $configFile = $this->joinPath($this->invrtDirectory, 'config.yaml');
+        $configFile = Path::join($this->invrtDirectory, 'config.yaml');
 
         if (!file_exists($configFile)) {
             return [];
@@ -149,7 +150,7 @@ class EnvironmentService
      */
     public function getEnvironmentArray(): array
     {
-        $dataDir = $this->joinPath($this->invrtDirectory, 'data', $this->profile, $this->environment);
+        $dataDir = Path::join($this->invrtDirectory, 'data', $this->profile, $this->environment);
 
         return [
             'INVRT_PROFILE'                 => $this->profile,
@@ -158,8 +159,8 @@ class EnvironmentService
             'INVRT_SCRIPTS_DIR'             => $this->scriptsDir,
             'INVRT_DIRECTORY'               => $this->invrtDirectory,
             'INVRT_DATA_DIR'                => $dataDir,
-            'INVRT_COOKIES_FILE'            => $this->joinPath($dataDir, 'cookies'),
-            'INVRT_CONFIG_FILE'             => $this->joinPath($this->invrtDirectory, 'config.yaml'),
+            'INVRT_COOKIES_FILE'            => Path::join($dataDir, 'cookies'),
+            'INVRT_CONFIG_FILE'             => Path::join($this->invrtDirectory, 'config.yaml'),
             'INVRT_URL'                     => (string) $this->resolved['url'],
             'INVRT_LOGIN_URL'               => (string) $this->resolved['login_url'],
             'INVRT_USERNAME'                => (string) $this->resolved['username'],
@@ -176,10 +177,5 @@ class EnvironmentService
     public function getEnv(string $key): string
     {
         return $this->getEnvironmentArray()[$key] ?? '';
-    }
-
-    private function joinPath(string ...$segments): string
-    {
-        return implode(DIRECTORY_SEPARATOR, $segments);
     }
 }

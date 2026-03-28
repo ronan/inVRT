@@ -13,7 +13,8 @@
         "symfony/yaml": "^8.0",
         "symfony/console": "^8.0.7",
         "symfony/process": "^8.0",
-        "symfony/config": "^8.0"
+        "symfony/config": "^8.0",
+        "symfony/filesystem": "^8.0"
     },
     "autoload": {
         "psr-4": {

@@ -2,11 +2,11 @@
 
 namespace App\Commands;
 
-use App\Support\PathHelper;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Path;
 
 #[AsCommand(
     name: 'init',
@@ -15,11 +15,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class InitCommand
 {
-    use PathHelper;
     public function __invoke(SymfonyStyle $io): int
     {
         $initCwd = getenv('INIT_CWD') ?: getcwd();
-        $invrtDirectory = $this->joinPath($initCwd, '.invrt');
+        $invrtDirectory = Path::join($initCwd, '.invrt');
 
         $io->writeln('🚀 Initializing InVRT for the project at ' . $initCwd);
 
@@ -34,12 +33,12 @@ class InitCommand
         }
         $io->writeln('<info>✓ Created invrt directory at ' . $invrtDirectory . '</info>', OutputInterface::VERBOSITY_VERBOSE);
 
-        if (!mkdir($this->joinPath($invrtDirectory, 'data'), 0755, true)) {
+        if (!mkdir(Path::join($invrtDirectory, 'data'), 0755, true)) {
             $io->error('Failed to create data directory');
             return Command::FAILURE;
         }
 
-        if (!mkdir($this->joinPath($invrtDirectory, 'scripts'), 0755, true)) {
+        if (!mkdir(Path::join($invrtDirectory, 'scripts'), 0755, true)) {
             $io->error('Failed to create scripts directory');
             return Command::FAILURE;
         }
@@ -90,7 +89,7 @@ devices:
     viewport_height: 667
 YAML;
 
-        $configPath = $this->joinPath($invrtDirectory, 'config.yaml');
+        $configPath = Path::join($invrtDirectory, 'config.yaml');
         if (file_put_contents($configPath, $configContent) === false) {
             $io->error('Failed to create config.yaml');
             return Command::FAILURE;
@@ -98,7 +97,7 @@ YAML;
         $io->writeln('<info>✓ Initialized InVRT configuration file at ' . $configPath . '</info>', OutputInterface::VERBOSITY_VERBOSE);
 
         $excludeUrls = "/user/logout\n/files\n/sites\n/core\n";
-        $excludePath = $this->joinPath($invrtDirectory, 'exclude_urls.txt');
+        $excludePath = Path::join($invrtDirectory, 'exclude_urls.txt');
         if (file_put_contents($excludePath, $excludeUrls) === false) {
             $io->error('Failed to create exclude_urls.txt');
             return Command::FAILURE;

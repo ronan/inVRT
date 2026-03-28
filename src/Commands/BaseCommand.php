@@ -5,15 +5,13 @@ namespace App\Commands;
 use App\Input\InvrtInput;
 use App\Service\EnvironmentService;
 use App\Service\LoginService;
-use App\Support\PathHelper;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
 
 abstract class BaseCommand
 {
-    use PathHelper;
-
     /**
      * Initialises environment + login, then calls $callback with the resolved env array.
      * Short-circuits with an exit code if boot fails.
@@ -55,7 +53,7 @@ abstract class BaseCommand
      */
     protected function executeScript(string $scriptName, array $env, SymfonyStyle $io): int
     {
-        $cmd = 'bash ' . escapeshellarg($this->joinPath(__DIR__ . '/..', $scriptName));
+        $cmd = 'bash ' . escapeshellarg(Path::join(__DIR__ . '/..', $scriptName));
 
         $process = Process::fromShellCommandline($cmd, null, $env);
         $process->setTimeout(null);

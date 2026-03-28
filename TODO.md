@@ -32,6 +32,8 @@ _(none yet)_
 
         Use the [symfony config component](https://symfony.com/doc/current/components/config.html) to rewrite and simplify config handling
 
+- [x] Replace the custom joinPath function with symfony/filesystem
+
 ## Tests
 
 - [x] **E2E: ReferenceCommandTest**

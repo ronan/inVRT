@@ -7,6 +7,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\MapInput;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Yaml\Yaml;
 
 #[AsCommand(
@@ -19,7 +20,7 @@ class ConfigCommand extends BaseCommand
     public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
         return $this->withEnv($opts, $io, function (array $env) use ($io): int {
-            $configFile = $this->joinPath($env['INVRT_DIRECTORY'], 'config.yaml');
+            $configFile = Path::join($env['INVRT_DIRECTORY'], 'config.yaml');
 
             if (!file_exists($configFile)) {
                 $io->writeln('# Configuration file not found at: ' . $configFile);
