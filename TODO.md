@@ -19,7 +19,7 @@ _(none yet)_
 
 - [x] Remove use of 'passthru' in php for testibility
 
-- [ ] Refactor the php command codebase
+- [x] Refactor the php command codebase
 
         There is a lot of repeated code.
 

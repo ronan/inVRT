@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Support\PathHelper;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class InitCommand
 {
+    use PathHelper;
     public function __invoke(SymfonyStyle $io): int
     {
         $initCwd = getenv('INIT_CWD') ?: getcwd();
@@ -104,10 +106,5 @@ YAML;
 
         $io->success('InVRT successfully initialized!');
         return Command::SUCCESS;
-    }
-
-    private function joinPath(string ...$parts): string
-    {
-        return implode(DIRECTORY_SEPARATOR, array_filter($parts));
     }
 }

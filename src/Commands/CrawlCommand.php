@@ -18,40 +18,36 @@ class CrawlCommand extends BaseCommand
 {
     public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        $result = $this->boot($opts, $io);
-        if (\is_int($result)) {
-            return $result;
-        }
+        return $this->withEnv($opts, $io, function (array $env) use ($io): int {
+            $url = $env['INVRT_URL'];
+            $dataDir = $env['INVRT_DATA_DIR'];
+            $maxDepth = getenv('INVRT_MAX_CRAWL_DEPTH') ?: '3';
+            $maxPages = getenv('INVRT_MAX_PAGES') ?: '100';
 
-        $env = $result;
-        $url = $env['INVRT_URL'];
-        $dataDir = $env['INVRT_DATA_DIR'];
-        $maxDepth = getenv('INVRT_MAX_CRAWL_DEPTH') ?: '3';
-        $maxPages = getenv('INVRT_MAX_PAGES') ?: '100';
+            $io->writeln(
+                "🕸️ Crawling '{$env['INVRT_ENVIRONMENT']}' environment ($url) with profile: '{$env['INVRT_PROFILE']}' to depth: $maxDepth, max pages: $maxPages",
+                OutputInterface::VERBOSITY_VERBOSE,
+            );
 
-        $io->writeln(
-            "🕸️ Crawling '{$env['INVRT_ENVIRONMENT']}' environment ($url) with profile: '{$env['INVRT_PROFILE']}' to depth: $maxDepth, max pages: $maxPages",
-            OutputInterface::VERBOSITY_VERBOSE,
-        );
+            foreach (["$dataDir/clone", "$dataDir/logs"] as $dir) {
+                $this->clearDirectory($dir);
+            }
 
-        foreach (["$dataDir/clone", "$dataDir/logs"] as $dir) {
-            $this->clearDirectory($dir);
-        }
+            $domain = parse_url($url, PHP_URL_HOST) ?? '';
+            [$cookieFile, $cookieHeader] = $this->resolveCookieOption($io, $env['INVRT_COOKIES_FILE'], $dataDir);
+            $excludeUrls = $this->resolveExcludeUrls($io, $env['INVRT_DIRECTORY']);
 
-        $domain = parse_url($url, PHP_URL_HOST) ?? '';
-        [$cookieFile, $cookieHeader] = $this->resolveCookieOption($io, $env['INVRT_COOKIES_FILE'], $dataDir);
-        $excludeUrls = $this->resolveExcludeUrls($io, $env['INVRT_DIRECTORY']);
+            $exitCode = $this->runWget($io, $url, $domain, $dataDir, $maxDepth, $excludeUrls, $cookieFile, $cookieHeader);
+            if ($exitCode !== Command::SUCCESS) {
+                return $exitCode;
+            }
 
-        $exitCode = $this->runWget($io, $url, $domain, $dataDir, $maxDepth, $excludeUrls, $cookieFile, $cookieHeader);
-        if ($exitCode !== Command::SUCCESS) {
-            return $exitCode;
-        }
+            $count = $this->parseUrlsFromLog("$dataDir/logs/crawl.log", $url, "$dataDir/crawled_urls.txt");
 
-        $count = $this->parseUrlsFromLog("$dataDir/logs/crawl.log", $url, "$dataDir/crawled_urls.txt");
+            $io->writeln("Crawling completed. Found $count unique paths. Results saved to $dataDir/crawled_urls.txt", OutputInterface::VERBOSITY_VERBOSE);
 
-        $io->writeln("Crawling completed. Found $count unique paths. Results saved to $dataDir/crawled_urls.txt", OutputInterface::VERBOSITY_VERBOSE);
-
-        return Command::SUCCESS;
+            return Command::SUCCESS;
+        });
     }
 
     /**
