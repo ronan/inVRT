@@ -74,9 +74,12 @@ try {
 
   backstop(op, {config: config}).then(() => {
       console.log('Test complete');
+      process.exit(0);
     }).catch((err) => {
       console.log(err);
+      process.exit(1);
     });
 } catch (err) {
   console.log(err);
+  process.exit(1);
 }

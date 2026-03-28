@@ -117,7 +117,7 @@ class EnvironmentService
             'profile' => 'anonymous',
             'device' => 'desktop',
             'environment' => 'local',
-            'directory' => './.invrt',
+            'directory' => $this->invrtDirectory,  // use already-resolved path, not a hardcoded default
             'data_dir' => 'data',
             'cookies_file' => $this->joinPath('data', $this->profile, $this->environment, 'cookies.txt'),
             'url' => '',

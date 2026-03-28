@@ -32,8 +32,12 @@ abstract class CommandTestCase extends TestCase
     {
         parent::setUp();
 
+        // Use scratch/tmp/{ClassName}/{testName} for deterministic, inspectable output
+        $shortClass = (new \ReflectionClass($this))->getShortName();
+        $base = dirname(__DIR__, 2) . '/scratch/tmp/' . $shortClass . '/' . $this->name();
+
         // Create fixture
-        $this->fixture = new TestProjectFixture();
+        $this->fixture = new TestProjectFixture($base);
         $this->fixture->create();
 
         // Create application with all commands
@@ -53,9 +57,8 @@ abstract class CommandTestCase extends TestCase
 
     protected function tearDown(): void
     {
-        // Cleanup
+        // Unset env var; output is preserved in scratch/tmp/ for inspection
         $this->fixture->unsetEnvironmentVariable();
-        $this->fixture->cleanup();
 
         parent::tearDown();
     }

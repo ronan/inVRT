@@ -43,7 +43,11 @@ abstract class BaseCommand extends Command
         }
 
         // Execute the script
-        return $this->executeScript($this->getScriptName(), $env, $output);
+        return $this->executeScript(
+            $this->getScriptName(),
+            $env,
+            $output,
+        );
     }
 
     /**

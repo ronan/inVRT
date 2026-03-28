@@ -17,11 +17,12 @@ class TestProjectFixture
     private string $projectDir;
     private string $invrtDir;
 
-    public function __construct()
+    public function __construct(?string $baseDir = null)
     {
-        $this->tempDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'invrt_test_' . uniqid();
-        $this->projectDir = $this->tempDir . DIRECTORY_SEPARATOR . 'project';
-        $this->invrtDir = $this->projectDir . DIRECTORY_SEPARATOR . '.invrt';
+        $base = $baseDir ?? sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'invrt_test_' . uniqid();
+        $this->tempDir = $base;
+        $this->projectDir = $base . DIRECTORY_SEPARATOR . 'project';
+        $this->invrtDir = $base . DIRECTORY_SEPARATOR . 'project' . DIRECTORY_SEPARATOR . '.invrt';
     }
 
     /**
@@ -271,6 +272,18 @@ class TestProjectFixture
 
         file_put_contents($cookiesPath, json_encode($cookies, JSON_PRETTY_PRINT));
         return $cookiesPath;
+    }
+
+    /**
+     * Write a crawled_urls.txt file with one URL path per line
+     *
+     * @param string[] $urls URL paths (e.g. ['/', '/about.html'])
+     */
+    public function writeCrawledUrlsFile(string $profile, string $environment, array $urls): self
+    {
+        $dataDir = $this->createDataDir($profile, $environment);
+        file_put_contents($dataDir . '/crawled_urls.txt', implode("\n", $urls));
+        return $this;
     }
 
     /**

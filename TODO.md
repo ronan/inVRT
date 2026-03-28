@@ -21,9 +21,9 @@ _(none yet)_
 
 ## Tests
 
-- [ ] **E2E: ReferenceCommandTest**
+- [x] **E2E: ReferenceCommandTest**
 
-- [ ] **E2E: TestCommandTest**
+- [x] **E2E: TestCommandTest**
 
 
 ## Features
