@@ -22,26 +22,21 @@ class ReferenceCommandTest extends WebCommandTestCase
     public function testReferenceCommandCapturesScreenshots(): void
     {
         $this->setupFixture();
-        $this->executeCommand('reference');
+        $this->executeCommand('reference', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
         $this->assertCommandSuccess();
 
-        $refDir = $this->fixture->getInvrtDir() . '/data/anonymous/local/bitmaps/reference';
-        $this->assertDirectoryExists($refDir, 'Reference bitmaps directory should exist');
+        // Output status line
+        $this->assertOutputContains('📸 Capturing references');
+        $this->assertOutputContains($this->webserverUrl());
 
+        // PNGs created
+        $refDir = $this->fixture->getInvrtDir() . '/data/anonymous/local/bitmaps/reference';
+        $this->assertDirectoryExists($refDir);
         $pngs = $this->findPngs($refDir);
-        $this->assertGreaterThanOrEqual(2, count($pngs), 'Expected at least one PNG per URL (2 total)');
+        $this->assertGreaterThanOrEqual(2, count($pngs));
         foreach ($pngs as $png) {
             $this->assertGreaterThan(0, filesize($png), "PNG $png should not be empty");
         }
-    }
-
-    public function testReferenceCommandOutputContainsStatusLine(): void
-    {
-        $this->setupFixture();
-        $this->executeCommand('reference', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
-        $this->assertCommandSuccess();
-        $this->assertOutputContains('📸 Capturing references');
-        $this->assertOutputContains($this->webserverUrl());
     }
 
     /** @return string[] */

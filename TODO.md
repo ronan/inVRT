@@ -34,7 +34,12 @@ _(none yet)_
 
          Reduce the number of PHP tests in tests/. Leave only the tests of the core functionality. Don't test error handling. Don't test yaml parsing ot cookie handling. Simplify the config handling. Look for other ways to simplify and improve tests.
 
-- [ ] Clean up tests
+- [x] Clean up tests
+        - [x] Rename the tests/E2E directory to tests/e2e and update references
+        - [x] Combine e2e tests to reduce the number of times the command needs to be run
+                use tests/e2e/CrawlCommandTest.php as an example
+
+
 
 - [ ] Test drupal auth support
 

@@ -19,54 +19,35 @@ class CrawlCommandTest extends WebCommandTestCase
         $this->executeCommand('crawl');
     }
 
-    public function testCrawlDiscoversAllPages(): void
+    public function testCrawlHappyPath(): void
     {
         $this->setupCrawlFixture();
-
-        $this->executeCommand('crawl');
+        $this->executeCommand('crawl', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
         $this->assertCommandSuccess();
 
+        // Output status line
+        $this->assertOutputContains('🕸️ Crawling');
+        $this->assertOutputContains($this->webserverUrl());
+
+        // URLs file populated with discovered pages
         $urlsFile = $this->fixture->getInvrtDir() . '/data/anonymous/local/crawled_urls.txt';
-        $this->assertFileExists($urlsFile, 'crawled_urls.txt should be created after crawl');
-
+        $this->assertFileExists($urlsFile);
         $urls = array_filter(explode("\n", file_get_contents($urlsFile)));
-        $this->assertGreaterThanOrEqual(5, count($urls), 'Expected at least 5 crawled paths');
-
+        $this->assertGreaterThanOrEqual(5, count($urls));
         foreach (['/about.html', '/services.html', '/contact.html', '/blog.html'] as $path) {
             $this->assertContains($path, $urls, "Expected $path to be discovered");
         }
-    }
 
-    public function testCrawlOutputContainsStatusLine(): void
-    {
-        $this->setupCrawlFixture();
-
-        $this->executeCommand('crawl', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
-        $this->assertCommandSuccess();
-        $this->assertOutputContains('🕸️ Crawling');
-        $this->assertOutputContains($this->webserverUrl());
+        // Log file created
+        $logFile = $this->fixture->getInvrtDir() . '/data/anonymous/local/logs/crawl.log';
+        $this->assertFileExists($logFile);
     }
 
     public function testCrawlWithEnvironmentOption(): void
     {
         $this->setupCrawlFixture();
-
         $this->executeCommand('crawl', ['--environment' => 'local']);
         $this->assertCommandSuccess();
-
-        $urlsFile = $this->fixture->getInvrtDir() . '/data/anonymous/local/crawled_urls.txt';
-        $this->assertFileExists($urlsFile);
-    }
-
-    public function testCrawlCreatesLogFile(): void
-    {
-        $this->setupCrawlFixture();
-
-        $this->executeCommand('crawl');
-        $this->assertCommandSuccess();
-
-        $logFile = $this->fixture->getInvrtDir() . '/data/anonymous/local/logs/crawl.log';
-        $this->assertFileExists($logFile, 'crawl.log should be created by wget');
     }
 
     /** Write config pointing at the test webserver — no pre-seeded URL list needed. */

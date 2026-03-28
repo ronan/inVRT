@@ -31,7 +31,7 @@ tasks:
     desc: Run integration tests with PHPUnit
     dir: /tmp
     cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/E2E
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/e2e
 
 
   test:coverage:

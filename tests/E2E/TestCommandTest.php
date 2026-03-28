@@ -27,25 +27,19 @@ class TestCommandTest extends WebCommandTestCase
         $this->executeCommand('reference');
         $this->assertCommandSuccess();
 
-        // Run visual regression test — identical site, so no regressions
-        $this->executeCommand('test');
-        $this->assertCommandSuccess();
-
-        $testDir = $this->fixture->getInvrtDir() . '/data/anonymous/local/bitmaps/test';
-        $this->assertDirectoryExists($testDir, 'Test bitmaps directory should exist');
-
-        $pngs = $this->findPngs($testDir);
-        $this->assertGreaterThan(0, count($pngs), 'Expected test PNGs to be created');
-    }
-
-    public function testTestCommandOutputContainsStatusLine(): void
-    {
-        $this->setupFixture();
-        $this->executeCommand('reference'); // seed references
+        // Run visual regression test with verbose — identical site, so no regressions
         $this->executeCommand('test', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
         $this->assertCommandSuccess();
+
+        // Output status line
         $this->assertOutputContains('🔬 Testing');
         $this->assertOutputContains($this->webserverUrl());
+
+        // Test bitmaps created
+        $testDir = $this->fixture->getInvrtDir() . '/data/anonymous/local/bitmaps/test';
+        $this->assertDirectoryExists($testDir);
+        $pngs = $this->findPngs($testDir);
+        $this->assertGreaterThan(0, count($pngs));
     }
 
     /** @return string[] */
