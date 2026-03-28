@@ -6,13 +6,18 @@ For AI agents and human developers.
 - `- [ ]` open · `- [x]` done
 - Reference the relevant file or doc when adding an item.
 
-## Features
-
-- [ ] **WordPress support**
 
 ## Bugs
 
 _(none yet)_
+
+## Tech Debt
+
+- [x] **Refactor `src/invrt-reference.sh`**
+
+- [x] **Refactor `src/invrt-test.sh`**
+
+- [x] Remove use of 'passthru' in php for testibility
 
 ## Tests
 
@@ -20,8 +25,7 @@ _(none yet)_
 
 - [ ] **E2E: TestCommandTest**
 
-## Tech Debt
 
-- [x] **Refactor `src/invrt-reference.sh`**
+## Features
 
-- [x] **Refactor `src/invrt-test.sh`**
+- [ ] **WordPress support**

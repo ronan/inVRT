@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 abstract class BaseCommand extends Command
 {
@@ -42,7 +43,7 @@ abstract class BaseCommand extends Command
         }
 
         // Execute the script
-        return $this->executeScript($this->getScriptName(), $env);
+        return $this->executeScript($this->getScriptName(), $env, $output);
     }
 
     /**
@@ -63,20 +64,15 @@ abstract class BaseCommand extends Command
     /**
      * Execute a bash script with environment variables
      */
-    protected function executeScript(string $scriptName, array $env): int
+    protected function executeScript(string $scriptName, array $env, OutputInterface $output): int
     {
         $cmd = 'bash ' . escapeshellarg($this->joinPath(__DIR__ . '/..', $scriptName));
 
-        // Prepare environment variables for subprocess
-        $envStr = '';
-        foreach ($env as $key => $value) {
-            $envStr .= $key . '=' . escapeshellarg((string) $value) . ' ';
-        }
+        $process = Process::fromShellCommandline($cmd, null, $env);
+        $process->setTimeout(null);
+        $process->run(fn($type, $buffer) => $output->write($buffer));
 
-        $exitCode = null;
-        passthru($envStr . $cmd, $exitCode);
-
-        return $exitCode ?? Command::SUCCESS;
+        return $process->getExitCode() ?? Command::SUCCESS;
     }
 
     /**

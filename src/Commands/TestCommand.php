@@ -6,6 +6,7 @@ use App\Service\EnvironmentService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 class TestCommand extends BaseCommand
 {
@@ -37,10 +38,11 @@ class TestCommand extends BaseCommand
             OutputInterface::VERBOSITY_VERBOSE,
         );
 
-        $exitCode = null;
-        passthru('node ' . escapeshellarg($env['INVRT_SCRIPTS_DIR'] . '/backstop.js') . ' test', $exitCode);
+        $process = Process::fromShellCommandline('node ' . escapeshellarg($env['INVRT_SCRIPTS_DIR'] . '/backstop.js') . ' test', null, $env);
+        $process->setTimeout(null);
+        $process->run(fn($type, $buffer) => $output->write($buffer));
 
-        return $exitCode ?? Command::SUCCESS;
+        return $process->getExitCode() ?? Command::SUCCESS;
     }
 
     protected function getScriptName(): string

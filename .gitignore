@@ -6,3 +6,5 @@ scratch
 reports
 .invrt
 .DS_Store
+tooling/.php-cs-fixer.cache
+tooling/.phpunit.result.cache

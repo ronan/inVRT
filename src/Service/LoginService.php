@@ -4,6 +4,7 @@ namespace App\Service;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 class LoginService
 {
@@ -52,13 +53,17 @@ class LoginService
                 return Command::FAILURE;
             }
 
-            $env = "INVRT_LOGIN_URL=" . escapeshellarg($loginUrl) . " "
-                   . "INVRT_USERNAME=" . escapeshellarg($username) . " "
-                   . "INVRT_PASSWORD=" . escapeshellarg($password) . " "
-                   . "INVRT_COOKIES_FILE=" . escapeshellarg($cookiesFile);
+            $env = [
+                'INVRT_LOGIN_URL' => $loginUrl,
+                'INVRT_USERNAME' => $username,
+                'INVRT_PASSWORD' => $password,
+                'INVRT_COOKIES_FILE' => $cookiesFile,
+            ];
 
-            $exitCode = 0;
-            passthru("$env node " . escapeshellarg($script), $exitCode);
+            $process = Process::fromShellCommandline('node ' . escapeshellarg($script), null, $env);
+            $process->setTimeout(null);
+            $process->run(fn($type, $buffer) => $output->write($buffer));
+            $exitCode = $process->getExitCode() ?? 0;
 
             if ($exitCode !== 0) {
                 $output->writeln("<error>❌ Playwright login failed with exit code $exitCode</error>");
