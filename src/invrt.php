@@ -13,16 +13,12 @@ use App\Commands\ReferenceCommand;
 use App\Commands\TestCommand;
 use Symfony\Component\Console\Application;
 
-// Create the application
-$app = new Application('inVRT CLI', '1.0.0');
-$app->setName('📖 inVRT CLI - Visual Regression Testing Tool');
+$app = new Application('📖 inVRT CLI - Visual Regression Testing Tool', '1.0.0');
 
-// Register commands
 $app->addCommand(new InitCommand());
 $app->addCommand(new CrawlCommand());
 $app->addCommand(new ReferenceCommand());
 $app->addCommand(new TestCommand());
 $app->addCommand(new ConfigCommand());
 
-// Run the application
 $app->run();

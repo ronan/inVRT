@@ -19,6 +19,10 @@ _(none yet)_
 
 - [x] Remove use of 'passthru' in php for testibility
 
+- [ ] Refactor the php command codebase
+
+        There is a lot of repeated code.
+
 ## Tests
 
 - [x] **E2E: ReferenceCommandTest**
@@ -46,5 +50,11 @@ _(none yet)_
 - [ ] Test backdrop support
 
 ## Features
+
+- [ ] More config functionality
+        - [ ] specify a specific key
+                invrt config --key=title,url --environment-dev
+        - [ ] update or add a key to config.yml
+                invrt config set --key=title,url --value="Hello, World",http://example.com
 
 - [ ] **Add WordPress support**

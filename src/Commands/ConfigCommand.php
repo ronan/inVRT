@@ -2,97 +2,79 @@
 
 namespace App\Commands;
 
-use App\Service\EnvironmentService;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use App\Input\InvrtInput;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\MapInput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Yaml\Yaml;
 
+#[AsCommand(
+    name: 'config',
+    description: 'View the inVRT configuration',
+    help: 'Displays the current inVRT project configuration.',
+)]
 class ConfigCommand extends BaseCommand
 {
-    protected function configure(): void
+    public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        $this
-            ->setName('config')
-            ->setDescription('View the inVRT configuration')
-            ->setHelp('Displays the current inVRT project configuration.');
-        parent::configure();
-    }
+        $result = $this->boot($opts, $io, requiresConfig: false);
+        if (\is_int($result)) {
+            return $result;
+        }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $profile = $input->getOption('profile');
-        $device = $input->getOption('device');
-        $environment = $input->getOption('environment');
+        $env = $result;
+        $configFile = $this->joinPath($env['INVRT_DIRECTORY'], 'config.yaml');
 
-        // Initialize environment service - config file not required for viewing
-        $this->environment = new EnvironmentService($profile, $device, $environment);
-        $this->environment->initialize($output, false);
-
-        // Get config file path
-        $configFile = $this->joinPath(getenv('INVRT_DIRECTORY') ?: '.invrt', 'config.yaml');
-
-        // Check if config file exists
         if (!file_exists($configFile)) {
-            $output->writeln('# Configuration file not found at: ' . $configFile);
-            $output->writeln("# Run '<comment>invrt init</comment>' to create a new configuration.");
-            return 0;
+            $io->writeln('# Configuration file not found at: ' . $configFile);
+            $io->writeln("# Run '<comment>invrt init</comment>' to create a new configuration.");
+            return Command::SUCCESS;
         }
 
         try {
             $fileContents = file_get_contents($configFile);
             $config = Yaml::parse($fileContents) ?: [];
 
-            $output->writeln('# Current inVRT Configuration:');
-            $output->writeln('# ============================');
-            $output->writeln('');
+            $io->writeln('# Current inVRT Configuration:');
+            $io->writeln('# ============================');
+            $io->writeln('');
 
-            $this->displayConfiguration($config, $output);
+            $this->displayConfiguration($config, $io);
         } catch (\Exception $error) {
-            $output->writeln('<error>Error reading config file: ' . $error->getMessage() . '</error>');
-            return 1;
+            $io->error('Error reading config file: ' . $error->getMessage());
+            return Command::FAILURE;
         }
 
-        return 0;
+        return Command::SUCCESS;
     }
 
-    /**
-     * Display configuration sections in readable format
-     */
-    private function displayConfiguration(array $config, OutputInterface $output): void
+    private function displayConfiguration(array $config, SymfonyStyle $io): void
     {
         foreach ($config as $section => $values) {
             if (!is_array($values)) {
-                $output->writeln($section . ': ' . $values);
+                $io->writeln($section . ': ' . $values);
                 continue;
             }
 
-            $output->writeln($section . ':');
+            $io->writeln($section . ':');
             foreach ($values as $key => $value) {
-                $this->displayConfigValue($key, $value, $output);
+                $this->displayConfigValue($key, $value, $io);
             }
-            $output->writeln('');
+            $io->writeln('');
         }
     }
 
-    /**
-     * Display a single config value
-     */
-    private function displayConfigValue(string $key, mixed $value, OutputInterface $output): void
+    private function displayConfigValue(string $key, mixed $value, SymfonyStyle $io): void
     {
         if (is_array($value)) {
-            $output->writeln('  ' . $key . ':');
+            $io->writeln('  ' . $key . ':');
             foreach ($value as $subkey => $subvalue) {
                 $formatted = is_array($subvalue) ? json_encode($subvalue) : $subvalue;
-                $output->writeln('    ' . $subkey . ': ' . $formatted);
+                $io->writeln('    ' . $subkey . ': ' . $formatted);
             }
         } else {
-            $output->writeln('  ' . $key . ': ' . $value);
+            $io->writeln('  ' . $key . ': ' . $value);
         }
-    }
-
-    protected function getScriptName(): string
-    {
-        // Config command doesn't execute a script
-        return '';
     }
 }

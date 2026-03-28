@@ -2,51 +2,39 @@
 
 namespace App\Commands;
 
-use App\Service\EnvironmentService;
+use App\Input\InvrtInput;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\MapInput;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Process\Process;
 
+#[AsCommand(
+    name: 'reference',
+    description: 'Create reference screenshots for comparison',
+    help: 'Creates reference screenshots for the specified profile, device, and environment to use as baseline for comparison.',
+)]
 class ReferenceCommand extends BaseCommand
 {
-    protected function configure(): void
+    public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        $this
-            ->setName('reference')
-            ->setDescription('Create reference screenshots for comparison')
-            ->setHelp('Creates reference screenshots for the specified profile, device, and environment to use as baseline for comparison.');
-        parent::configure();
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $this->environment = new EnvironmentService(
-            $input->getOption('profile'),
-            $input->getOption('device'),
-            $input->getOption('environment'),
-        );
-        $env = $this->environment->initialize($output, true);
-
-        $loginResult = $this->handleLogin($output, $env);
-        if ($loginResult !== Command::SUCCESS) {
-            return $loginResult;
+        $result = $this->boot($opts, $io);
+        if (\is_int($result)) {
+            return $result;
         }
 
-        $output->writeln(
+        $env = $result;
+
+        $io->writeln(
             "📸 Capturing references from '{$env['INVRT_ENVIRONMENT']}' environment ({$env['INVRT_URL']}) with profile: '{$env['INVRT_PROFILE']}' and device: '{$env['INVRT_DEVICE']}'",
             OutputInterface::VERBOSITY_VERBOSE,
         );
 
         $process = Process::fromShellCommandline('node ' . escapeshellarg($env['INVRT_SCRIPTS_DIR'] . '/backstop.js') . ' reference', null, $env);
         $process->setTimeout(null);
-        $process->run(fn($type, $buffer) => $output->write($buffer));
+        $process->run(fn($type, $buffer) => $io->write($buffer));
 
         return $process->getExitCode() ?? Command::SUCCESS;
-    }
-
-    protected function getScriptName(): string
-    {
-        return '';
     }
 }

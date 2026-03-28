@@ -2,42 +2,34 @@
 
 namespace App\Commands;
 
-use App\Service\EnvironmentService;
+use App\Input\InvrtInput;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\MapInput;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(
+    name: 'crawl',
+    description: 'Crawl the website and generate screenshots',
+    help: 'Crawls the configured website and generates screenshots for the specified profile, device, and environment.',
+)]
 class CrawlCommand extends BaseCommand
 {
-    protected function configure(): void
+    public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        $this
-            ->setName('crawl')
-            ->setDescription('Crawl the website and generate screenshots')
-            ->setHelp('Crawls the configured website and generates screenshots for the specified profile, device, and environment.');
-        parent::configure();
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $this->environment = new EnvironmentService(
-            $input->getOption('profile'),
-            $input->getOption('device'),
-            $input->getOption('environment'),
-        );
-        $env = $this->environment->initialize($output, true);
-
-        $loginResult = $this->handleLogin($output, $env);
-        if ($loginResult !== Command::SUCCESS) {
-            return $loginResult;
+        $result = $this->boot($opts, $io);
+        if (\is_int($result)) {
+            return $result;
         }
 
+        $env = $result;
         $url = $env['INVRT_URL'];
         $dataDir = $env['INVRT_DATA_DIR'];
         $maxDepth = getenv('INVRT_MAX_CRAWL_DEPTH') ?: '3';
         $maxPages = getenv('INVRT_MAX_PAGES') ?: '100';
 
-        $output->writeln(
+        $io->writeln(
             "🕸️ Crawling '{$env['INVRT_ENVIRONMENT']}' environment ($url) with profile: '{$env['INVRT_PROFILE']}' to depth: $maxDepth, max pages: $maxPages",
             OutputInterface::VERBOSITY_VERBOSE,
         );
@@ -47,17 +39,17 @@ class CrawlCommand extends BaseCommand
         }
 
         $domain = parse_url($url, PHP_URL_HOST) ?? '';
-        [$cookieFile, $cookieHeader] = $this->resolveCookieOption($output, $env['INVRT_COOKIES_FILE'], $dataDir);
-        $excludeUrls = $this->resolveExcludeUrls($output, $env['INVRT_DIRECTORY']);
+        [$cookieFile, $cookieHeader] = $this->resolveCookieOption($io, $env['INVRT_COOKIES_FILE'], $dataDir);
+        $excludeUrls = $this->resolveExcludeUrls($io, $env['INVRT_DIRECTORY']);
 
-        $exitCode = $this->runWget($output, $url, $domain, $dataDir, $maxDepth, $excludeUrls, $cookieFile, $cookieHeader);
+        $exitCode = $this->runWget($io, $url, $domain, $dataDir, $maxDepth, $excludeUrls, $cookieFile, $cookieHeader);
         if ($exitCode !== Command::SUCCESS) {
             return $exitCode;
         }
 
         $count = $this->parseUrlsFromLog("$dataDir/logs/crawl.log", $url, "$dataDir/crawled_urls.txt");
 
-        $output->writeln("Crawling completed. Found $count unique paths. Results saved to $dataDir/crawled_urls.txt", OutputInterface::VERBOSITY_VERBOSE);
+        $io->writeln("Crawling completed. Found $count unique paths. Results saved to $dataDir/crawled_urls.txt", OutputInterface::VERBOSITY_VERBOSE);
 
         return Command::SUCCESS;
     }
@@ -66,7 +58,7 @@ class CrawlCommand extends BaseCommand
      * Build and execute the wget crawl command.
      */
     private function runWget(
-        OutputInterface $output,
+        SymfonyStyle $io,
         string $url,
         string $domain,
         string $dataDir,
@@ -101,7 +93,7 @@ class CrawlCommand extends BaseCommand
         exec($cmd, $stdout, $exitCode);
 
         if ($stdout !== []) {
-            $output->writeln(implode("\n", $stdout), OutputInterface::VERBOSITY_VERBOSE);
+            $io->writeln(implode("\n", $stdout), OutputInterface::VERBOSITY_VERBOSE);
         }
 
         return $exitCode;
@@ -146,21 +138,21 @@ class CrawlCommand extends BaseCommand
      *
      * @return array{string, string}
      */
-    private function resolveCookieOption(OutputInterface $output, string $cookiesFile, string $dataDir): array
+    private function resolveCookieOption(SymfonyStyle $io, string $cookiesFile, string $dataDir): array
     {
         $rawCookie = getenv('INVRT_COOKIE') ?: '';
 
         if ($rawCookie !== '') {
-            $output->writeln('Using provided cookie for crawling.', OutputInterface::VERBOSITY_VERBOSE);
+            $io->writeln('Using provided cookie for crawling.', OutputInterface::VERBOSITY_VERBOSE);
             return ['', $rawCookie];
         }
 
         if (file_exists("$cookiesFile.txt")) {
-            $output->writeln("Using cookies from file: $cookiesFile.txt", OutputInterface::VERBOSITY_VERBOSE);
+            $io->writeln("Using cookies from file: $cookiesFile.txt", OutputInterface::VERBOSITY_VERBOSE);
             return ["$cookiesFile.txt", ''];
         }
 
-        $output->writeln('No cookie provided. Crawling without authentication.', OutputInterface::VERBOSITY_VERBOSE);
+        $io->writeln('No cookie provided. Crawling without authentication.', OutputInterface::VERBOSITY_VERBOSE);
         touch("$dataDir/cookies.txt");
         return ['', ''];
     }
@@ -168,20 +160,20 @@ class CrawlCommand extends BaseCommand
     /**
      * Load URL exclusions from exclude_urls.txt, falling back to sensible defaults.
      */
-    private function resolveExcludeUrls(OutputInterface $output, string $invrtDir): string
+    private function resolveExcludeUrls(SymfonyStyle $io, string $invrtDir): string
     {
         $excludeFile = "$invrtDir/exclude_urls.txt";
 
         if (!file_exists($excludeFile)) {
             $defaults = '/files,/sites,/user/logout';
-            $output->writeln("No exclude_urls.txt found at $excludeFile. Excluding defaults: $defaults", OutputInterface::VERBOSITY_VERBOSE);
+            $io->writeln("No exclude_urls.txt found at $excludeFile. Excluding defaults: $defaults", OutputInterface::VERBOSITY_VERBOSE);
             return $defaults;
         }
 
         $lines = file($excludeFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
         $lines = array_values(array_filter($lines, fn($l) => !str_starts_with(ltrim($l), '#')));
         $excludeUrls = implode(',', $lines);
-        $output->writeln("Excluding URLs: $excludeUrls", OutputInterface::VERBOSITY_VERBOSE);
+        $io->writeln("Excluding URLs: $excludeUrls", OutputInterface::VERBOSITY_VERBOSE);
         return $excludeUrls;
     }
 
@@ -202,10 +194,5 @@ class CrawlCommand extends BaseCommand
         foreach ($items as $item) {
             $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
         }
-    }
-
-    protected function getScriptName(): string
-    {
-        return '';
     }
 }
