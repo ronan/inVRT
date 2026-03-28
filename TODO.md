@@ -25,6 +25,11 @@ _(none yet)_
 
 - [x] **E2E: TestCommandTest**
 
+- [x] Improve e2e tests/E2E/CrawlCommandTest.php
+
+        Use the same test fixture website that are used in tests/E2E/ReferenceCommandTest.php
+        and tests/E2E/TestCommandTest.php. Expand the test website to include 5 web pages to crawl.
+
 
 ## Features
 
