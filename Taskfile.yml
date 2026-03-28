@@ -65,7 +65,7 @@ tasks:
   test:schema:
     desc: Validate config JSON Schema and example config file
     cmds:
-      - node tooling/validate-schema.mjs
+      - node tooling/scripts/validate-schema.mjs
 
   fix:
     desc: Run all code fixes (modernize, lint)
