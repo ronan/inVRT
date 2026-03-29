@@ -19,9 +19,9 @@ class TestCommandTest extends WebCommandTestCase
         $this->executeCommand('test');
     }
 
-    public function testAutoTriggersReferenceOnFirstRun(): void
+    public function testTestHappyPath(): void
     {
-        $this->setupFixture();
+        $this->setupFixture(true);
 
         // Run test without any prior reference — should auto-capture references then succeed
         $this->executeCommand('test', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
@@ -35,15 +35,6 @@ class TestCommandTest extends WebCommandTestCase
         $this->assertDirectoryExists($dataDir . '/test');
         $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/reference')));
         $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/test')));
-    }
-
-    public function testTestCommandRunsComparison(): void
-    {
-        $this->setupFixture();
-
-        // Seed reference screenshots
-        $this->executeCommand('reference');
-        $this->assertCommandSuccess();
 
         // Run visual regression test with verbose — identical site, so no regressions
         $this->executeCommand('test', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);

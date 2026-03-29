@@ -73,8 +73,11 @@ abstract class WebCommandTestCase extends CommandTestCase
     }
 
     /** Write config + crawled_urls.txt pointing at the test webserver. */
-    protected function setupFixture(): void
+    protected function setupFixture($clear = false): void
     {
+        if ($clear) {
+            $this->fixture->cleanup();
+        }
         $this->fixture->writeConfig([
             'environments' => [
                 'local' => ['url' => $this->webserverUrl()],
