@@ -19,31 +19,34 @@ class ConfigCommand extends BaseCommand
 {
     public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        return $this->withEnv($opts, $io, function (array $env) use ($io): int {
-            $configFile = Path::join($env['INVRT_DIRECTORY'], 'config.yaml');
+        $result = $this->boot($opts, $io, requiresConfig: false);
+        if (is_int($result)) {
+            return $result;
+        }
 
-            if (!file_exists($configFile)) {
-                $io->writeln('# Configuration file not found at: ' . $configFile);
-                $io->writeln("# Run '<comment>invrt init</comment>' to create a new configuration.");
-                return Command::SUCCESS;
-            }
+        $configFile = Path::join($result['INVRT_DIRECTORY'], 'config.yaml');
 
-            try {
-                $fileContents = file_get_contents($configFile);
-                $config = Yaml::parse($fileContents) ?: [];
-
-                $io->writeln('# Current inVRT Configuration:');
-                $io->writeln('# ============================');
-                $io->writeln('');
-
-                $this->displayConfiguration($config, $io);
-            } catch (\Exception $error) {
-                $io->error('Error reading config file: ' . $error->getMessage());
-                return Command::FAILURE;
-            }
-
+        if (!file_exists($configFile)) {
+            $io->writeln('# Configuration file not found at: ' . $configFile);
+            $io->writeln("# Run '<comment>invrt init</comment>' to create a new configuration.");
             return Command::SUCCESS;
-        }, requiresConfig: false);
+        }
+
+        try {
+            $fileContents = file_get_contents($configFile);
+            $config = Yaml::parse($fileContents) ?: [];
+
+            $io->writeln('# Current inVRT Configuration:');
+            $io->writeln('# ============================');
+            $io->writeln('');
+
+            $this->displayConfiguration($config, $io);
+        } catch (\Exception $error) {
+            $io->error('Error reading config file: ' . $error->getMessage());
+            return Command::FAILURE;
+        }
+
+        return Command::SUCCESS;
     }
 
     private function displayConfiguration(array $config, SymfonyStyle $io): void

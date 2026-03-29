@@ -36,6 +36,14 @@ _(none yet)_
 
 - [x] Replace the custom joinPath function with symfony/filesystem
 
+- [x] Use symfony dependency injection for configuration passing
+
+        See: https://symfony.com/doc/current/service_container.html
+        Use DI/Service container and autowiring to pass the config object to commands
+        Remove the $this->withEnv pattern and simplofy the controllers as much as possible
+
+- [ ] Do a manual refactor of the config/options system to get rid of the last of the code smells
+
 ## Tests
 
 - [x] **E2E: ReferenceCommandTest**

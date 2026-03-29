@@ -8,20 +8,6 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 /** Auto-generated from docs/config.schema.yaml — do not edit directly. Run `task build:templates` to regenerate. */
 class InvrtConfiguration implements ConfigurationInterface
 {
-    /** Keys shared across settings/environments/profiles/devices sections. */
-    public const CONFIG_KEYS = [
-        'url',
-        'login_url',
-        'username',
-        'password',
-        'viewport_width',
-        'viewport_height',
-        'max_crawl_depth',
-        'max_pages',
-        'user_agent',
-        'max_concurrent_requests',
-    ];
-
     /** Hard-coded defaults — applied when key is absent from all config sections. */
     public const DEFAULTS = [
         'url' => '',
@@ -35,6 +21,23 @@ class InvrtConfiguration implements ConfigurationInterface
         'user_agent' => 'InVRT/1.0',
         'max_concurrent_requests' => 5,
     ];
+
+    public static function keys(): array
+    {
+        return array_keys(self::DEFAULTS);
+    }
+
+    public static function defaults(): array
+    {
+        return self::DEFAULTS;
+    }
+
+    public static function env(): array
+    {
+        // Return all environment variables starting with INVRT_ as an associative array.
+        $keys = array_map(fn($k) => 'INVRT_' . strtoupper($k), self::keys());
+        return array_intersect_key($_ENV, array_flip($keys));
+    }
 
     public function getConfigTreeBuilder(): TreeBuilder
     {

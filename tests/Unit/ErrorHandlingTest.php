@@ -37,14 +37,14 @@ class ErrorHandlingTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Configuration file not found');
 
-        (new EnvironmentService())->initialize(new NullOutput(), true);
+        (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
     }
 
     public function testMissingConfigHandledWhenNotRequired(): void
     {
         $this->fixture->setEnvironmentVariable();
 
-        $env = (new EnvironmentService())->initialize(new NullOutput(), false);
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), false);
 
         $this->assertIsArray($env);
         $this->assertArrayHasKey('INVRT_PROFILE', $env);
@@ -58,7 +58,7 @@ class ErrorHandlingTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Error reading config file');
 
-        (new EnvironmentService())->initialize(new NullOutput(), true);
+        (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
     }
 
     public function testInvalidYamlHandledWhenNotRequired(): void
@@ -66,7 +66,7 @@ class ErrorHandlingTest extends TestCase
         $this->fixture->setEnvironmentVariable();
         $this->fixture->writeInvalidYamlConfig();
 
-        $env = (new EnvironmentService())->initialize(new NullOutput(), false);
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), false);
 
         $this->assertIsArray($env);
     }
@@ -76,7 +76,7 @@ class ErrorHandlingTest extends TestCase
         $this->fixture->setEnvironmentVariable();
         $this->fixture->writeConfig(['name' => 'Test', 'settings' => ['max_crawl_depth' => 2]]);
 
-        $env = (new EnvironmentService())->initialize(new NullOutput(), true);
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
 
         $this->assertEquals('', $env['INVRT_URL']);
     }
@@ -86,7 +86,7 @@ class ErrorHandlingTest extends TestCase
         $this->fixture->setEnvironmentVariable();
         $this->fixture->writeMinimalConfig();
 
-        $env = (new EnvironmentService('anonymous', 'desktop', 'nonexistent'))->initialize(new NullOutput(), true);
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'nonexistent', new NullOutput(), true);
 
         $this->assertArrayHasKey('INVRT_ENVIRONMENT', $env);
         $this->assertEquals('nonexistent', $env['INVRT_ENVIRONMENT']);
@@ -97,7 +97,7 @@ class ErrorHandlingTest extends TestCase
         $this->fixture->setEnvironmentVariable();
         $this->fixture->writeMinimalConfig();
 
-        $env = (new EnvironmentService('nonexistent', 'desktop', 'local'))->initialize(new NullOutput(), true);
+        $env = (new EnvironmentService())->initialize('nonexistent', 'desktop', 'local', new NullOutput(), true);
 
         $this->assertArrayHasKey('INVRT_PROFILE', $env);
         $this->assertEquals('nonexistent', $env['INVRT_PROFILE']);
@@ -111,7 +111,7 @@ class ErrorHandlingTest extends TestCase
             'profiles' => ['default' => ['username' => '', 'password' => '']],
         ]);
 
-        $env = (new EnvironmentService('default'))->initialize(new NullOutput(), true);
+        $env = (new EnvironmentService())->initialize('default', 'desktop', 'local', new NullOutput(), true);
 
         $this->assertEquals('', $env['INVRT_USERNAME']);
         $this->assertEquals('', $env['INVRT_PASSWORD']);
@@ -129,7 +129,7 @@ class ErrorHandlingTest extends TestCase
         putenv('INVRT_PASSWORD=env_pass');
 
         try {
-            $env = (new EnvironmentService('admin'))->initialize(new NullOutput(), true);
+            $env = (new EnvironmentService())->initialize('admin', 'desktop', 'local', new NullOutput(), true);
 
             $this->assertEquals('env_user', $env['INVRT_USERNAME']);
             $this->assertEquals('env_pass', $env['INVRT_PASSWORD']);
@@ -147,7 +147,7 @@ class ErrorHandlingTest extends TestCase
             'settings' => ['url' => 'https://example.com', 'max_pages' => 50],
         ]);
 
-        $env = (new EnvironmentService())->initialize(new NullOutput(), true);
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
 
         $this->assertIsArray($env);
         $this->assertNotEmpty($env);
@@ -159,7 +159,7 @@ class ErrorHandlingTest extends TestCase
         $this->fixture->setEnvironmentVariable();
         $this->fixture->writeMinimalConfig();
 
-        $env = (new EnvironmentService())->initialize(new NullOutput(), true);
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
 
         foreach (['INVRT_PROFILE', 'INVRT_DEVICE', 'INVRT_ENVIRONMENT', 'INVRT_SCRIPTS_DIR',
             'INVRT_DIRECTORY', 'INVRT_DATA_DIR', 'INVRT_COOKIES_FILE', 'INVRT_CONFIG_FILE'] as $var) {
@@ -177,7 +177,7 @@ class ErrorHandlingTest extends TestCase
             ],
         ]);
 
-        $env = (new EnvironmentService())->initialize(new NullOutput(), true);
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
 
         $this->assertIsArray($env);
         $this->assertNotEmpty($env);

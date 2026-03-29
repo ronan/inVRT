@@ -34,7 +34,7 @@ class EnvironmentServiceTest extends TestCase
 
     private function init(string $profile = 'anonymous', string $device = 'desktop', string $env = 'local'): array
     {
-        return (new EnvironmentService($profile, $device, $env))->initialize(new NullOutput(), true);
+        return (new EnvironmentService())->initialize($profile, $device, $env, new NullOutput(), true);
     }
 
     // ── Settings section ──────────────────────────────────────────────────────
@@ -156,13 +156,24 @@ class EnvironmentServiceTest extends TestCase
         $env = $this->init();
 
         $expected = [
-            'INVRT_PROFILE', 'INVRT_DEVICE', 'INVRT_ENVIRONMENT',
-            'INVRT_SCRIPTS_DIR', 'INVRT_DIRECTORY', 'INVRT_DATA_DIR',
-            'INVRT_COOKIES_FILE', 'INVRT_CONFIG_FILE',
-            'INVRT_URL', 'INVRT_LOGIN_URL', 'INVRT_USERNAME', 'INVRT_PASSWORD',
-            'INVRT_VIEWPORT_WIDTH', 'INVRT_VIEWPORT_HEIGHT',
-            'INVRT_MAX_CRAWL_DEPTH', 'INVRT_MAX_PAGES',
-            'INVRT_USER_AGENT', 'INVRT_MAX_CONCURRENT_REQUESTS',
+            'INVRT_PROFILE',
+            'INVRT_DEVICE',
+            'INVRT_ENVIRONMENT',
+            'INVRT_SCRIPTS_DIR',
+            'INVRT_DIRECTORY',
+            'INVRT_DATA_DIR',
+            'INVRT_COOKIES_FILE',
+            'INVRT_CONFIG_FILE',
+            'INVRT_URL',
+            'INVRT_LOGIN_URL',
+            'INVRT_USERNAME',
+            'INVRT_PASSWORD',
+            'INVRT_VIEWPORT_WIDTH',
+            'INVRT_VIEWPORT_HEIGHT',
+            'INVRT_MAX_CRAWL_DEPTH',
+            'INVRT_MAX_PAGES',
+            'INVRT_USER_AGENT',
+            'INVRT_MAX_CONCURRENT_REQUESTS',
         ];
 
         foreach ($expected as $var) {
@@ -176,7 +187,20 @@ class EnvironmentServiceTest extends TestCase
 
         $env = $this->init();
 
-        foreach (InvrtConfiguration::CONFIG_KEYS as $key) {
+        foreach (
+            [
+                'url',
+                'login_url',
+                'username',
+                'password',
+                'viewport_width',
+                'viewport_height',
+                'max_crawl_depth',
+                'max_pages',
+                'user_agent',
+                'max_concurrent_requests',
+            ] as $key
+        ) {
             $envKey = 'INVRT_' . strtoupper($key);
             $this->assertArrayHasKey($envKey, $env, "Missing env var for config key: $key");
         }

@@ -4,179 +4,145 @@ namespace App\Service;
 
 use App\Input\InvrtConfiguration;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Path;
-use Symfony\Component\Yaml\Yaml;
 
 class EnvironmentService
 {
-    private string $profile;
-    private string $device;
-    private string $environment;
-    private string $scriptsDir;
-    private string $invrtDirectory;
-    private array $config = [];
-    private array $resolved = InvrtConfiguration::DEFAULTS;
+    private readonly string $scriptsDir;
 
-    public function __construct(
-        string $profile = 'anonymous',
-        string $device = 'desktop',
-        string $environment = 'local',
-    ) {
-        $this->profile = $profile;
-        $this->device = $device;
-        $this->environment = $environment;
+    public function __construct()
+    {
         $this->scriptsDir = __DIR__ . '/..';
     }
 
     /**
-     * Initialize environment variables and load configuration.
+     * Initialise environment, load + resolve config, export env vars for subprocesses.
      *
      * @throws \RuntimeException when $requireConfig is true and file is missing/invalid
      */
-    public function initialize(OutputInterface $output, bool $requireConfig = true): array
-    {
-        $this->setupDirectories();
-
-        if ($requireConfig) {
-            $this->config = $this->loadConfig($output);
-        } else {
-            $this->config = $this->tryLoadConfig();
-        }
-
-        $this->resolveConfig();
-
-        return $this->getEnvironmentArray();
-    }
-
-    private function setupDirectories(): void
-    {
-        $this->invrtDirectory = getenv('INVRT_DIRECTORY') ?: Path::join(
+    public function initialize(
+        string $profile,
+        string $device,
+        string $environment,
+        OutputInterface $output,
+        bool $requireConfig = true,
+    ): array {
+        $invrtDir = getenv('INVRT_DIRECTORY') ?: Path::join(
             getenv('INIT_CWD') ?: (string) getcwd(),
             '.invrt',
         );
 
-        putenv('INVRT_DIRECTORY=' . $this->invrtDirectory);
-        putenv('INVRT_SCRIPTS_DIR=' . $this->scriptsDir);
-        putenv('INVRT_PROFILE=' . $this->profile);
-        putenv('INVRT_DEVICE=' . $this->device);
-        putenv('INVRT_ENVIRONMENT=' . $this->environment);
+        $config = $this->readConfig(Path::join($invrtDir, 'config.yaml'), $requireConfig, $output, $profile, $device, $environment);
+        $resolved = $this->resolve($config, $profile, $device, $environment);
+
+        $dataDir = Path::join($invrtDir, 'data', $profile, $environment);
+
+        // Export all values for subprocess access
+        putenv("INVRT_DIRECTORY=$invrtDir");
+        putenv("INVRT_SCRIPTS_DIR={$this->scriptsDir}");
+        putenv("INVRT_PROFILE=$profile");
+        putenv("INVRT_DEVICE=$device");
+        putenv("INVRT_ENVIRONMENT=$environment");
+        foreach ($resolved as $key => $value) {
+            putenv('INVRT_' . strtoupper($key) . "=$value");
+        }
+
+        return [
+            'INVRT_PROFILE'                 => $profile,
+            'INVRT_DEVICE'                  => $device,
+            'INVRT_ENVIRONMENT'             => $environment,
+            'INVRT_SCRIPTS_DIR'             => $this->scriptsDir,
+            'INVRT_DIRECTORY'               => $invrtDir,
+            'INVRT_DATA_DIR'                => $dataDir,
+            'INVRT_COOKIES_FILE'            => Path::join($dataDir, 'cookies'),
+            'INVRT_CONFIG_FILE'             => Path::join($invrtDir, 'config.yaml'),
+            'INVRT_URL'                     => (string) $resolved['url'],
+            'INVRT_LOGIN_URL'               => (string) $resolved['login_url'],
+            'INVRT_USERNAME'                => (string) $resolved['username'],
+            'INVRT_PASSWORD'                => (string) $resolved['password'],
+            'INVRT_VIEWPORT_WIDTH'          => (string) $resolved['viewport_width'],
+            'INVRT_VIEWPORT_HEIGHT'         => (string) $resolved['viewport_height'],
+            'INVRT_MAX_CRAWL_DEPTH'         => (string) $resolved['max_crawl_depth'],
+            'INVRT_MAX_PAGES'               => (string) $resolved['max_pages'],
+            'INVRT_USER_AGENT'              => (string) $resolved['user_agent'],
+            'INVRT_MAX_CONCURRENT_REQUESTS' => (string) $resolved['max_concurrent_requests'],
+        ];
     }
 
-    /** Load and validate config; throw on missing file or parse error. */
-    private function loadConfig(OutputInterface $output): array
-    {
-        $configFile = Path::join($this->invrtDirectory, 'config.yaml');
-
+    /**
+     * Load and process config.yaml via InvrtConfiguration.
+     * Returns the processed config array, or [] if not required and file is missing/invalid.
+     *
+     * @throws \RuntimeException when $required is true and file is missing/invalid
+     */
+    private function readConfig(
+        string $configFile,
+        bool $required,
+        OutputInterface $output,
+        string $profile,
+        string $device,
+        string $environment,
+    ): array {
         if (!file_exists($configFile)) {
-            throw new \RuntimeException(
-                "Configuration file not found at $configFile. Please run 'invrt init' to initialize the project.",
+            if ($required) {
+                throw new \RuntimeException(
+                    "Configuration file not found at $configFile. Please run 'invrt init' to initialize the project.",
+                );
+            }
+            return [];
+        }
+
+        try {
+            $loader = new YamlConfigLoader(new FileLocator(dirname($configFile)));
+            $raw = $loader->load(basename($configFile));
+            $processed = (new Processor())->processConfiguration(new InvrtConfiguration(), [$raw]);
+        } catch (\Exception $e) {
+            if ($required) {
+                throw new \RuntimeException('Error reading config file: ' . $e->getMessage());
+            }
+            return [];
+        }
+
+        if ($required) {
+            $output->writeln(
+                "<comment>#  Loading project settings for profile: $profile device: $device environment: $environment</comment>",
+                OutputInterface::VERBOSITY_VERBOSE,
             );
         }
 
-        $output->writeln(
-            "<comment>#  Loading project settings for profile: {$this->profile} "
-            . "device: {$this->device} "
-            . "environment: {$this->environment}</comment>",
-            OutputInterface::VERBOSITY_VERBOSE,
-        );
-
-        try {
-            $raw = Yaml::parse((string) file_get_contents($configFile)) ?: [];
-            // Validate structure — throws on unknown keys or invalid types
-            (new Processor())->processConfiguration(new InvrtConfiguration(), [$raw]);
-            return $raw;
-        } catch (\Exception $e) {
-            throw new \RuntimeException('Error reading config file: ' . $e->getMessage());
-        }
-    }
-
-    /** Attempt to load config silently; return empty array on any failure. */
-    private function tryLoadConfig(): array
-    {
-        $configFile = Path::join($this->invrtDirectory, 'config.yaml');
-
-        if (!file_exists($configFile)) {
-            return [];
-        }
-
-        try {
-            $raw = Yaml::parse((string) file_get_contents($configFile)) ?: [];
-            (new Processor())->processConfiguration(new InvrtConfiguration(), [$raw]);
-            return $raw;
-        } catch (\Exception $e) {
-            return [];
-        }
+        return $processed;
     }
 
     /**
-     * Merge settings → environment → profile → device, then export env vars.
-     * Uses raw YAML array so only explicitly set keys override earlier values.
+     * Merge settings → environment → profile → device, then apply credential env var overrides.
      */
-    private function resolveConfig(): void
+    private function resolve(array $config, string $profile, string $device, string $environment): array
     {
-        $this->resolved = InvrtConfiguration::DEFAULTS;
-
-        $sections = [
-            $this->config['settings'] ?? [],
-            $this->config['environments'][$this->environment] ?? [],
-            $this->config['profiles'][$this->profile] ?? [],
-            $this->config['devices'][$this->device] ?? [],
-        ];
-
-        foreach ($sections as $section) {
-            foreach (InvrtConfiguration::CONFIG_KEYS as $key) {
-                if (array_key_exists($key, $section)) {
-                    $this->resolved[$key] = $section[$key];
-                }
+        $resolved = [];
+        foreach (
+            [
+                $config['settings'] ?? [],
+                $config['environments'][$environment] ?? [],
+                $config['profiles'][$profile] ?? [],
+                $config['devices'][$device] ?? [],
+                InvrtConfiguration::env(),
+            ] as $section
+        ) {
+            foreach (InvrtConfiguration::DEFAULTS as $key => $default) {
+                $resolved[$key] = $section[$key] ?? $resolved[$key] ?? $default;
             }
         }
 
-        // Env var overrides for credentials (highest precedence)
+        // Credential env var overrides (highest precedence)
         foreach (['username', 'password'] as $cred) {
-            $envVal = getenv('INVRT_' . strtoupper($cred));
-            if ($envVal !== false && $envVal !== '') {
-                $this->resolved[$cred] = $envVal;
+            $val = getenv('INVRT_' . strtoupper($cred));
+            if ($val !== false && $val !== '') {
+                $resolved[$cred] = $val;
             }
         }
 
-        // Export all resolved values for subprocess access
-        foreach ($this->resolved as $key => $value) {
-            putenv('INVRT_' . strtoupper($key) . '=' . $value);
-        }
-    }
-
-    /**
-     * Return all environment variables as an array for passing to shell scripts.
-     */
-    public function getEnvironmentArray(): array
-    {
-        $dataDir = Path::join($this->invrtDirectory, 'data', $this->profile, $this->environment);
-
-        return [
-            'INVRT_PROFILE'                 => $this->profile,
-            'INVRT_DEVICE'                  => $this->device,
-            'INVRT_ENVIRONMENT'             => $this->environment,
-            'INVRT_SCRIPTS_DIR'             => $this->scriptsDir,
-            'INVRT_DIRECTORY'               => $this->invrtDirectory,
-            'INVRT_DATA_DIR'                => $dataDir,
-            'INVRT_COOKIES_FILE'            => Path::join($dataDir, 'cookies'),
-            'INVRT_CONFIG_FILE'             => Path::join($this->invrtDirectory, 'config.yaml'),
-            'INVRT_URL'                     => (string) $this->resolved['url'],
-            'INVRT_LOGIN_URL'               => (string) $this->resolved['login_url'],
-            'INVRT_USERNAME'                => (string) $this->resolved['username'],
-            'INVRT_PASSWORD'                => (string) $this->resolved['password'],
-            'INVRT_VIEWPORT_WIDTH'          => (string) $this->resolved['viewport_width'],
-            'INVRT_VIEWPORT_HEIGHT'         => (string) $this->resolved['viewport_height'],
-            'INVRT_MAX_CRAWL_DEPTH'         => (string) $this->resolved['max_crawl_depth'],
-            'INVRT_MAX_PAGES'               => (string) $this->resolved['max_pages'],
-            'INVRT_USER_AGENT'              => (string) $this->resolved['user_agent'],
-            'INVRT_MAX_CONCURRENT_REQUESTS' => (string) $this->resolved['max_concurrent_requests'],
-        ];
-    }
-
-    public function getEnv(string $key): string
-    {
-        return $this->getEnvironmentArray()[$key] ?? '';
+        return $resolved;
     }
 }

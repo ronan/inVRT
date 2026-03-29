@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Commands\CrawlCommand;
+use App\Service\EnvironmentService;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,7 +20,7 @@ class CrawlCommandTest extends TestCase
         $this->tempDir = sys_get_temp_dir() . '/crawl-command-test-' . uniqid();
         mkdir($this->tempDir, 0755, true);
 
-        $this->command = new CrawlCommand();
+        $this->command = new CrawlCommand(new EnvironmentService());
         $this->method = new \ReflectionMethod(CrawlCommand::class, 'parseUrlsFromLog');
     }
 

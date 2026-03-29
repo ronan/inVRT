@@ -17,12 +17,16 @@ class ReferenceCommand extends BaseCommand
 {
     public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        return $this->withEnv($opts, $io, function (array $env) use ($io): int {
-            $io->writeln(
-                "📸 Capturing references from '{$env['INVRT_ENVIRONMENT']}' environment ({$env['INVRT_URL']}) with profile: '{$env['INVRT_PROFILE']}' and device: '{$env['INVRT_DEVICE']}'",
-                OutputInterface::VERBOSITY_VERBOSE,
-            );
-            return $this->runBackstop('reference', $env, $io);
-        });
+        $result = $this->boot($opts, $io);
+        if (is_int($result)) {
+            return $result;
+        }
+
+        $io->writeln(
+            "📸 Capturing references from '{$result['INVRT_ENVIRONMENT']}' environment ({$result['INVRT_URL']}) with profile: '{$result['INVRT_PROFILE']}' and device: '{$result['INVRT_DEVICE']}'",
+            OutputInterface::VERBOSITY_VERBOSE,
+        );
+
+        return $this->runBackstop('reference', $result, $io);
     }
 }

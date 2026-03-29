@@ -111,11 +111,11 @@ Symfony Console Commands (src/Commands/)
   Bash scripts (src/*.sh)  ←→  Node.js (src/*.js, Playwright, BackstopJS)
 ```
 
-Most commands extend `BaseCommand` and expose an invokable `__invoke()` method. `BaseCommand` initialises `EnvironmentService`, optionally invokes `LoginService`, and then hands the resolved environment to command-specific behavior via `withEnv()`.
+Most commands extend `BaseCommand` and expose an invokable `__invoke()` method. `EnvironmentService` is injected into `BaseCommand` via constructor DI — the entry point (`src/invrt.php`) uses `symfony/dependency-injection` with a `ContainerBuilder` to wire services and commands automatically. Commands call `$this->boot($opts, $io)` to initialise the environment and handle login, then work directly with the returned env array.
 
 For process execution, commands should use `executeScript()` for bash-driven flows and `runBackstop()` for BackstopJS flows so subprocess handling stays consistent.
 
-**Exceptions:** `InitCommand` is a standalone invokable command because it does not need resolved inVRT environment variables. `ConfigCommand` still extends `BaseCommand`, but calls `withEnv(..., requiresConfig: false)` because it needs the project directory without requiring an existing config file.
+**Exceptions:** `InitCommand` is a standalone invokable command because it does not need resolved inVRT environment variables and is registered directly without DI. `ConfigCommand` still extends `BaseCommand`, but calls `$this->boot($opts, $io, requiresConfig: false)` because it needs the project directory without requiring an existing config file.
 
 **Configuration merging** in `EnvironmentService` processes sections in this order — later sections overwrite earlier ones (highest precedence last):
 
@@ -140,11 +140,12 @@ Refer to [The configuration documentation](docs/configuration.md) for details on
 1. Use Symfony's attribute-based command registration with `#[AsCommand(name: '...', description: '...', help: '...')]`
 2. Prefer an invokable command class with `public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int`
 3. Extend `BaseCommand` when the command needs resolved inVRT environment variables, config loading, or login handling
-4. Inside `__invoke()`, call `$this->withEnv($opts, $io, fn (array $env): int => ...)` and keep the closure focused on the command-specific behavior
-5. Use `executeScript()` for bash-driven commands and `runBackstop()` for BackstopJS flows instead of rebuilding process bootstrapping in each command
-6. Use `InvrtInput` with `#[MapInput]` for the shared `--profile`, `--device`, and `--environment` options instead of defining those options per command
-7. Return Symfony `Command::SUCCESS` or `Command::FAILURE` codes explicitly and add a verbosity level to every `$io->writeln()` call
-8. Only skip `BaseCommand` for true exceptions that do not need environment bootstrapping, such as `init`; if a command needs custom behavior but still depends on the resolved environment, keep it on `BaseCommand` and compose the behavior inside `__invoke()`
+4. Inside `__invoke()`, call `$result = $this->boot($opts, $io)`, check `if (is_int($result)) return $result;`, then work directly with `$result` as the env array
+5. Register the new command in `src/invrt.php` via `$container->autowire(NewCommand::class)->setPublic(true)` and add it to the app loop
+6. Use `executeScript()` for bash-driven commands and `runBackstop()` for BackstopJS flows instead of rebuilding process bootstrapping in each command
+7. Use `InvrtInput` with `#[MapInput]` for the shared `--profile`, `--device`, and `--environment` options instead of defining those options per command
+8. Return Symfony `Command::SUCCESS` or `Command::FAILURE` codes explicitly and add a verbosity level to every `$io->writeln()` call
+9. Only skip `BaseCommand` for true exceptions that do not need environment bootstrapping, such as `init`
 
 ### Static Service Classes
 `LoginService` and `CookieService` are entirely static — no instantiation. Keep new utility-style services static unless state is required.

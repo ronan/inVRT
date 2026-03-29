@@ -18,36 +18,39 @@ class CrawlCommand extends BaseCommand
 {
     public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        return $this->withEnv($opts, $io, function (array $env) use ($io): int {
-            $url = $env['INVRT_URL'];
-            $dataDir = $env['INVRT_DATA_DIR'];
-            $maxDepth = getenv('INVRT_MAX_CRAWL_DEPTH') ?: '3';
-            $maxPages = getenv('INVRT_MAX_PAGES') ?: '100';
+        $result = $this->boot($opts, $io);
+        if (is_int($result)) {
+            return $result;
+        }
 
-            $io->writeln(
-                "🕸️ Crawling '{$env['INVRT_ENVIRONMENT']}' environment ($url) with profile: '{$env['INVRT_PROFILE']}' to depth: $maxDepth, max pages: $maxPages",
-                OutputInterface::VERBOSITY_VERBOSE,
-            );
+        $url = $result['INVRT_URL'];
+        $dataDir = $result['INVRT_DATA_DIR'];
+        $maxDepth = getenv('INVRT_MAX_CRAWL_DEPTH') ?: '3';
+        $maxPages = getenv('INVRT_MAX_PAGES') ?: '100';
 
-            foreach (["$dataDir/clone", "$dataDir/logs"] as $dir) {
-                $this->clearDirectory($dir);
-            }
+        $io->writeln(
+            "🕸️ Crawling '{$result['INVRT_ENVIRONMENT']}' environment ($url) with profile: '{$result['INVRT_PROFILE']}' to depth: $maxDepth, max pages: $maxPages",
+            OutputInterface::VERBOSITY_VERBOSE,
+        );
 
-            $domain = parse_url($url, PHP_URL_HOST) ?? '';
-            [$cookieFile, $cookieHeader] = $this->resolveCookieOption($io, $env['INVRT_COOKIES_FILE'], $dataDir);
-            $excludeUrls = $this->resolveExcludeUrls($io, $env['INVRT_DIRECTORY']);
+        foreach (["$dataDir/clone", "$dataDir/logs"] as $dir) {
+            $this->clearDirectory($dir);
+        }
 
-            $exitCode = $this->runWget($io, $url, $domain, $dataDir, $maxDepth, $excludeUrls, $cookieFile, $cookieHeader);
-            if ($exitCode !== Command::SUCCESS) {
-                return $exitCode;
-            }
+        $domain = parse_url($url, PHP_URL_HOST) ?? '';
+        [$cookieFile, $cookieHeader] = $this->resolveCookieOption($io, $result['INVRT_COOKIES_FILE'], $dataDir);
+        $excludeUrls = $this->resolveExcludeUrls($io, $result['INVRT_DIRECTORY']);
 
-            $count = $this->parseUrlsFromLog("$dataDir/logs/crawl.log", $url, "$dataDir/crawled_urls.txt");
+        $exitCode = $this->runWget($io, $url, $domain, $dataDir, $maxDepth, $excludeUrls, $cookieFile, $cookieHeader);
+        if ($exitCode !== Command::SUCCESS) {
+            return $exitCode;
+        }
 
-            $io->writeln("Crawling completed. Found $count unique paths. Results saved to $dataDir/crawled_urls.txt", OutputInterface::VERBOSITY_VERBOSE);
+        $count = $this->parseUrlsFromLog("$dataDir/logs/crawl.log", $url, "$dataDir/crawled_urls.txt");
 
-            return Command::SUCCESS;
-        });
+        $io->writeln("Crawling completed. Found $count unique paths. Results saved to $dataDir/crawled_urls.txt", OutputInterface::VERBOSITY_VERBOSE);
+
+        return Command::SUCCESS;
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Commands\CrawlCommand;
 use App\Commands\InitCommand;
 use App\Commands\ReferenceCommand;
 use App\Commands\TestCommand;
+use App\Service\EnvironmentService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -42,11 +43,12 @@ abstract class CommandTestCase extends TestCase
 
         // Create application with all commands
         $this->app = new Application('inVRT CLI', '1.0.0');
+        $env = new EnvironmentService();
         $this->app->addCommand(new InitCommand());
-        $this->app->addCommand(new CrawlCommand());
-        $this->app->addCommand(new ReferenceCommand());
-        $this->app->addCommand(new TestCommand());
-        $this->app->addCommand(new ConfigCommand());
+        $this->app->addCommand(new CrawlCommand($env));
+        $this->app->addCommand(new ReferenceCommand($env));
+        $this->app->addCommand(new TestCommand($env));
+        $this->app->addCommand(new ConfigCommand($env));
 
         // Make application not exit on exception
         $this->app->setCatchExceptions(false);

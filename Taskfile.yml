@@ -1,17 +1,6 @@
 version: '3'
 
 tasks:
-  build:
-    desc: Build the project
-    cmds:
-      - task: fix
-      - task: build:docker
-
-
-  build:docker:
-    desc: Build Docker image
-    cmds:
-      - docker build -t ronan4000/invrt .
 
   test:
     desc: Run all tests and quality checks
@@ -21,6 +10,36 @@ tasks:
       - task: test:lint
       - task: test:php
       - task: test:security
+
+  watch:
+    desc: Watch for file changes and rerun tasks
+    cmds:
+      - task: test
+
+  fix:
+    desc: Run all code fixes (modernize, lint)
+    cmds:
+      - task: fix:modernize
+      - task: fix:lint
+
+  build:
+    desc: Build the project
+    cmds:
+      - task: fix
+      - task: build:docker
+
+
+
+  build:docker:
+    desc: Build Docker image
+    cmds:
+      - docker build -t ronan4000/invrt .
+
+  build:templates:
+    desc: Generate PHP files from Handlebars templates and the config schema
+    cmds:
+      - node tooling/scripts/build-config-definition.mjs
+
 
   test:php:
     desc: Run all tests with PHPUnit
@@ -82,21 +101,12 @@ tasks:
       - composer audit
       - npm audit
 
-  build:templates:
-    desc: Generate PHP files from Handlebars templates and the config schema
-    cmds:
-      - node tooling/scripts/build-config-definition.mjs
 
   test:schema:
     desc: Validate config JSON Schema and example config file
     cmds:
       - node tooling/scripts/validate-schema.mjs
 
-  fix:
-    desc: Run all code fixes (modernize, lint)
-    cmds:
-      - task: fix:modernize
-      - task: fix:lint
 
   help:
     desc: Show all available tasks

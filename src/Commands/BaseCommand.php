@@ -12,20 +12,27 @@ use Symfony\Component\Process\Process;
 
 abstract class BaseCommand
 {
+    public function __construct(protected readonly EnvironmentService $env) {}
+
     /**
-     * Initialises environment + login, then calls $callback with the resolved env array.
-     * Short-circuits with an exit code if boot fails.
+     * Initialise environment + login.
+     * Returns the resolved INVRT_* env array on success, or an exit code int on failure.
      *
-     * @param callable(array<string,string>): int $callback
+     * @return array<string, string>|int
      */
-    protected function withEnv(
-        InvrtInput $opts,
-        SymfonyStyle $io,
-        callable $callback,
-        bool $requiresConfig = true,
-    ): int {
-        $result = $this->boot($opts, $io, $requiresConfig);
-        return \is_int($result) ? $result : $callback($result);
+    protected function boot(InvrtInput $opts, SymfonyStyle $io, bool $requiresConfig = true): array|int
+    {
+        $env = $this->env->initialize($opts->profile, $opts->device, $opts->environment, $io, $requiresConfig);
+
+        $loginResult = LoginService::loginIfCredentialsExist(
+            $env['INVRT_USERNAME'] ?? '',
+            $env['INVRT_PASSWORD'] ?? '',
+            $env['INVRT_URL'] ?? '',
+            $env['INVRT_COOKIES_FILE'] ?? '',
+            $io,
+        );
+
+        return $loginResult !== Command::SUCCESS ? $loginResult : $env;
     }
 
     /**
@@ -60,31 +67,5 @@ abstract class BaseCommand
         $process->run(fn($type, $buffer) => $io->write($buffer));
 
         return $process->getExitCode() ?? Command::SUCCESS;
-    }
-
-    /**
-     * Initialises the environment and handles login.
-     * Returns the resolved INVRT_* env array on success, or an exit code int on failure.
-     *
-     * @return array<string, string>|int
-     */
-    private function boot(InvrtInput $opts, SymfonyStyle $io, bool $requiresConfig = true): array|int
-    {
-        $env = (new EnvironmentService($opts->profile, $opts->device, $opts->environment))
-            ->initialize($io, $requiresConfig);
-
-        $loginResult = LoginService::loginIfCredentialsExist(
-            $env['INVRT_USERNAME'] ?? '',
-            $env['INVRT_PASSWORD'] ?? '',
-            $env['INVRT_URL'] ?? '',
-            $env['INVRT_COOKIES_FILE'] ?? '',
-            $io,
-        );
-
-        if ($loginResult !== Command::SUCCESS) {
-            return $loginResult;
-        }
-
-        return $env;
     }
 }
