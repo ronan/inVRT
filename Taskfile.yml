@@ -1,5 +1,7 @@
 version: '3'
 
+interval: 100ms
+
 tasks:
 
   test:
@@ -13,9 +15,11 @@ tasks:
 
   watch:
     desc: Watch for file changes and rerun tasks
+    watch: true
     cmds:
-      - task: test
-
+      - task: fix:lint
+      - task: test:php:unit
+ 
   fix:
     desc: Run all code fixes (modernize, lint)
     cmds:
@@ -27,8 +31,6 @@ tasks:
     cmds:
       - task: fix
       - task: build:docker
-
-
 
   build:docker:
     desc: Build Docker image
@@ -46,19 +48,27 @@ tasks:
     dir: /tmp
     cmds:
       - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests
+    sources:
+      - 'src/**/*.php'
+      - 'tests/**/*.php'
 
   test:php:unit:
     desc: Run unit tests with PHPUnit
     dir: /tmp
     cmds:
       - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/Unit
+    sources:
+      - 'src/**/*.php'
+      - 'tests/**/*.php'
     
   test:php:e2e:
     desc: Run integration tests with PHPUnit
     dir: /tmp
     cmds:
       - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/e2e
-
+    sources:
+      - 'src/**/*.php'
+      - 'tests/**/*.php'
 
   test:coverage:
     desc: Run tests with code coverage report
@@ -92,6 +102,10 @@ tasks:
 
   fix:lint:
     desc: Auto-fix code style with PHP CS Fixer
+    sources:
+      - 'src/**/*.php'
+      - 'tests/**/*.php'
+
     cmds:
       - php ./vendor/bin/php-cs-fixer fix --config=tooling/.php-cs-fixer.php
 
