@@ -64,6 +64,7 @@ _(none yet)_
 
 - [x] Auto trigger reference when test is run for first time
 - [ ] Auto trigger crawl when test is run for the first time
+- [ ] Auto trigger init when crawl is run for the first time
 - [ ] Implement an interactive init mode
 - [ ] specify a specific config key or multiple keys
 
