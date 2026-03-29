@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Service\ConfigDefinition;
+use App\Input\InvrtConfiguration;
 use App\Service\EnvironmentService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\NullOutput;
@@ -176,7 +176,7 @@ class EnvironmentServiceTest extends TestCase
 
         $env = $this->init();
 
-        foreach (ConfigDefinition::CONFIG_KEYS as $key) {
+        foreach (InvrtConfiguration::CONFIG_KEYS as $key) {
             $envKey = 'INVRT_' . strtoupper($key);
             $this->assertArrayHasKey($envKey, $env, "Missing env var for config key: $key");
         }
@@ -191,9 +191,9 @@ class EnvironmentServiceTest extends TestCase
 
         $env = $this->init();
 
-        $this->assertEquals((string) ConfigDefinition::DEFAULTS['viewport_width'], $env['INVRT_VIEWPORT_WIDTH']);
-        $this->assertEquals((string) ConfigDefinition::DEFAULTS['max_crawl_depth'], $env['INVRT_MAX_CRAWL_DEPTH']);
-        $this->assertEquals(ConfigDefinition::DEFAULTS['user_agent'], $env['INVRT_USER_AGENT']);
+        $this->assertEquals((string) InvrtConfiguration::DEFAULTS['viewport_width'], $env['INVRT_VIEWPORT_WIDTH']);
+        $this->assertEquals((string) InvrtConfiguration::DEFAULTS['max_crawl_depth'], $env['INVRT_MAX_CRAWL_DEPTH']);
+        $this->assertEquals(InvrtConfiguration::DEFAULTS['user_agent'], $env['INVRT_USER_AGENT']);
     }
 
     // ── Path construction ─────────────────────────────────────────────────────

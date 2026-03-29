@@ -9,8 +9,7 @@
   "directories": {
     "test": "test"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ronan/inVRT.git"
@@ -27,12 +26,14 @@
   },
   "homepage": "https://github.com/ronan/inVRT#readme",
   "dependencies": {
+    "@apidevtools/json-schema-ref-parser": "^15.3.4",
     "backstopjs": "^6.3.25",
     "js-yaml": "^4.1.1",
     "playwright": "^1.58.2"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "handlebars": "^4.7.9"
   }
 }

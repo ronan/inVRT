@@ -82,6 +82,11 @@ tasks:
       - composer audit
       - npm audit
 
+  build:templates:
+    desc: Generate PHP files from Handlebars templates and the config schema
+    cmds:
+      - node tooling/scripts/build-config-definition.mjs
+
   test:schema:
     desc: Validate config JSON Schema and example config file
     cmds:

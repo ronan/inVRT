@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Input\InvrtConfiguration;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Path;
@@ -15,7 +16,7 @@ class EnvironmentService
     private string $scriptsDir;
     private string $invrtDirectory;
     private array $config = [];
-    private array $resolved = ConfigDefinition::DEFAULTS;
+    private array $resolved = InvrtConfiguration::DEFAULTS;
 
     public function __construct(
         string $profile = 'anonymous',
@@ -83,7 +84,7 @@ class EnvironmentService
         try {
             $raw = Yaml::parse((string) file_get_contents($configFile)) ?: [];
             // Validate structure — throws on unknown keys or invalid types
-            (new Processor())->processConfiguration(new ConfigDefinition(), [$raw]);
+            (new Processor())->processConfiguration(new InvrtConfiguration(), [$raw]);
             return $raw;
         } catch (\Exception $e) {
             throw new \RuntimeException('Error reading config file: ' . $e->getMessage());
@@ -101,7 +102,7 @@ class EnvironmentService
 
         try {
             $raw = Yaml::parse((string) file_get_contents($configFile)) ?: [];
-            (new Processor())->processConfiguration(new ConfigDefinition(), [$raw]);
+            (new Processor())->processConfiguration(new InvrtConfiguration(), [$raw]);
             return $raw;
         } catch (\Exception $e) {
             return [];
@@ -114,7 +115,7 @@ class EnvironmentService
      */
     private function resolveConfig(): void
     {
-        $this->resolved = ConfigDefinition::DEFAULTS;
+        $this->resolved = InvrtConfiguration::DEFAULTS;
 
         $sections = [
             $this->config['settings'] ?? [],
@@ -124,7 +125,7 @@ class EnvironmentService
         ];
 
         foreach ($sections as $section) {
-            foreach (ConfigDefinition::CONFIG_KEYS as $key) {
+            foreach (InvrtConfiguration::CONFIG_KEYS as $key) {
                 if (array_key_exists($key, $section)) {
                     $this->resolved[$key] = $section[$key];
                 }

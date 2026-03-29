@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Service;
+namespace App\Input;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class ConfigDefinition implements ConfigurationInterface
+/** Auto-generated from docs/config.schema.yaml — do not edit directly. Run `task build:templates` to regenerate. */
+class InvrtConfiguration implements ConfigurationInterface
 {
     /** Keys shared across settings/environments/profiles/devices sections. */
     public const CONFIG_KEYS = [
@@ -23,15 +24,15 @@ class ConfigDefinition implements ConfigurationInterface
 
     /** Hard-coded defaults — applied when key is absent from all config sections. */
     public const DEFAULTS = [
-        'url'                     => '',
-        'login_url'               => '',
-        'username'                => '',
-        'password'                => '',
-        'viewport_width'          => 1024,
-        'viewport_height'         => 768,
-        'max_crawl_depth'         => 3,
-        'max_pages'               => 100,
-        'user_agent'              => 'InVRT/1.0',
+        'url' => '',
+        'login_url' => '',
+        'username' => '',
+        'password' => '',
+        'viewport_width' => 1024,
+        'viewport_height' => 768,
+        'max_crawl_depth' => 3,
+        'max_pages' => 100,
+        'user_agent' => 'InVRT/1.0',
         'max_concurrent_requests' => 5,
     ];
 
