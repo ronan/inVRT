@@ -162,6 +162,9 @@ invrt test [--profile=<name>] [--device=<name>] [--environment=<name>]
 
 Captures fresh screenshots of all crawled URLs and compares them against the reference images using BackstopJS (ResembleJS). Generates an HTML report in `.invrt/data/<profile>/<environment>/reports/`.
 
+If no reference screenshots exist for the current profile/device/environment combination, the
+reference step is run automatically before the test.
+
 Exits with code `0` if all comparisons pass, non-zero if any fail.
 
 **Examples:**

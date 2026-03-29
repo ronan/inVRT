@@ -62,10 +62,18 @@ _(none yet)_
 
 ## Features
 
-- [ ] More config functionality
-        - [ ] specify a specific key
-                invrt config --key=title,url --environment-dev
-        - [ ] update or add a key to config.yml
-                invrt config set --key=title,url --value="Hello, World",http://example.com
+- [x] Auto trigger reference when test is run for first time
+- [ ] Auto trigger crawl when test is run for the first time
+- [ ] Implement an interactive init mode
+- [ ] specify a specific config key or multiple keys
+
+        invrt config --key=viewport_width --environment=dev --device=mobile
+        invrt config --key=title,url --environment=dev
+
+- [ ] update or add a key to config.yml
+
+        invrt config set --key=title --value="Hello, World"
+        invrt config set --key=profile.admin.name --value="Admin User"
+        invrt config set --key=title,settings.url --value="Hello, World",http://example.com
 
 - [ ] **Add WordPress support**

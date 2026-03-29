@@ -19,6 +19,24 @@ class TestCommandTest extends WebCommandTestCase
         $this->executeCommand('test');
     }
 
+    public function testAutoTriggersReferenceOnFirstRun(): void
+    {
+        $this->setupFixture();
+
+        // Run test without any prior reference — should auto-capture references then succeed
+        $this->executeCommand('test', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+        $this->assertCommandSuccess();
+
+        $this->assertOutputContains('No reference screenshots found');
+
+        // Both reference and test bitmaps should exist
+        $dataDir = $this->fixture->getInvrtDir() . '/data/anonymous/local/bitmaps';
+        $this->assertDirectoryExists($dataDir . '/reference');
+        $this->assertDirectoryExists($dataDir . '/test');
+        $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/reference')));
+        $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/test')));
+    }
+
     public function testTestCommandRunsComparison(): void
     {
         $this->setupFixture();

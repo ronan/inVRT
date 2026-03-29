@@ -5,6 +5,7 @@ namespace App\Commands;
 use App\Input\InvrtInput;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\MapInput;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -22,7 +23,33 @@ class TestCommand extends BaseCommand
                 "🔬 Testing '{$env['INVRT_ENVIRONMENT']}' environment ({$env['INVRT_URL']}) with profile: '{$env['INVRT_PROFILE']}' and device: '{$env['INVRT_DEVICE']}'",
                 OutputInterface::VERBOSITY_VERBOSE,
             );
+
+            if ($this->referencesAreMissing($env['INVRT_DATA_DIR'])) {
+                $io->writeln(
+                    '📸 No reference screenshots found — capturing references first.',
+                    OutputInterface::VERBOSITY_VERBOSE,
+                );
+                $result = $this->runBackstop('reference', $env, $io);
+                if ($result !== Command::SUCCESS) {
+                    return $result;
+                }
+            }
+
             return $this->runBackstop('test', $env, $io);
         });
+    }
+
+    private function referencesAreMissing(string $dataDir): bool
+    {
+        $refDir = $dataDir . '/bitmaps/reference';
+        if (!is_dir($refDir)) {
+            return true;
+        }
+        foreach (new \FilesystemIterator($refDir) as $entry) {
+            if ($entry->isFile() && strtolower($entry->getExtension()) === 'png') {
+                return false;
+            }
+        }
+        return true;
     }
 }
