@@ -2,7 +2,7 @@
 
 ## What This Project Is
 
-inVRT is a **Symfony Console CLI application** (not Laravel) for running Visual Regression Testing (VRT) against cms-driven websites (Drupal, Backdrop, and Wordpress). The tool is able to capture both the authenticated and unauthenticated user experience, and can simulate different devices (desktop/mobile) by setting the viewport size for screenshots.
+inVRT is a **Symfony Console CLI application** (not Laravel) for running Visual Regression Testing (VRT) against cms-driven websites (Drupal, Backdrop, and Wordpress). The tool is able to capture the authenticated and unauthenticated user experience on multiple web environments (local, stage, live), and can simulate different devices (desktop/mobile) by setting the viewport size for screenshots.
 
 PHP orchestrates configuration and runs the cli; bash scripts handle crawling (wget); Node.js tools (Playwright, BackstopJS) handle browser automation and screenshot comparison.
 
@@ -10,9 +10,15 @@ The tool is built of composable parts and uses environment variables internally 
 
 The codebase is somewhat language agnostic. Use the right language for job at hand. We favor using PHP since the target testable platforms are PHP-based CMSs, but we also use bash and Node.js where appropriate.
 
-## Track tasks with the todo file
+## Required documentation:
 
-Track larger objectives in the [todo file](TODO.md). 
+Save implementation plans to the `plans/` directory so they are tracked with the changes.
+
+Track objectives in the [todo file](TODO.md).
+
+Never commit anything to git.
+
+## Track tasks with the todo file
 
 The todo file is a markdown file with checkbox syntax.
 
@@ -22,20 +28,17 @@ If you complete a task you can put an 'x' between the square brackets on that li
 
 Don't track todo's or task progress in any other system
 
-
 ## How to communicate with the team
 
-Use simple clear language. There is no need for niceties and chit chat. Don't tell me how good my ideas are.
+Use simple clear language. There is no need for niceties and chit chat. Be brief.
 
-Before you act: communicate. Create a brief outline of your plan of action and ask the user before proceeding.
+Before you act Create a brief outline of your plan of action and ask the user before proceeding.
 
 If you have a question, ask it. If you don't understand something, ask for clarification.
 
-If you see a problem, point it out. 
+If you see a problem, point it out.
 
 If you have an idea for improvement, share it.
-
-Save implementation plans to the `plans/` directory so they are tracked with the project.
 
 Show the output of terminal commands you run to test your code, so I can see the results and understand your thought process.
 
@@ -71,6 +74,8 @@ All code should be tested.
 
 Write tests with PHPUnit, including end-to-end tests that execute real bash scripts.
 
+Test the happy path
+
 Don't test at too fine a detail.
 
 Don't test glue code.
@@ -92,12 +97,9 @@ Run `task test` in the terminal to test and lint code.
 
 The functionality of the inVRT app is described in the [usage docs](docs/usage.md).
 
-Document new features in the usage docs before building them. Explain all inputs, give examples, show outputs.
-
-Mark incomplete functionality in the usage docs as "FUTURE FEATURE" until it is implemented. Remove the "FUTURE FEATURE" tag once a feature is implemented and passes end to end tests.
+Document new features in the usage docs before building them. Explain all inputs, give examples, show outputs. Use code snippets.
 
 Defer to usage docs for business logic and behavior and suggest updates where there are gaps.
-
 
 ## Architecture
 
@@ -109,9 +111,11 @@ Symfony Console Commands (src/Commands/)
   Bash scripts (src/*.sh)  ←→  Node.js (src/*.js, Playwright, BackstopJS)
 ```
 
-Most commands extend `BaseCommand`, which initialises `EnvironmentService`, optionally invokes `LoginService`, then calls `passthru()` on a bash script. Each such command returns a bash script filename via the abstract `getScriptName(): string` method.
+Most commands extend `BaseCommand` and expose an invokable `__invoke()` method. `BaseCommand` initialises `EnvironmentService`, optionally invokes `LoginService`, and then hands the resolved environment to command-specific behavior via `withEnv()`.
 
-**Exceptions:** `InitCommand` and `ConfigCommand` extend `Command` directly and override `execute()` themselves. `InitCommand` has no `EnvironmentService` dependency. `ConfigCommand` returns `''` from `getScriptName()`.
+For process execution, commands should use `executeScript()` for bash-driven flows and `runBackstop()` for BackstopJS flows so subprocess handling stays consistent.
+
+**Exceptions:** `InitCommand` is a standalone invokable command because it does not need resolved inVRT environment variables. `ConfigCommand` still extends `BaseCommand`, but calls `withEnv(..., requiresConfig: false)` because it needs the project directory without requiring an existing config file.
 
 **Configuration merging** in `EnvironmentService` processes sections in this order — later sections overwrite earlier ones (highest precedence last):
 
@@ -121,21 +125,26 @@ Most commands extend `BaseCommand`, which initialises `EnvironmentService`, opti
 
 Resolved values are exported as `putenv()` environment variables so bash and Node scripts can read them.
 
+Refer to [The configuration documentation](docs/configuration.md) for details on how configuration works. 
+
 ## Key Conventions
 
 ### Namespaces & File Layout
 - `App\Commands\` → `src/Commands/`
 - `App\Service\` → `src/Service/`
 - `Tests\Unit\` → `tests/Unit/`
-- `Tests\E2E\` → `tests/E2E/`
+- `Tests\E2E\` → `tests/e2e/`
 - `Tests\Fixtures\` → `tests/fixtures/`
 
 ### Adding a New Command
-1. Extend `BaseCommand`
-2. Call `$this->setName('name')->setDescription('...')` inside `configure()`
-3. Implement `getScriptName(): string` returning the corresponding bash script filename
-4. Call `parent::configure()` last in `configure()` to add the shared `--profile`, `--device`, `--environment` options
-5. The base `execute()` handles env init, login, and script execution — only override it if the command has special behaviour (see `ConfigCommand`)
+1. Use Symfony's attribute-based command registration with `#[AsCommand(name: '...', description: '...', help: '...')]`
+2. Prefer an invokable command class with `public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int`
+3. Extend `BaseCommand` when the command needs resolved inVRT environment variables, config loading, or login handling
+4. Inside `__invoke()`, call `$this->withEnv($opts, $io, fn (array $env): int => ...)` and keep the closure focused on the command-specific behavior
+5. Use `executeScript()` for bash-driven commands and `runBackstop()` for BackstopJS flows instead of rebuilding process bootstrapping in each command
+6. Use `InvrtInput` with `#[MapInput]` for the shared `--profile`, `--device`, and `--environment` options instead of defining those options per command
+7. Return Symfony `Command::SUCCESS` or `Command::FAILURE` codes explicitly and add a verbosity level to every `$io->writeln()` call
+8. Only skip `BaseCommand` for true exceptions that do not need environment bootstrapping, such as `init`; if a command needs custom behavior but still depends on the resolved environment, keep it on `BaseCommand` and compose the behavior inside `__invoke()`
 
 ### Static Service Classes
 `LoginService` and `CookieService` are entirely static — no instantiation. Keep new utility-style services static unless state is required.
@@ -144,7 +153,7 @@ Resolved values are exported as `putenv()` environment variables so bash and Nod
 
 **Unit tests** (`tests/Unit/`) test PHP services in isolation using PHPUnit mocking. No filesystem or subprocess access.
 
-**E2E tests** (`tests/E2E/`) extend `CommandTestCase`, which sets up a `TestProjectFixture` temp directory and a Symfony `Application` with all commands registered. `setUp()` calls `$this->fixture->setEnvironmentVariable()` to set `INVRT_DIRECTORY` — you do not need to set it manually.
+**E2E tests** (`tests/e2e/`) extend `CommandTestCase`, which sets up a `TestProjectFixture` temp directory and a Symfony `Application` with all commands registered. `setUp()` calls `$this->fixture->setEnvironmentVariable()` to set `INVRT_DIRECTORY` — you do not need to set it manually.
 
 `CommandTestCase` methods:
 - `executeCommand(string $name, array $input = [])` — run a command, returns `CommandTester`

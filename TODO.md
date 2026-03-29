@@ -13,6 +13,8 @@ _(none yet)_
 
 ## Tech Debt
 
+- [x] Update AGENTS.md new command guidance for Symfony 8 command patterns
+
 - [x] **Refactor `src/invrt-reference.sh`**
 
 - [x] **Refactor `src/invrt-test.sh`**
