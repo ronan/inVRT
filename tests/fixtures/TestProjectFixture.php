@@ -17,12 +17,12 @@ class TestProjectFixture
     private string $projectDir;
     private string $invrtDir;
 
-    public function __construct(?string $baseDir = null)
+    public function __construct(?string $base_dir = null)
     {
-        $base = $baseDir ?? sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'invrt_test_' . uniqid();
+        $base = $base_dir ?? sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'invrt_test_' . uniqid();
         $this->tempDir = $base;
-        $this->projectDir = $base . DIRECTORY_SEPARATOR . 'project';
-        $this->invrtDir = $base . DIRECTORY_SEPARATOR . 'project' . DIRECTORY_SEPARATOR . '.invrt';
+        $this->projectDir = "$base_dir/project";
+        $this->invrtDir = "$this->projectDir/.invrt";
     }
 
     /**
@@ -223,9 +223,9 @@ class TestProjectFixture
     /**
      * Create data directory structure for a profile/environment
      */
-    public function createDataDir(string $profile, string $environment): string
+    public function createDataDir(string $environment, string $profile): string
     {
-        $dataDir = $this->invrtDir . "/data/$profile/$environment";
+        $dataDir = $this->invrtDir . "/data/$environment/$profile";
         @mkdir($dataDir, 0755, true);
         return $dataDir;
     }
@@ -233,11 +233,11 @@ class TestProjectFixture
     /**
      * Write a cookies.json file
      */
-    public function writeCookiesFile(string $profile, string $environment): string
+    public function writeCookiesFile(string $environment, string $profile): string
     {
-        $dataDir = $this->createDataDir($profile, $environment);
+        $dataDir = $this->createDataDir($environment, $profile);
         $cookiesPath = $dataDir . '/cookies.json';
-        
+
         $cookies = [
             [
                 'name' => 'session_id',
@@ -264,9 +264,9 @@ class TestProjectFixture
      *
      * @param string[] $urls URL paths (e.g. ['/', '/about.html'])
      */
-    public function writeCrawledUrlsFile(string $profile, string $environment, array $urls): self
+    public function writeCrawledUrlsFile(string $environment, string $profile, array $urls): self
     {
-        $dataDir = $this->createDataDir($profile, $environment);
+        $dataDir = $this->createDataDir($environment, $profile);
         file_put_contents($dataDir . '/crawled_urls.txt', implode("\n", $urls));
         return $this;
     }
@@ -310,6 +310,8 @@ class TestProjectFixture
      */
     public function setEnvironmentVariable(): self
     {
+        $this->unsetEnvironmentVariable();
+        putenv('INVRT_CWD=' . $this->projectDir);
         putenv('INVRT_DIRECTORY=' . $this->invrtDir);
         return $this;
     }
@@ -319,7 +321,30 @@ class TestProjectFixture
      */
     public function unsetEnvironmentVariable(): self
     {
+        foreach([
+            'INVRT_DIRECTORY',
+            'INVRT_DATA_DIR',
+            'INVRT_PROFILE',
+            'INVRT_DEVICE',
+            'INVRT_ENVIRONMENT',
+            'INVRT_SCRIPTS_DIR',
+            'INVRT_COOKIES_FILE',
+            'INVRT_CONFIG_FILE',
+            'INVRT_URL',
+            'INVRT_LOGIN_URL',
+            'INVRT_USERNAME',
+            'INVRT_PASSWORD',
+            'INVRT_VIEWPORT_WIDTH',
+            'INVRT_VIEWPORT_HEIGHT',
+            'INVRT_MAX_CRAWL_DEPTH',
+            'INVRT_MAX_PAGES',
+            'INVRT_USER_AGENT',
+            'INVRT_MAX_CONCURRENT_REQUESTS'
+        ] as $var) {
+            putenv("$var=");
+        }
         putenv('INVRT_DIRECTORY=');
+        putenv('INVRT_CWD=');
         return $this;
     }
 }

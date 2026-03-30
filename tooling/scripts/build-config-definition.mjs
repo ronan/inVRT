@@ -67,10 +67,10 @@ const sections = [
     },
 ];
 
-const templateSrc = readFileSync(resolve(root, 'tooling/templates/InVRTConfiguration.tpl.php'), 'utf8');
+const templateSrc = readFileSync(resolve(root, 'tooling/templates/InVRTConfiguration.hbl.php'), 'utf8');
 const template = Handlebars.compile(templateSrc, { noEscape: true });
 const output = template({ configKeys, sections });
 
-const outPath = resolve(root, 'src/Input/InvrtConfiguration.php');
+const outPath = resolve(root, 'src/Service/InvrtConfiguration.php');
 writeFileSync(outPath, output);
 console.log(`Generated ${outPath}`);

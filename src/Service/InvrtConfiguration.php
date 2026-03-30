@@ -1,11 +1,11 @@
 <?php
+### Auto-generated from docs/config.schema.yaml — do not edit directly. Run `task build:templates` to regenerate.
 
-namespace App\Input;
+namespace App\Service;
 
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-/** Auto-generated from docs/config.schema.yaml — do not edit directly. Run `task build:templates` to regenerate. */
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 class InvrtConfiguration implements ConfigurationInterface
 {
     /** Hard-coded defaults — applied when key is absent from all config sections. */
@@ -20,24 +20,9 @@ class InvrtConfiguration implements ConfigurationInterface
         'max_pages' => 100,
         'user_agent' => 'InVRT/1.0',
         'max_concurrent_requests' => 5,
+        'data_dir' => '',
+        'scripts_dir' => '',
     ];
-
-    public static function keys(): array
-    {
-        return array_keys(self::DEFAULTS);
-    }
-
-    public static function defaults(): array
-    {
-        return self::DEFAULTS;
-    }
-
-    public static function env(): array
-    {
-        // Return all environment variables starting with INVRT_ as an associative array.
-        $keys = array_map(fn($k) => 'INVRT_' . strtoupper($k), self::keys());
-        return array_intersect_key($_ENV, array_flip($keys));
-    }
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -60,6 +45,8 @@ class InvrtConfiguration implements ConfigurationInterface
             ->integerNode('max_pages')->defaultValue(100)->end()
             ->scalarNode('user_agent')->defaultValue('InVRT/1.0')->end()
             ->integerNode('max_concurrent_requests')->defaultValue(5)->end()
+            ->scalarNode('data_dir')->defaultValue('')->end()
+            ->scalarNode('scripts_dir')->defaultValue('')->end()
             ->end()
             ->end()
             ->arrayNode('environments')
@@ -77,6 +64,8 @@ class InvrtConfiguration implements ConfigurationInterface
             ->integerNode('max_pages')->end()
             ->scalarNode('user_agent')->end()
             ->integerNode('max_concurrent_requests')->end()
+            ->scalarNode('data_dir')->end()
+            ->scalarNode('scripts_dir')->end()
             ->end()
             ->end()
             ->end()
@@ -96,6 +85,8 @@ class InvrtConfiguration implements ConfigurationInterface
             ->integerNode('max_pages')->end()
             ->scalarNode('user_agent')->end()
             ->integerNode('max_concurrent_requests')->end()
+            ->scalarNode('data_dir')->end()
+            ->scalarNode('scripts_dir')->end()
             ->end()
             ->end()
             ->end()
@@ -115,11 +106,23 @@ class InvrtConfiguration implements ConfigurationInterface
             ->integerNode('max_pages')->end()
             ->scalarNode('user_agent')->end()
             ->integerNode('max_concurrent_requests')->end()
+            ->scalarNode('data_dir')->end()
+            ->scalarNode('scripts_dir')->end()
             ->end()
             ->end()
             ->end()
             ->end();
 
         return $tb;
+    }
+
+        public function keys(): array
+    {
+        return array_keys(self::DEFAULTS);
+    }
+
+    public function defaults(): array
+    {
+        return self::DEFAULTS;
     }
 }

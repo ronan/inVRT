@@ -43,7 +43,7 @@ abstract class BaseCommand
     protected function runBackstop(string $mode, array $env, SymfonyStyle $io): int
     {
         $process = Process::fromShellCommandline(
-            'node ' . escapeshellarg($env['INVRT_SCRIPTS_DIR'] . '/backstop.js') . ' ' . $mode,
+            'node ' . escapeshellarg(__DIR__ . '/../backstop.js') . ' ' . $mode,
             null,
             $env,
         );

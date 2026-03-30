@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Input\InvrtConfiguration;
 use App\Service\EnvironmentService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\NullOutput;
@@ -17,133 +16,133 @@ class EnvironmentServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->fixture = new TestProjectFixture();
+            // Use scratch/tmp/{ClassName}/{testName} for deterministic, inspectable output
+        $shortClass = (new \ReflectionClass($this))->getShortName();
+        $base = dirname(__DIR__, 2) . '/scratch/tmp/' . $shortClass . '/' . $this->name();
+
+        $this->fixture = new TestProjectFixture($base);
         $this->fixture->create();
         $this->fixture->setEnvironmentVariable();
-        putenv('INVRT_USERNAME=');
-        putenv('INVRT_PASSWORD=');
     }
 
     protected function tearDown(): void
     {
         $this->fixture->unsetEnvironmentVariable();
         $this->fixture->cleanup();
-        putenv('INVRT_USERNAME=');
-        putenv('INVRT_PASSWORD=');
     }
 
     private function init(string $profile = 'anonymous', string $device = 'desktop', string $env = 'local'): array
     {
+        $this->fixture->setEnvironmentVariable();
         return (new EnvironmentService())->initialize($profile, $device, $env, new NullOutput(), true);
     }
+
+    // File handling / config file loading / env var export tests
+
+    public function testInitializeThrowsWhenConfigMissingAndRequired(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->init();
+    }
+
+    public function testInitializeReturnsDefaultBaseWhenConfigMissingAndNotRequired(): void
+    {
+        $config = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), false);
+        $compare = [
+            'INVRT_PROFILE' => 'anonymous',
+            'INVRT_DEVICE' => 'desktop',
+            'INVRT_ENVIRONMENT' => 'local',
+            'INVRT_CWD' => $this->fixture->getProjectDir(),
+            'INVRT_DIRECTORY' => $this->fixture->getInvrtDir(),
+            'INVRT_CONFIG_FILE' => $this->fixture->getInvrtDir() . '/config.yaml',
+            'INVRT_DATA_DIR' => $this->fixture->getInvrtDir() . '/data/local/anonymous',
+            'INVRT_COOKIES_FILE' => $this->fixture->getInvrtDir() . '/data/local/anonymous/cookies',
+            'INVRT_URL' => '',
+            'INVRT_LOGIN_URL' => '',
+            'INVRT_USERNAME' => '',
+            'INVRT_PASSWORD' => '',
+            'INVRT_VIEWPORT_WIDTH' => 1024,
+            'INVRT_VIEWPORT_HEIGHT' => 768,
+            'INVRT_MAX_CRAWL_DEPTH' => 3,
+            'INVRT_MAX_PAGES' => 100,
+            'INVRT_USER_AGENT' => 'InVRT/1.0',
+            'INVRT_MAX_CONCURRENT_REQUESTS' => 5,
+            'INVRT_SCRIPTS_DIR' => '',
+        ];
+        $this->assertSame($compare, $config);
+    }
+
 
     // ── Settings section ──────────────────────────────────────────────────────
 
     public function testSettingsSectionValuesAreUsedAsBase(): void
     {
         $this->fixture->writeConfig([
-            'settings' => ['url' => 'https://settings.example.com', 'max_pages' => 42],
+            'settings' => [
+                'viewport_width' => 1920,
+                'max_pages' => 42,
+            ],
+            'environments' => [
+                'local' => ['url' => 'http://localhost'],
+                'dev' => ['url' => 'http://dev.local']
+            ],
+            'profiles' => [
+                'admin' => ['username' => 'admin_user', 'password' => 'admin_pass']
+                ],
+            'devices' => [
+                'mobile' => ['viewport_width' => 375, 'viewport_height' => 667]
+            ],
         ]);
 
         $env = $this->init();
 
-        $this->assertEquals('https://settings.example.com', $env['INVRT_URL']);
         $this->assertEquals('42', $env['INVRT_MAX_PAGES']);
-    }
-
-    // ── Environment section ───────────────────────────────────────────────────
-
-    public function testEnvironmentOverridesSettings(): void
-    {
-        $this->fixture->writeConfig([
-            'settings' => ['url' => 'https://settings.example.com'],
-            'environments' => ['local' => ['url' => 'http://localhost']],
-        ]);
-
-        $env = $this->init();
-
         $this->assertEquals('http://localhost', $env['INVRT_URL']);
     }
-
-    // ── Profile section ───────────────────────────────────────────────────────
-
-    public function testProfileOverridesEnvironment(): void
+    
+    public function testSettingsSectionValuesAreOverridenByEnvironmentProfileAndDevice(): void
     {
         $this->fixture->writeConfig([
-            'settings' => ['url' => 'https://settings.example.com'],
-            'environments' => ['dev' => ['url' => 'https://dev.example.com']],
-            'profiles' => ['admin' => ['url' => 'https://profile.example.com']],
+            'settings' => [
+                'viewport_width' => 1920,
+                'max_pages' => 42,
+            ],
+            'environments' => [
+                'local' => ['url' => 'http://localhost'],
+                'dev' => ['url' => 'http://dev.local']
+            ],
+            'profiles' => [
+                'admin' => ['username' => 'admin_user', 'password' => 'admin_pass']
+                ],
+            'devices' => [
+                'mobile' => ['viewport_width' => 375, 'viewport_height' => 667]
+            ],
         ]);
+
 
         $env = $this->init('admin', 'desktop', 'dev');
 
-        $this->assertEquals('https://profile.example.com', $env['INVRT_URL']);
-    }
-
-    public function testProfileCredentialsAreResolved(): void
-    {
-        $this->fixture->writeConfig([
-            'settings' => ['url' => 'https://example.com'],
-            'profiles' => ['admin' => ['username' => 'admin_user', 'password' => 'admin_pass']],
-        ]);
-
-        $env = $this->init('admin');
-
+        $this->assertEquals('http://dev.local', $env['INVRT_URL']);
         $this->assertEquals('admin_user', $env['INVRT_USERNAME']);
         $this->assertEquals('admin_pass', $env['INVRT_PASSWORD']);
-    }
-
-    public function testProfileCredentialsOverrideEnvironment(): void
-    {
-        $this->fixture->writeConfig([
-            'settings' => ['url' => 'https://example.com'],
-            'profiles' => ['default' => ['username' => 'profile_user', 'password' => 'profile_pass']],
-            'environments' => ['dev' => ['username' => 'env_user', 'password' => 'env_pass']],
-        ]);
-
-        $env = $this->init('default', 'desktop', 'dev');
-
-        $this->assertEquals('profile_user', $env['INVRT_USERNAME']);
-        $this->assertEquals('profile_pass', $env['INVRT_PASSWORD']);
-    }
-
-    // ── Device section ────────────────────────────────────────────────────────
-
-    public function testDeviceOverridesProfile(): void
-    {
-        $this->fixture->writeConfig([
-            'settings' => ['viewport_width' => 1920],
-            'profiles' => ['mobile' => ['viewport_width' => 500]],
-            'devices' => ['mobile' => ['viewport_width' => 375, 'viewport_height' => 667]],
-        ]);
-
-        $env = $this->init('mobile', 'mobile');
-
-        $this->assertEquals('375', $env['INVRT_VIEWPORT_WIDTH']);
-    }
-
-    public function testDeviceIsStored(): void
-    {
-        $this->fixture->writeConfig(['settings' => ['url' => 'https://example.com']]);
 
         $env = $this->init('anonymous', 'mobile');
 
+        $this->assertEquals('375', $env['INVRT_VIEWPORT_WIDTH']);
         $this->assertEquals('mobile', $env['INVRT_DEVICE']);
     }
-
     // ── Full precedence chain ─────────────────────────────────────────────────
 
     public function testFullPrecedenceChain(): void
     {
         $this->fixture->writeConfig([
-            'settings' => ['max_pages' => 10],
-            'environments' => ['local' => ['max_pages' => 20]],
-            'profiles' => ['admin' => ['max_pages' => 30]],
-            'devices' => ['mobile' => ['max_pages' => 40]],
+            'settings'      => ['max_pages' => 10],
+            'environments'  => ['local'     => ['max_pages' => 20]],
+            'profiles'      => ['admin'     => ['max_pages' => 30]],
+            'devices'       => ['mobile'    => ['max_pages' => 40]],
         ]);
 
         $env = $this->init('admin', 'mobile', 'local');
-
         $this->assertEquals('40', $env['INVRT_MAX_PAGES']);
     }
 
@@ -179,6 +178,7 @@ class EnvironmentServiceTest extends TestCase
         foreach ($expected as $var) {
             $this->assertArrayHasKey($var, $env, "Missing: $var");
         }
+        $this->assertSame('https://example.com', getenv('INVRT_URL'));
     }
 
     public function testReturnedVarsMatchConfigKeys(): void
@@ -215,9 +215,9 @@ class EnvironmentServiceTest extends TestCase
 
         $env = $this->init();
 
-        $this->assertEquals((string) InvrtConfiguration::DEFAULTS['viewport_width'], $env['INVRT_VIEWPORT_WIDTH']);
-        $this->assertEquals((string) InvrtConfiguration::DEFAULTS['max_crawl_depth'], $env['INVRT_MAX_CRAWL_DEPTH']);
-        $this->assertEquals(InvrtConfiguration::DEFAULTS['user_agent'], $env['INVRT_USER_AGENT']);
+        $this->assertEquals('1024', $env['INVRT_VIEWPORT_WIDTH']);
+        $this->assertEquals('3', $env['INVRT_MAX_CRAWL_DEPTH']);
+        $this->assertEquals('InVRT/1.0', $env['INVRT_USER_AGENT']);
     }
 
     // ── Path construction ─────────────────────────────────────────────────────
@@ -251,5 +251,161 @@ class EnvironmentServiceTest extends TestCase
 
         $this->assertStringContainsString('myprofile', $env['INVRT_COOKIES_FILE']);
         $this->assertStringContainsString('production', $env['INVRT_COOKIES_FILE']);
+    }
+
+
+    public function testInvalidYamlThrowsException(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeInvalidYamlConfig();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Error reading config file');
+
+        (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
+    }
+
+
+    public function testMissingConfigFileThrowsException(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Could not find a config.yml file');
+
+        (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
+    }
+
+    public function testMissingConfigHandledWhenNotRequired(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), false);
+
+        $this->assertIsArray($env);
+        $this->assertArrayHasKey('INVRT_PROFILE', $env);
+    }
+
+
+    public function testInvalidYamlHandledWhenNotRequired(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeInvalidYamlConfig();
+
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), false);
+
+        $this->assertIsArray($env);
+    }
+
+    public function testMissingUrlDefaultsToEmpty(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeConfig(['name' => 'Test', 'settings' => ['max_crawl_depth' => 2]]);
+
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
+
+        $this->assertEquals('', $env['INVRT_URL']);
+    }
+
+    public function testMissingEnvironmentSectionUsesDefaults(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeMinimalConfig();
+
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'nonexistent', new NullOutput(), true);
+
+        $this->assertArrayHasKey('INVRT_ENVIRONMENT', $env);
+        $this->assertEquals('nonexistent', $env['INVRT_ENVIRONMENT']);
+    }
+
+    public function testMissingProfileSectionUsesDefaults(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeMinimalConfig();
+
+        $env = (new EnvironmentService())->initialize('nonexistent', 'desktop', 'local', new NullOutput(), true);
+
+        $this->assertArrayHasKey('INVRT_PROFILE', $env);
+        $this->assertEquals('nonexistent', $env['INVRT_PROFILE']);
+    }
+
+    public function testEmptyCredentialsInProfileYieldEmptyVars(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeConfig([
+            'settings' => ['url' => 'https://example.com'],
+            'profiles' => ['default' => ['username' => '', 'password' => '']],
+        ]);
+
+        $env = (new EnvironmentService())->initialize('default', 'desktop', 'local', new NullOutput(), true);
+
+        $this->assertEquals('', $env['INVRT_USERNAME']);
+        $this->assertEquals('', $env['INVRT_PASSWORD']);
+    }
+
+    public function testEnvVarsOverrideConfigCredentials(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeConfig([
+            'settings' => ['url' => 'https://example.com'],
+            'profiles' => ['admin' => ['username' => 'config_user', 'password' => 'config_pass']],
+        ]);
+
+        putenv('INVRT_USERNAME=env_user');
+        putenv('INVRT_PASSWORD=env_pass');
+
+        try {
+            $env = (new EnvironmentService())->initialize('admin', 'desktop', 'local', new NullOutput(), true);
+
+            $this->assertEquals('env_user', $env['INVRT_USERNAME']);
+            $this->assertEquals('env_pass', $env['INVRT_PASSWORD']);
+        } finally {
+            putenv('INVRT_USERNAME');
+            putenv('INVRT_PASSWORD');
+        }
+    }
+
+    public function testValidConfigWithOnlyNameAndSettings(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeConfig([
+            'name' => 'My Project',
+            'settings' => ['url' => 'https://example.com', 'max_pages' => 50],
+        ]);
+
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
+
+        $this->assertIsArray($env);
+        $this->assertNotEmpty($env);
+        $this->assertEquals('https://example.com', $env['INVRT_URL']);
+    }
+
+    public function testAllDefaultEnvironmentVariablesAreSet(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeMinimalConfig();
+
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
+
+        foreach (['INVRT_PROFILE', 'INVRT_DEVICE', 'INVRT_ENVIRONMENT', 'INVRT_SCRIPTS_DIR',
+            'INVRT_DIRECTORY', 'INVRT_DATA_DIR', 'INVRT_COOKIES_FILE', 'INVRT_CONFIG_FILE'] as $var) {
+            $this->assertArrayHasKey($var, $env, "Missing: $var");
+        }
+    }
+
+    public function testSpecialCharactersInConfigValues(): void
+    {
+        $this->fixture->setEnvironmentVariable();
+        $this->fixture->writeConfig([
+            'settings' => [
+                'url' => 'https://example.com/path?query=value&other=123',
+                'user_agent' => 'Mozilla/5.0 (Test) & More "Stuff"',
+            ],
+        ]);
+
+        $env = (new EnvironmentService())->initialize('anonymous', 'desktop', 'local', new NullOutput(), true);
+
+        $this->assertIsArray($env);
+        $this->assertNotEmpty($env);
     }
 }

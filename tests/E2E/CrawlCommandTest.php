@@ -15,7 +15,7 @@ class CrawlCommandTest extends WebCommandTestCase
     public function testRequiresConfig(): void
     {
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageMatches('/Configuration file not found/');
+        $this->expectExceptionMessageMatches('/Run `invrt init` to get started/');
         $this->executeCommand('crawl');
     }
 
@@ -28,9 +28,18 @@ class CrawlCommandTest extends WebCommandTestCase
         // Output status line
         $this->assertOutputContains('🕸️ Crawling');
         $this->assertOutputContains($this->webserverUrl());
+    
+
+    }
+
+    public function testCrawlHappyPathExtended(): void
+    {
+        $this->setupCrawlFixture();
+        $this->executeCommand('crawl', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+        $this->assertCommandSuccess();
 
         // URLs file populated with discovered pages
-        $urlsFile = $this->fixture->getInvrtDir() . '/data/anonymous/local/crawled_urls.txt';
+        $urlsFile = $this->fixture->getInvrtDir() . '/data/local/anonymous/crawled_urls.txt';
         $this->assertFileExists($urlsFile);
         $urls = array_filter(explode("\n", file_get_contents($urlsFile)));
         $this->assertGreaterThanOrEqual(5, count($urls));
@@ -39,7 +48,7 @@ class CrawlCommandTest extends WebCommandTestCase
         }
 
         // Log file created
-        $logFile = $this->fixture->getInvrtDir() . '/data/anonymous/local/logs/crawl.log';
+        $logFile = $this->fixture->getInvrtDir() . '/data/local/anonymous/logs/crawl.log';
         $this->assertFileExists($logFile);
     }
 

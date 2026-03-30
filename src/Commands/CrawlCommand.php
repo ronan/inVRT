@@ -28,6 +28,11 @@ class CrawlCommand extends BaseCommand
         $maxDepth = getenv('INVRT_MAX_CRAWL_DEPTH') ?: '3';
         $maxPages = getenv('INVRT_MAX_PAGES') ?: '100';
 
+        if (empty($dataDir)) {
+            $io->error('INVRT_DATA_DIR must be set and not empty');
+            return Command::FAILURE;
+        }
+
         $io->writeln(
             "🕸️ Crawling '{$result['INVRT_ENVIRONMENT']}' environment ($url) with profile: '{$result['INVRT_PROFILE']}' to depth: $maxDepth, max pages: $maxPages",
             OutputInterface::VERBOSITY_VERBOSE,

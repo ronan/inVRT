@@ -77,12 +77,13 @@ abstract class WebCommandTestCase extends CommandTestCase
     {
         if ($clear) {
             $this->fixture->cleanup();
+            $this->fixture->create();
         }
         $this->fixture->writeConfig([
             'environments' => [
                 'local' => ['url' => $this->webserverUrl()],
             ],
         ]);
-        $this->fixture->writeCrawledUrlsFile('anonymous', 'local', ['/', '/about.html']);
+        $this->fixture->writeCrawledUrlsFile('local', 'anonymous', ['/', '/about.html']);
     }
 }

@@ -15,13 +15,17 @@ class ReferenceCommandTest extends WebCommandTestCase
     public function testRequiresConfig(): void
     {
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageMatches('/Configuration file not found/');
+        $this->expectExceptionMessageMatches('/Could not find a config.yml file/');
         $this->executeCommand('reference');
     }
 
     public function testReferenceCommandCapturesScreenshots(): void
     {
         $this->setupFixture();
+        
+        # Add a fake crawled urls file because we don't yet seem to auto-trigger a crawl.
+        $this->fixture->writeCrawledUrlsFile('local', 'anonymous', ['/', '/about.html']);
+        
         $this->executeCommand('reference', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
         $this->assertCommandSuccess();
 
@@ -30,7 +34,7 @@ class ReferenceCommandTest extends WebCommandTestCase
         $this->assertOutputContains($this->webserverUrl());
 
         // PNGs created
-        $refDir = $this->fixture->getInvrtDir() . '/data/anonymous/local/bitmaps/reference';
+        $refDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/bitmaps/reference';
         $this->assertDirectoryExists($refDir);
         $pngs = $this->findPngs($refDir);
         $this->assertGreaterThanOrEqual(2, count($pngs));

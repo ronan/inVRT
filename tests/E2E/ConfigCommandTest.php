@@ -11,7 +11,7 @@ class ConfigCommandTest extends CommandTestCase
     {
         $this->fixture->writeConfig([
             'environments' => ['local' => ['url' => 'http://localhost:1234']],
-            'profiles' => ['admin' => ['auth' => ['username' => 'adminuser', 'password' => 'secret']]],
+            'profiles' => ['admin' => ['username' => 'adminuser', 'password' => 'secret']],
         ]);
 
         $this->executeCommand('config');

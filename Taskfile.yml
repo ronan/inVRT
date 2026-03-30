@@ -1,17 +1,20 @@
 version: '3'
 
-interval: 100ms
-
 tasks:
 
   test:
     desc: Run all tests and quality checks
     cmds:
-      - task: test:modernize
+      - task: fix:modernize
+      - task: fix:lint
       - task: test:phpstan
-      - task: test:lint
       - task: test:php
-      - task: test:security
+
+  livecode:
+    desc: Run the live coding session
+    watch: true
+    cmds:
+      - inotifywait -e modify -m tooling/templates | while read path action file; do echo "$action:$file. Rebuilding..."; task build:templates --force; done
 
   watch:
     desc: Watch for file changes and rerun tasks
@@ -19,6 +22,7 @@ tasks:
     cmds:
       - task: fix:lint
       - task: test:php:unit
+      - task: build:templates
  
   fix:
     desc: Run all code fixes (modernize, lint)
@@ -30,6 +34,7 @@ tasks:
     desc: Build the project
     cmds:
       - task: fix
+      - task: test:security
       - task: build:docker
 
   build:docker:
@@ -39,6 +44,9 @@ tasks:
 
   build:templates:
     desc: Generate PHP files from Handlebars templates and the config schema
+    sources:
+      - 'tooling/templates/*'
+      - 'docs/config.schema.yaml'
     cmds:
       - node tooling/scripts/build-config-definition.mjs
 

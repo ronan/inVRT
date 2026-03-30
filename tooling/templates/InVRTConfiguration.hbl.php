@@ -1,18 +1,13 @@
 <?php
+### Auto-generated from docs/config.schema.yaml — do not edit directly. Run `task build:templates` to regenerate.
 
-namespace App\Input;
+namespace App\Service;
 
-use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-/** Auto-generated from docs/config.schema.yaml — do not edit directly. Run `task build:templates` to regenerate. */
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 class InvrtConfiguration implements ConfigurationInterface
 {
-    /** Keys shared across settings/environments/profiles/devices sections. */
-    public const CONFIG_KEYS = [
-{{#each configKeys}}        '{{name}}',
-{{/each}}    ];
-
     /** Hard-coded defaults — applied when key is absent from all config sections. */
     public const DEFAULTS = [
 {{#each configKeys}}        '{{name}}' => {{phpDefault}},
@@ -39,5 +34,15 @@ class InvrtConfiguration implements ConfigurationInterface
 {{/if}}{{/each}}            ->end();
 
         return $tb;
+    }
+
+        public function keys(): array
+    {
+        return array_keys(self::DEFAULTS);
+    }
+
+    public function defaults(): array
+    {
+        return self::DEFAULTS;
     }
 }

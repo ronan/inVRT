@@ -14,13 +14,12 @@ properties:
     description: Display name for this inVRT project.
     examples:
       - My inVRT Project
-
+  
   settings:
     description: Base-layer defaults. Values here are overridden by environments, profiles, and devices.
     type: object
     allOf:
       - $ref: "#/$defs/configKeys"
-    additionalProperties: false
 
   environments:
     type: object
@@ -46,6 +45,7 @@ properties:
       Each key becomes selectable via --device.
     additionalProperties:
       $ref: "#/$defs/device"
+
 
 additionalProperties: false
 
@@ -116,6 +116,12 @@ $defs:
         minimum: 1
         description: Number of parallel screenshot captures.
         default: 5
+      data_dir:
+        type: string
+        description: Directory where inVRT stores data for this profile/environment combination.
+      scripts_dir:
+        type: string
+        description: Directory where inVRT stores its scripts.
 
   # ------------------------------------------------------------------
   # Section definitions — each extends configKeys with its own fields
