@@ -8,6 +8,7 @@ use Symfony\Component\Console\Attribute\MapInput;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Filesystem;
 
 #[AsCommand(
     name: 'crawl',
@@ -18,66 +19,55 @@ class CrawlCommand extends BaseCommand
 {
     public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        $result = $this->boot($opts, $io);
-        if (is_int($result)) {
+        if (($result = $this->boot($opts, $io)) !== Command::SUCCESS) {
             return $result;
         }
 
-        $url = $result['INVRT_URL'];
-        $dataDir = $result['INVRT_DATA_DIR'];
-        $maxDepth = getenv('INVRT_MAX_CRAWL_DEPTH') ?: '3';
-        $maxPages = getenv('INVRT_MAX_PAGES') ?: '100';
+        [
+            $INVRT_ENVIRONMENT,
+            $INVRT_URL,
+            $INVRT_PROFILE,
+            $INVRT_CRAWL_DIR,
+            $INVRT_CRAWL_LOG,
+            $INVRT_CRAWL_FILE,
+            $INVRT_CLONE_DIR,
+            $INVRT_MAX_CRAWL_DEPTH,
+            $INVRT_MAX_PAGES,
+            $INVRT_EXCLUDE_FILE,
+        ] = array_fill(0, 10, '');
+        extract($this->config, EXTR_IF_EXISTS);
 
-        if (empty($dataDir)) {
-            $io->error('INVRT_DATA_DIR must be set and not empty');
+        $filesystem = new Filesystem();
+        $this->config['INVRT_CRAWL_LOG'] && $filesystem->dumpFile($this->config['INVRT_CRAWL_LOG'], '');
+        $this->config['INVRT_CRAWL_FILE'] && $filesystem->dumpFile($this->config['INVRT_CRAWL_FILE'], '');
+
+        if (empty($INVRT_URL)) {
+            $io->error('INVRT_URL must be set');
             return Command::FAILURE;
         }
 
+        if (empty($INVRT_CRAWL_DIR)) {
+            $io->error('INVRT_CRAWL_DIR must be set');
+            return Command::FAILURE;
+        }
+
+        $filesystem->touch('file.txt');
+
         $io->writeln(
-            "🕸️ Crawling '{$result['INVRT_ENVIRONMENT']}' environment ($url) with profile: '{$result['INVRT_PROFILE']}' to depth: $maxDepth, max pages: $maxPages",
+            "🕸️ Crawling '$INVRT_ENVIRONMENT' environment ($INVRT_URL) with profile: '$INVRT_PROFILE' to depth: $INVRT_MAX_CRAWL_DEPTH, max pages: $INVRT_MAX_PAGES",
             OutputInterface::VERBOSITY_VERBOSE,
         );
 
-        foreach (["$dataDir/clone", "$dataDir/logs"] as $dir) {
-            $this->clearDirectory($dir);
+        foreach (["$INVRT_CLONE_DIR", dirname($INVRT_CRAWL_LOG)] as $dir) {
+            $this->prepareDirectory($dir);
         }
 
-        $domain = parse_url($url, PHP_URL_HOST) ?? '';
-        [$cookieFile, $cookieHeader] = $this->resolveCookieOption($io, $result['INVRT_COOKIES_FILE'], $dataDir);
-        $excludeUrls = $this->resolveExcludeUrls($io, $result['INVRT_DIRECTORY']);
-
-        $exitCode = $this->runWget($io, $url, $domain, $dataDir, $maxDepth, $excludeUrls, $cookieFile, $cookieHeader);
-        if ($exitCode !== Command::SUCCESS) {
-            return $exitCode;
-        }
-
-        $count = $this->parseUrlsFromLog("$dataDir/logs/crawl.log", $url, "$dataDir/crawled_urls.txt");
-
-        $io->writeln("Crawling completed. Found $count unique paths. Results saved to $dataDir/crawled_urls.txt", OutputInterface::VERBOSITY_VERBOSE);
-
-        return Command::SUCCESS;
-    }
-
-    /**
-     * Build and execute the wget crawl command.
-     */
-    private function runWget(
-        SymfonyStyle $io,
-        string $url,
-        string $domain,
-        string $dataDir,
-        string $maxDepth,
-        string $excludeUrls,
-        string $cookieFile,
-        string $cookieHeader,
-    ): int {
         $args = array_values(array_filter([
-            "--level=$maxDepth",
-            "--exclude-directories=$excludeUrls",
-            "--domains=$domain",
-            "--directory-prefix=$dataDir/clone",
-            $cookieFile !== '' ? "--load-cookies=$cookieFile" : null,
-            $cookieHeader !== '' ? "--header=Cookie: $cookieHeader" : null,
+            $this->resolveExcludeWGETArg($io, $INVRT_EXCLUDE_FILE),
+            $this->resolveCookieWGETArg($io),
+            "--level=$INVRT_MAX_CRAWL_DEPTH",
+            "--domains=" . (parse_url($INVRT_URL, PHP_URL_HOST) ?? ''),
+            "--directory-prefix=$INVRT_CLONE_DIR",
             '--recursive',
             '--max-redirect=3',
             '--user-agent=invrt/crawler',
@@ -88,19 +78,28 @@ class CrawlCommand extends BaseCommand
             '--no-host-directories',
             '--execute',
             'robots=off',
-            $url,
+            $INVRT_URL,
         ]));
 
         $cmd = 'wget ' . implode(' ', array_map('escapeshellarg', $args))
-            . ' 2> ' . escapeshellarg("$dataDir/logs/crawl.log");
+            . ' 2> ' . escapeshellarg($INVRT_CRAWL_LOG);
+
+        $io->writeLn("Running command: $cmd", OutputInterface::VERBOSITY_DEBUG);
 
         exec($cmd, $stdout, $exitCode);
 
-        if ($stdout !== []) {
-            $io->writeln(implode("\n", $stdout), OutputInterface::VERBOSITY_VERBOSE);
+        $stdout && $io->writeln($stdout, OutputInterface::VERBOSITY_NORMAL);
+
+        if ($exitCode !== Command::SUCCESS) {
+            $io->writeln("Crawling failed. See logs at $INVRT_CRAWL_LOG", OutputInterface::VERBOSITY_QUIET);
+            return $exitCode;
         }
 
-        return $exitCode;
+        $count = $this->parseUrlsFromLog($INVRT_CRAWL_LOG, $INVRT_URL, $INVRT_CRAWL_FILE);
+
+        $io->writeln("Crawling completed. Found $count unique paths. Results saved to $INVRT_CRAWL_FILE", OutputInterface::VERBOSITY_NORMAL);
+
+        return Command::SUCCESS;
     }
 
     /**
@@ -138,53 +137,50 @@ class CrawlCommand extends BaseCommand
 
     /**
      * Resolve wget cookie arguments from INVRT_COOKIE env var or cookies file.
-     * Returns [cookieFilePath, rawCookieHeaderValue] — at most one will be non-empty.
+     * Returns a wget --header=Cookie argument string if INVRT_COOKIE is set, or empty string if no cookie is available.
      *
-     * @return array{string, string}
+     * @return string
      */
-    private function resolveCookieOption(SymfonyStyle $io, string $cookiesFile, string $dataDir): array
+    private function resolveCookieWGETArg(SymfonyStyle $io): string
     {
-        $rawCookie = getenv('INVRT_COOKIE') ?: '';
-
-        if ($rawCookie !== '') {
+        if ($rawCookie = $this->config('INVRT_COOKIE')) {
             $io->writeln('Using provided cookie for crawling.', OutputInterface::VERBOSITY_VERBOSE);
-            return ['', $rawCookie];
+            return "--header=Cookie: $rawCookie";
         }
 
-        if (file_exists("$cookiesFile.txt")) {
-            $io->writeln("Using cookies from file: $cookiesFile.txt", OutputInterface::VERBOSITY_VERBOSE);
-            return ["$cookiesFile.txt", ''];
+        $cookie_txt = $this->config('INVRT_COOKIES_FILE') . ".txt";
+        if (file_exists($cookie_txt)) {
+            $io->writeln("Using cookies from file: $cookie_txt", OutputInterface::VERBOSITY_VERBOSE);
+            return "--load-cookies=$cookie_txt";
         }
 
         $io->writeln('No cookie provided. Crawling without authentication.', OutputInterface::VERBOSITY_VERBOSE);
-        touch("$dataDir/cookies.txt");
-        return ['', ''];
+        touch($cookie_txt);
+        return '';
     }
 
     /**
      * Load URL exclusions from exclude_urls.txt, falling back to sensible defaults.
      */
-    private function resolveExcludeUrls(SymfonyStyle $io, string $invrtDir): string
+    private function resolveExcludeWGETArg(SymfonyStyle $io, string $excludeFile): string
     {
-        $excludeFile = "$invrtDir/exclude_urls.txt";
-
         if (!file_exists($excludeFile)) {
             $defaults = '/files,/sites,/user/logout';
             $io->writeln("No exclude_urls.txt found at $excludeFile. Excluding defaults: $defaults", OutputInterface::VERBOSITY_VERBOSE);
-            return $defaults;
+            return "--exclude-directories=$defaults";
         }
 
         $lines = file($excludeFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
         $lines = array_values(array_filter($lines, fn($l) => !str_starts_with(ltrim($l), '#')));
         $excludeUrls = implode(',', $lines);
         $io->writeln("Excluding URLs: $excludeUrls", OutputInterface::VERBOSITY_VERBOSE);
-        return $excludeUrls;
+        return "--exclude-directories=$excludeUrls";
     }
 
     /**
      * Create dir if absent, or remove all contents if present.
      */
-    private function clearDirectory(string $dir): void
+    private function prepareDirectory(string $dir): void
     {
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);

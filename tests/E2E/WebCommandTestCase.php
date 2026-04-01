@@ -19,7 +19,7 @@ abstract class WebCommandTestCase extends CommandTestCase
     {
         parent::setUpBeforeClass();
 
-        self::$serverPort = self::findFreePort();
+        self::$serverPort = 41111;
 
         $websiteDir = dirname(__DIR__) . '/fixtures/website';
         $desc = [['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w']];
@@ -45,14 +45,6 @@ abstract class WebCommandTestCase extends CommandTestCase
         parent::tearDownAfterClass();
     }
 
-    private static function findFreePort(): int
-    {
-        $sock = stream_socket_server('tcp://127.0.0.1:0', $errno, $errstr);
-        $port = (int) parse_url(stream_socket_get_name($sock, false), PHP_URL_PORT);
-        fclose($sock);
-        return $port;
-    }
-
     private static function waitForServer(int $port, float $timeout = 3.0): void
     {
         $deadline = microtime(true) + $timeout;
@@ -73,17 +65,13 @@ abstract class WebCommandTestCase extends CommandTestCase
     }
 
     /** Write config + crawled_urls.txt pointing at the test webserver. */
-    protected function setupFixture($clear = false): void
+    protected function setUpFixture(bool $clear = false): void
     {
-        if ($clear) {
-            $this->fixture->cleanup();
-            $this->fixture->create();
-        }
+        parent::setUpFixture($clear);
         $this->fixture->writeConfig([
             'environments' => [
                 'local' => ['url' => $this->webserverUrl()],
             ],
         ]);
-        $this->fixture->writeCrawledUrlsFile('local', 'anonymous', ['/', '/about.html']);
     }
 }

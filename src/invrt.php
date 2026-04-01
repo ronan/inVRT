@@ -11,22 +11,25 @@ use App\Commands\CrawlCommand;
 use App\Commands\InitCommand;
 use App\Commands\ReferenceCommand;
 use App\Commands\TestCommand;
-use App\Service\EnvironmentService;
+use App\Service\ConfigurationService;
 use Symfony\Component\Console\Application;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 $container = new ContainerBuilder();
 
-$container->autowire(EnvironmentService::class)->setPublic(true);
+$container->autowire(ConfigurationService::class)->setPublic(true);
+
 $container->autowire(CrawlCommand::class)->setPublic(true);
 $container->autowire(ReferenceCommand::class)->setPublic(true);
 $container->autowire(TestCommand::class)->setPublic(true);
 $container->autowire(ConfigCommand::class)->setPublic(true);
+$container->autowire(InitCommand::class)->setPublic(true);
+
 $container->compile();
 
 $app = new Application('📖 inVRT CLI - Visual Regression Testing Tool', '1.0.0');
 
-$app->addCommand(new InitCommand());
+$app->addCommand($container->get(InitCommand::class));
 $app->addCommand($container->get(CrawlCommand::class));
 $app->addCommand($container->get(ReferenceCommand::class));
 $app->addCommand($container->get(TestCommand::class));

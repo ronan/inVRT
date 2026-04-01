@@ -14,14 +14,17 @@ class TestCommandTest extends WebCommandTestCase
 {
     public function testRequiresConfig(): void
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageMatches('/Could not find a config.yml file/');
-        $this->executeCommand('test');
+        $this->setupFixture();
+        $this->fixture->deleteConfig();
+        $this->executeCommand('reference');
+        $this->assertCommandFailure(1);
+        $this->assertOutputContains('Configuration file not found');
     }
 
     public function testTestHappyPathForTestingScreenshots(): void
     {
-        $this->setupFixture(true);
+        $this->setUpFixture(true);
+        $this->fixture->writeCrawledUrlsFile('local', 'anonymous', ['/', '/about.html']);
 
         // Run test without any prior reference — should auto-capture references then succeed
         $this->executeCommand('test', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
@@ -30,14 +33,14 @@ class TestCommandTest extends WebCommandTestCase
         $this->assertOutputContains('No reference screenshots found');
 
         // Both reference and test bitmaps should exist
-        $dataDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/bitmaps';
+        $dataDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/desktop/bitmaps';
         $this->assertDirectoryExists($dataDir . '/reference');
         $this->assertDirectoryExists($dataDir . '/test');
         $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/reference')));
         $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/test')));
 
         // Run visual regression test with verbose — identical site, so no regressions
-        $this->executeCommand('test', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+        $this->executeCommand('test');
         $this->assertCommandSuccess();
 
         // Output status line
@@ -45,7 +48,7 @@ class TestCommandTest extends WebCommandTestCase
         $this->assertOutputContains($this->webserverUrl());
 
         // Test bitmaps created
-        $testDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/bitmaps/test';
+        $testDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/desktop/bitmaps/test';
         $this->assertDirectoryExists($testDir);
         $pngs = $this->findPngs($testDir);
         $this->assertGreaterThan(0, count($pngs));

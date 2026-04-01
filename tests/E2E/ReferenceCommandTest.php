@@ -14,15 +14,17 @@ class ReferenceCommandTest extends WebCommandTestCase
 {
     public function testRequiresConfig(): void
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageMatches('/Could not find a config.yml file/');
+        $this->setupFixture();
+        $this->fixture->deleteConfig();
         $this->executeCommand('reference');
+        $this->assertCommandFailure(1);
+        $this->assertOutputContains('Configuration file not found');
     }
 
     public function testReferenceCommandCapturesScreenshots(): void
     {
         $this->setupFixture();
-        
+
         # Add a fake crawled urls file because we don't yet seem to auto-trigger a crawl.
         $this->fixture->writeCrawledUrlsFile('local', 'anonymous', ['/', '/about.html']);
         

@@ -2,7 +2,9 @@
 
 namespace App\Commands;
 
+use App\Input\InvrtInput;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\MapInput;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -13,32 +15,47 @@ use Symfony\Component\Filesystem\Path;
     description: 'Initialize a new inVRT project in the current directory',
     help: 'Initializes a new inVRT project with the default configuration structure.',
 )]
-class InitCommand
+class InitCommand extends BaseCommand
 {
-    public function __invoke(SymfonyStyle $io): int
+    // Doesn't matter if we don't call boot
+    protected bool $requiresConfig = false;
+    protected bool $requiresLogin = false;
+
+    public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        $initCwd = getenv('INIT_CWD') ?: getcwd();
-        $invrtDirectory = Path::join($initCwd, '.invrt');
+        $this->boot($opts, $io);
 
-        $io->writeln('🚀 Initializing InVRT for the project at ' . $initCwd);
+        [
+            $INVRT_CWD,
+            $INVRT_DIRECTORY,
+            $INVRT_CONFIG_FILE,
+        ] = array_fill(0, 5, '');
+        extract($this->config, EXTR_IF_EXISTS);
 
-        if (is_dir($invrtDirectory)) {
-            $io->error('⚠️  InVRT is already initialized for this project. Please remove the .invrt directory if you want to re-initialize.');
+        if (empty($INVRT_CWD)) {
+            $io->error("⚠️  I can't make a directory here because I don't know where I am.");
             return Command::FAILURE;
         }
 
-        if (!mkdir($invrtDirectory, 0755, true)) {
-            $io->error('Failed to create invrt directory at ' . $invrtDirectory);
+        if (is_dir($INVRT_DIRECTORY)) {
+            $io->error('⚠️  InVRT is already initialized for this project. Please remove the .invrt directory (' . $INVRT_DIRECTORY . ') if you want to re-initialize.');
             return Command::FAILURE;
         }
-        $io->writeln('<info>✓ Created invrt directory at ' . $invrtDirectory . '</info>', OutputInterface::VERBOSITY_VERBOSE);
 
-        if (!mkdir(Path::join($invrtDirectory, 'data'), 0755, true)) {
+        $io->writeln('🚀 Initializing InVRT for the project at ' . $INVRT_CWD);
+
+        if (!mkdir($INVRT_DIRECTORY, 0755, true)) {
+            $io->error('Failed to create invrt directory at ' . $INVRT_DIRECTORY);
+            return Command::FAILURE;
+        }
+        $io->writeln('<info>✓ Created invrt directory at ' . $INVRT_DIRECTORY . '</info>', OutputInterface::VERBOSITY_VERBOSE);
+
+        if (!mkdir(Path::join($INVRT_DIRECTORY, 'data'), 0755, true)) {
             $io->error('Failed to create data directory');
             return Command::FAILURE;
         }
 
-        if (!mkdir(Path::join($invrtDirectory, 'scripts'), 0755, true)) {
+        if (!mkdir(Path::join($INVRT_DIRECTORY, 'scripts'), 0755, true)) {
             $io->error('Failed to create scripts directory');
             return Command::FAILURE;
         }
@@ -89,15 +106,14 @@ devices:
     viewport_height: 667
 YAML;
 
-        $configPath = Path::join($invrtDirectory, 'config.yaml');
-        if (file_put_contents($configPath, $configContent) === false) {
+        if (file_put_contents($INVRT_CONFIG_FILE, $configContent) === false) {
             $io->error('Failed to create config.yaml');
             return Command::FAILURE;
         }
-        $io->writeln('<info>✓ Initialized InVRT configuration file at ' . $configPath . '</info>', OutputInterface::VERBOSITY_VERBOSE);
+        $io->writeln('<info>✓ Initialized InVRT configuration file at ' . $INVRT_CONFIG_FILE . '</info>', OutputInterface::VERBOSITY_VERBOSE);
 
         $excludeUrls = "/user/logout\n/files\n/sites\n/core\n";
-        $excludePath = Path::join($invrtDirectory, 'exclude_urls.txt');
+        $excludePath = Path::join($INVRT_DIRECTORY, 'exclude_urls.txt');
         if (file_put_contents($excludePath, $excludeUrls) === false) {
             $io->error('Failed to create exclude_urls.txt');
             return Command::FAILURE;

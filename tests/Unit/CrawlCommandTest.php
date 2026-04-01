@@ -3,7 +3,8 @@
 namespace Tests\Unit;
 
 use App\Commands\CrawlCommand;
-use App\Service\EnvironmentService;
+use App\Input\InvrtInput;
+use App\Service\ConfigurationService;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,7 +21,7 @@ class CrawlCommandTest extends TestCase
         $this->tempDir = sys_get_temp_dir() . '/crawl-command-test-' . uniqid();
         mkdir($this->tempDir, 0755, true);
 
-        $this->command = new CrawlCommand(new EnvironmentService());
+        $this->command = new CrawlCommand(new ConfigurationService());
         $this->method = new \ReflectionMethod(CrawlCommand::class, 'parseUrlsFromLog');
     }
 
@@ -110,16 +111,5 @@ class CrawlCommandTest extends TestCase
 
         $this->assertSame(0, $result['count']);
         $this->assertSame([], $result['urls']);
-    }
-
-    public function testWritesEmptyFileWhenNoUrlsFound(): void
-    {
-        $log = "$this->tempDir/empty.log";
-        file_put_contents($log, "no matching lines here\n");
-        $outputFile = "$this->tempDir/urls.txt";
-
-        $this->method->invoke($this->command, $log, 'https://example.com', $outputFile);
-
-        $this->assertSame('', file_get_contents($outputFile));
     }
 }

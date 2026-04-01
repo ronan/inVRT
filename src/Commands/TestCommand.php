@@ -18,28 +18,36 @@ class TestCommand extends BaseCommand
 {
     public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        $result = $this->boot($opts, $io);
-        if (is_int($result)) {
+        if (($result = $this->boot($opts, $io)) !== Command::SUCCESS) {
             return $result;
         }
 
+        [
+            $INVRT_ENVIRONMENT,
+            $INVRT_URL,
+            $INVRT_PROFILE,
+            $INVRT_DEVICE,
+            $INVRT_CAPTURE_DIR,
+        ] = array_fill(0, 5, '');
+        extract($this->config, EXTR_IF_EXISTS);
+
         $io->writeln(
-            "🔬 Testing '{$result['INVRT_ENVIRONMENT']}' environment ({$result['INVRT_URL']}) with profile: '{$result['INVRT_PROFILE']}' and device: '{$result['INVRT_DEVICE']}'",
-            OutputInterface::VERBOSITY_VERBOSE,
+            "🔬 Testing '{$INVRT_ENVIRONMENT}' environment ({$INVRT_URL}) with profile: '{$INVRT_PROFILE}' and device: '{$INVRT_DEVICE}'",
+            OutputInterface::VERBOSITY_NORMAL,
         );
 
-        if ($this->referencesAreMissing($result['INVRT_DATA_DIR'])) {
+        if ($this->referencesAreMissing($INVRT_CAPTURE_DIR)) {
             $io->writeln(
                 '📸 No reference screenshots found — capturing references first.',
-                OutputInterface::VERBOSITY_VERBOSE,
+                OutputInterface::VERBOSITY_NORMAL,
             );
-            $refResult = $this->runBackstop('reference', $result, $io);
+            $refResult = $this->runBackstop('reference', $this->config, $io);
             if ($refResult !== Command::SUCCESS) {
                 return $refResult;
             }
         }
 
-        return $this->runBackstop('test', $result, $io);
+        return $this->runBackstop('test', $this->config, $io);
     }
 
     private function referencesAreMissing(string $dataDir): bool

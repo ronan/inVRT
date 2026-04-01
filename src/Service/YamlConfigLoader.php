@@ -15,6 +15,11 @@ class YamlConfigLoader extends FileLoader
         $loaded  = Yaml::parse((string) file_get_contents($path)) ?: [];
         $parser  = new InvrtConfiguration();
         $parsed  = (new Processor())->processConfiguration($parser, [$loaded]);
+
+        foreach ($parsed as $key => $value) {
+            $parsed[$key] = is_array($value) ? array_filter($value) : $value;
+        }
+
         return $parsed;
     }
 

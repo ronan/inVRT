@@ -5,7 +5,7 @@ namespace Tests\E2E;
 /**
  * E2E tests for ConfigCommand
  */
-class ConfigCommandTest extends CommandTestCase
+class ConfigCommandTest extends WebCommandTestCase
 {
     public function testDisplaysConfigurationFromFile(): void
     {
@@ -17,7 +17,6 @@ class ConfigCommandTest extends CommandTestCase
         $this->executeCommand('config');
         $this->assertCommandSuccess();
 
-        $this->assertOutputContains('environments:');
         $this->assertOutputContains('local');
         $this->assertOutputContains('http://localhost:1234');
     }
@@ -25,8 +24,9 @@ class ConfigCommandTest extends CommandTestCase
     public function testShowsMessageWhenNoConfigFile(): void
     {
         // No config written — fixture dir exists but no config.yaml
+        $this->fixture->deleteConfig();
         $this->executeCommand('config');
-        $this->assertCommandSuccess();
+        $this->assertCommandFailure();
         $this->assertOutputContains('Configuration file not found');
     }
 

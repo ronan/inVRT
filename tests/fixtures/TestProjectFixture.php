@@ -33,6 +33,7 @@ class TestProjectFixture
         @mkdir($this->projectDir, 0755, true);
         @mkdir($this->invrtDir, 0755, true);
         @mkdir($this->invrtDir . '/data', 0755, true);
+        
         return $this;
     }
 
@@ -198,6 +199,17 @@ class TestProjectFixture
     }
 
     /**
+     * Write an invalid YAML config file
+     */
+    public function writeInvalidYamlConfig(): self
+    {
+        $this->create();
+        $configPath = $this->invrtDir . '/config.yaml';
+        file_put_contents($configPath, "invalid: yaml: content: [");
+        return $this;
+    }
+
+    /**
      * Write a custom config.yaml file
      */
     public function writeConfig(array $config): self
@@ -208,15 +220,15 @@ class TestProjectFixture
         file_put_contents($configPath, $yaml);
         return $this;
     }
-
     /**
-     * Write an invalid YAML config file
+     * Delete the config.yaml file if it exists
      */
-    public function writeInvalidYamlConfig(): self
+    public function deleteConfig(): self
     {
-        $this->create();
         $configPath = $this->invrtDir . '/config.yaml';
-        file_put_contents($configPath, "invalid: yaml: content: [");
+        if (file_exists($configPath)) {
+            unlink($configPath);
+        }
         return $this;
     }
 
@@ -321,30 +333,11 @@ class TestProjectFixture
      */
     public function unsetEnvironmentVariable(): self
     {
-        foreach([
-            'INVRT_DIRECTORY',
-            'INVRT_DATA_DIR',
-            'INVRT_PROFILE',
-            'INVRT_DEVICE',
-            'INVRT_ENVIRONMENT',
-            'INVRT_SCRIPTS_DIR',
-            'INVRT_COOKIES_FILE',
-            'INVRT_CONFIG_FILE',
-            'INVRT_URL',
-            'INVRT_LOGIN_URL',
-            'INVRT_USERNAME',
-            'INVRT_PASSWORD',
-            'INVRT_VIEWPORT_WIDTH',
-            'INVRT_VIEWPORT_HEIGHT',
-            'INVRT_MAX_CRAWL_DEPTH',
-            'INVRT_MAX_PAGES',
-            'INVRT_USER_AGENT',
-            'INVRT_MAX_CONCURRENT_REQUESTS'
-        ] as $var) {
-            putenv("$var=");
+        foreach(getenv() as $var => $value) {
+            if (strpos($var, 'INVRT_') === 0) {
+                putenv($var);
+            }
         }
-        putenv('INVRT_DIRECTORY=');
-        putenv('INVRT_CWD=');
         return $this;
     }
 }

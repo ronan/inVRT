@@ -10,8 +10,10 @@ class InvrtConfiguration implements ConfigurationInterface
 {
     /** Hard-coded defaults — applied when key is absent from all config sections. */
     public const DEFAULTS = [
-{{#each configKeys}}        '{{name}}' => {{phpDefault}},
-{{/each}}    ];
+{{#each configKeys}}
+        '{{name}}' => {{phpDefault}},
+{{/each}}
+    ];
 
     public function getConfigTreeBuilder(): TreeBuilder
     {
@@ -20,18 +22,29 @@ class InvrtConfiguration implements ConfigurationInterface
 
         $root
             ->children()
-            ->scalarNode('name')->defaultNull()->end()
-{{#each sections}}            ->arrayNode('{{name}}')
-{{#if addDefaultsIfNotSet}}            ->addDefaultsIfNotSet()
-{{/if}}{{#if useAttributeAsKey}}            ->useAttributeAsKey('name')
-            ->arrayPrototype()
-{{/if}}            ->children()
-{{#each extraKeys}}            ->scalarNode('{{name}}')->end()
-{{/each}}{{#each keys}}            ->{{nodeType}}Node('{{name}}'){{#if showDefault}}->defaultValue({{phpDefault}}){{/if}}->end()
-{{/each}}            ->end()
+                ->scalarNode('name')->defaultNull()->end()
+{{#each sections}}
+                ->arrayNode('{{name}}')
+{{#if addDefaultsIfNotSet}}
+                ->addDefaultsIfNotSet()
+{{/if}}
+{{#if useAttributeAsKey}}
+                ->arrayPrototype()
+{{/if}}
+                ->children()
+{{#each extraKeys}}
+                    ->scalarNode('{{name}}')->end()
+{{/each}}
+{{#each keys}}
+                    ->{{nodeType}}Node('{{name}}'){{#if showDefault}}->defaultValue({{phpDefault}}){{/if}}->end()
+{{/each}}
+                    ->end()
+                ->end()
+{{#if useAttributeAsKey}}
             ->end()
-{{#if useAttributeAsKey}}            ->end()
-{{/if}}{{/each}}            ->end();
+{{/if}}
+{{/each}}
+            ->end();
 
         return $tb;
     }

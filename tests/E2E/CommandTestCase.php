@@ -7,11 +7,14 @@ use App\Commands\CrawlCommand;
 use App\Commands\InitCommand;
 use App\Commands\ReferenceCommand;
 use App\Commands\TestCommand;
-use App\Service\EnvironmentService;
+use App\Input\InvrtInput;
+use App\Service\ConfigurationService;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use Tests\Fixtures\TestProjectFixture;
+
+use \Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Base class for E2E command tests
@@ -33,28 +36,26 @@ abstract class CommandTestCase extends TestCase
     {
         parent::setUp();
 
-        // Use scratch/tmp/{ClassName}/{testName} for deterministic, inspectable output
-        $shortClass = (new \ReflectionClass($this))->getShortName();
-        $base = dirname(__DIR__, 2) . '/scratch/tmp/' . $shortClass . '/' . $this->name();
-
-        // Create fixture
-        $this->fixture = new TestProjectFixture($base);
-        $this->fixture->create();
+        // Set the project directory as the working directory for the test
+        $this->setUpFixture();
 
         // Create application with all commands
         $this->app = new Application('inVRT CLI', '1.0.0');
-        $env = new EnvironmentService();
-        $this->app->addCommand(new InitCommand());
-        $this->app->addCommand(new CrawlCommand($env));
-        $this->app->addCommand(new ReferenceCommand($env));
-        $this->app->addCommand(new TestCommand($env));
-        $this->app->addCommand(new ConfigCommand($env));
+        $cs = new ConfigurationService();
+        $in = new InvrtInput();
+        $in->environment = 'local';
+        $in->profile = 'anonymous';
+        $in->device = 'desktop';
+        $cs->options('local', 'anonymous', 'desktop');
+
+        $this->app->addCommand(new InitCommand($cs));
+        $this->app->addCommand(new CrawlCommand($cs));
+        $this->app->addCommand(new ReferenceCommand($cs));
+        $this->app->addCommand(new TestCommand($cs));
+        $this->app->addCommand(new ConfigCommand($cs));
 
         // Make application not exit on exception
         $this->app->setCatchExceptions(false);
-
-        // Set the project directory as the working directory for the test
-        $this->fixture->setEnvironmentVariable();
     }
 
     protected function tearDown(): void
@@ -63,6 +64,22 @@ abstract class CommandTestCase extends TestCase
         $this->fixture->unsetEnvironmentVariable();
 
         parent::tearDown();
+    }
+
+    protected function setUpFixture(bool $clear = false): void
+    {
+        if ($clear) {
+            $this->fixture->cleanup();
+        }
+
+        // Use scratch/tmp/{ClassName}/{testName} for deterministic, inspectable output
+        $class = (new \ReflectionClass($this))->getShortName();
+        $base = dirname(__DIR__, 2) . '/scratch/tmp/' . $class . '/' . $this->name();
+
+        // Create fixture
+        $this->fixture = new TestProjectFixture($base);
+        $this->fixture->create();
+        $this->fixture->setEnvironmentVariable();
     }
 
     /**
@@ -82,7 +99,7 @@ abstract class CommandTestCase extends TestCase
         $testInput = array_merge(['command' => $commandName], $input);
 
         // Execute the command
-        $this->commandTester->execute($testInput, $options);
+        $this->commandTester->execute($testInput, $options + ['verbosity' => OutputInterface::VERBOSITY_DEBUG]);
 
         return $this->commandTester;
     }

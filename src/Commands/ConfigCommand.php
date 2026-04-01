@@ -7,8 +7,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\MapInput;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Path;
-use Symfony\Component\Yaml\Yaml;
 
 #[AsCommand(
     name: 'config',
@@ -17,40 +15,27 @@ use Symfony\Component\Yaml\Yaml;
 )]
 class ConfigCommand extends BaseCommand
 {
+    protected bool $requiresConfig = true;
+    protected bool $requiresLogin = false;
+
     public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
-        $result = $this->boot($opts, $io, requiresConfig: false);
-        if (is_int($result)) {
+        if (($result = $this->boot($opts, $io)) !== Command::SUCCESS) {
             return $result;
         }
 
-        $configFile = Path::join($result['INVRT_DIRECTORY'], 'config.yaml');
-
-        if (!file_exists($configFile)) {
-            $io->writeln('# Configuration file not found at: ' . $configFile);
-            $io->writeln("# Run '<comment>invrt init</comment>' to create a new configuration.");
-            return Command::SUCCESS;
-        }
-
-        try {
-            $fileContents = file_get_contents($configFile);
-            $config = Yaml::parse($fileContents) ?: [];
-
-            $io->writeln('# Current inVRT Configuration:');
-            $io->writeln('# ============================');
-            $io->writeln('');
-
-            $this->displayConfiguration($config, $io);
-        } catch (\Exception $error) {
-            $io->error('Error reading config file: ' . $error->getMessage());
-            return Command::FAILURE;
-        }
+        $this->displayConfiguration($this->config, $io, 'Current inVRT Configuration');
 
         return Command::SUCCESS;
     }
 
-    private function displayConfiguration(array $config, SymfonyStyle $io): void
+    private function displayConfiguration(array $config, SymfonyStyle $io, $title = ''): void
     {
+        if ($title !== '') {
+            $io->writeln("# $title:");
+            $io->writeln('');
+        }
+
         foreach ($config as $section => $values) {
             if (!is_array($values)) {
                 $io->writeln($section . ': ' . $values);

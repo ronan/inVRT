@@ -25,18 +25,15 @@ class InitCommandTest extends CommandTestCase
     public function testInitCommandCreatesProject(): void
     {
         $invrtDir = $this->fixture->getInvrtDir();
-        if (is_dir($invrtDir)) {
-            $this->rmdirRecursive($invrtDir);
-        }
+        $this->rmdirRecursive($invrtDir);
 
         $originalCwd = getcwd();
         $originalInitCwd = getenv('INIT_CWD');
 
         try {
-            chdir($this->fixture->getProjectDir());
-            putenv('INIT_CWD=' . $this->fixture->getProjectDir());
+            $this->fixture->setEnvironmentVariable();
 
-            $this->executeCommand('init', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+            $this->executeCommand('init', [], ['verbosity' => OutputInterface::VERBOSITY_DEBUG]);
             $this->assertCommandSuccess();
 
             // Output

@@ -12,30 +12,23 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CrawlCommandTest extends WebCommandTestCase
 {
-    public function testRequiresConfig(): void
-    {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageMatches('/Run `invrt init` to get started/');
-        $this->executeCommand('crawl');
-    }
 
     public function testCrawlHappyPath(): void
     {
         $this->setupCrawlFixture();
-        $this->executeCommand('crawl', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+        $this->executeCommand('crawl', [], ['verbosity' => OutputInterface::VERBOSITY_DEBUG]);
         $this->assertCommandSuccess();
 
         // Output status line
         $this->assertOutputContains('🕸️ Crawling');
         $this->assertOutputContains($this->webserverUrl());
-    
 
     }
 
     public function testCrawlHappyPathExtended(): void
     {
         $this->setupCrawlFixture();
-        $this->executeCommand('crawl', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+        $this->executeCommand('crawl', [], ['verbosity' => OutputInterface::VERBOSITY_DEBUG]);
         $this->assertCommandSuccess();
 
         // URLs file populated with discovered pages
@@ -62,6 +55,7 @@ class CrawlCommandTest extends WebCommandTestCase
     /** Write config pointing at the test webserver — no pre-seeded URL list needed. */
     private function setupCrawlFixture(): void
     {
+        $this->setUpFixture(true);
         $this->fixture->writeConfig([
             'environments' => [
                 'local' => ['url' => $this->webserverUrl()],
