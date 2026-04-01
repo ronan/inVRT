@@ -55,7 +55,7 @@ tasks:
     desc: Run all tests with PHPUnit
     dir: /tmp
     cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests {{.CLI_ARGS}}
     sources:
       - 'src/**/*.php'
       - 'tests/**/*.php'
@@ -64,7 +64,7 @@ tasks:
     desc: Run unit tests with PHPUnit
     dir: /tmp
     cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/Unit
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/Unit {{.CLI_ARGS}}
     sources:
       - 'src/**/*.php'
       - 'tests/**/*.php'
@@ -73,7 +73,7 @@ tasks:
     desc: Run integration tests with PHPUnit
     dir: /tmp
     cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/e2e
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/e2e {{.CLI_ARGS}}
     sources:
       - 'src/**/*.php'
       - 'tests/**/*.php'
@@ -113,7 +113,6 @@ tasks:
     sources:
       - 'src/**/*.php'
       - 'tests/**/*.php'
-
     cmds:
       - php ./vendor/bin/php-cs-fixer fix --config=tooling/.php-cs-fixer.php
 
