@@ -3,9 +3,9 @@
 Tracks planned features, bugs, test gaps, and tech debt.
 For AI agents and human developers.
 
-- `- [ ]` open · `- [x]` done
-- Reference the relevant file or doc when adding an item.
+## Checkbox status key
 
+- `- [ ]` open · `- [x]` done. `- [-]` partially completed. `- [.]` in progress.
 
 ## Bugs
 
@@ -42,7 +42,14 @@ _(none yet)_
         Use DI/Service container and autowiring to pass the config object to commands
         Remove the $this->withEnv pattern and simplofy the controllers as much as possible
 
+
 - [x] Do a manual refactor of the config/options system to get rid of the last of the code smells
+
+
+
+
+## Developer Experience
+
 - [ ] Add script called (tooling/scrupts/generate-schema.mjs) to generate `docs/config.schema.yaml` from `docs/config.example.yaml`
 - [ ] Add ddev-invrt addon into main repo
 
@@ -66,7 +73,6 @@ _(none yet)_
         - [x] Combine e2e tests to reduce the number of times the command needs to be run
                 use tests/e2e/CrawlCommandTest.php as an example
 
-
 ### CMS-Specific Testing
   - [ ] Set up ddev to run during tests
   - [ ] Test drupal auth support
@@ -82,6 +88,7 @@ _(none yet)_
   - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
   - [ ] Implement an interactive init mode
 
+
 ### Options and Configuration (`invrt contig`)
 
 - [ ] Retrieve a specific config key or multiple keys
@@ -95,3 +102,16 @@ _(none yet)_
         invrt config set --key=profile.admin.name --value="Admin User"
         invrt config set --key=title,settings.url --value="Hello, World",http://example.com
 
+### User scripting
+
+- [ ] Optionally read the onload/onready playwright event script from `INVRT_SCRIPTS_DIR`
+- [ ] Allow the user to specify setup/teardown scripts per project
+
+### Reporting
+
+- [ ] Create a 1 page html report for all existing test results
+- [ ] Create an "Interactive" report
+  - [ ] Allow tests to be re-run
+  - [ ] Allow differences to be approved
+  - [ ] Allow comparison of different environments
+  - [ ] Allow comparison of different profiles
