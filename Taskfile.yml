@@ -5,6 +5,7 @@ tasks:
   test:
     desc: Run all tests and quality checks
     cmds:
+      - task: test:schema
       - task: fix:modernize
       - task: fix:lint
       - task: test:phpstan
@@ -55,7 +56,7 @@ tasks:
     desc: Run all tests with PHPUnit
     dir: /tmp
     cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests {{.CLI_ARGS}}
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox --stop-on-failure {{.TASKFILE_DIR}}/tests {{.CLI_ARGS}}
     sources:
       - 'src/**/*.php'
       - 'tests/**/*.php'

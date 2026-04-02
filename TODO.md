@@ -42,7 +42,9 @@ _(none yet)_
         Use DI/Service container and autowiring to pass the config object to commands
         Remove the $this->withEnv pattern and simplofy the controllers as much as possible
 
-- [ ] Do a manual refactor of the config/options system to get rid of the last of the code smells
+- [x] Do a manual refactor of the config/options system to get rid of the last of the code smells
+- [ ] Add script called (tooling/scrupts/generate-schema.mjs) to generate `docs/config.schema.yaml` from `docs/config.example.yaml`
+- [ ] Add ddev-invrt addon into main repo
 
 ## Tests
 
@@ -65,18 +67,24 @@ _(none yet)_
                 use tests/e2e/CrawlCommandTest.php as an example
 
 
-
-- [ ] Test drupal auth support
-
-- [ ] Test backdrop support
+### CMS-Specific Testing
+  - [ ] Set up ddev to run during tests
+  - [ ] Test drupal auth support
+  - [ ] Test backdrop support
 
 ## Features
 
-- [x] Auto trigger reference when test is run for first time
-- [ ] Auto trigger crawl when test is run for the first time
-- [ ] Auto trigger init when crawl is run for the first time
-- [ ] Implement an interactive init mode
-- [ ] specify a specific config key or multiple keys
+### Baseline/Test/Report flow
+
+  - [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
+  - [x] Auto trigger `invrt reference` when `invrt test` is run for first time
+  - [ ] Auto trigger `invrt crawl` when `invrt reference` is run for the first time
+  - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
+  - [ ] Implement an interactive init mode
+
+### Options and Configuration (`invrt contig`)
+
+- [ ] Retrieve a specific config key or multiple keys
 
         invrt config --key=viewport_width --environment=dev --device=mobile
         invrt config --key=title,url --environment=dev
@@ -87,4 +95,3 @@ _(none yet)_
         invrt config set --key=profile.admin.name --value="Admin User"
         invrt config set --key=title,settings.url --value="Hello, World",http://example.com
 
-- [ ] **Add WordPress support**
