@@ -2,6 +2,16 @@ version: '3'
 
 tasks:
 
+  install:dev:
+    desc: Install development dependencies
+    cmds:
+      - ./scripts/install-dev.sh
+
+  install:runtime:
+    desc: Install runtime dependencies
+    cmds:
+      - ./scripts/install-base.sh
+
   test:
     desc: Run all tests and quality checks
     cmds:
@@ -133,6 +143,7 @@ tasks:
     desc: Run tasks to clean up the repository structure
     cmds:
       - chmod a+x tooling/scripts/*
+      - chmod a+x .devcontainer/install*.sh
 
   publish:ddev-addon:
     desc: Publish the invrt-ddev addon to GitHub
