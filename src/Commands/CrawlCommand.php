@@ -91,8 +91,9 @@ class CrawlCommand extends BaseCommand
         $stdout && $io->writeln($stdout, OutputInterface::VERBOSITY_NORMAL);
 
         if ($exitCode !== Command::SUCCESS) {
-            $io->writeln("Crawling failed. See logs at $INVRT_CRAWL_LOG", OutputInterface::VERBOSITY_QUIET);
-            return $exitCode;
+            $io->writeln("There were errors during the crawl. See logs at $INVRT_CRAWL_LOG", OutputInterface::VERBOSITY_QUIET);
+            $io->writeln("Crawl exit code: $exitCode", OutputInterface::VERBOSITY_QUIET);
+            // return $exitCode;
         }
 
         $count = $this->parseUrlsFromLog($INVRT_CRAWL_LOG, $INVRT_URL, $INVRT_CRAWL_FILE);
