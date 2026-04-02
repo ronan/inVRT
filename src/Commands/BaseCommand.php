@@ -27,7 +27,7 @@ abstract class BaseCommand
      * Initialize environment + login.
      * Returns the resolved INVRT_* env array on success, or an exit code int on failure.
      *
-     * @return array<string, string>|int
+     * @return int
      */
     protected function boot(InvrtInput $opts, SymfonyStyle $io): int
     {
@@ -69,7 +69,7 @@ abstract class BaseCommand
         // Load the default config and environment settings
         $this->config = $this->configurationService->options($opts->environment, $opts->profile, $opts->device);
 
-        // If there's a config file load it. Otherwise throws and Exception.
+        // If there's a config file load it. Otherwise throws an Exception.
         $this->config = $this->configurationService->load();
     }
 

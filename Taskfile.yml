@@ -129,6 +129,15 @@ tasks:
     cmds:
       - node tooling/scripts/validate-schema.mjs
 
+  fix:repo:
+    desc: Run tasks to clean up the repository structure
+    cmds:
+      - chmod a+x tooling/scripts/*
+
+  publish:ddev-addon:
+    desc: Publish the invrt-ddev addon to GitHub
+    cmds:
+      - ./tooling/scripts/publish-ddev-addon.sh
 
   help:
     desc: Show all available tasks

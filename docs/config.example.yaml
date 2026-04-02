@@ -9,6 +9,24 @@ settings:
   login_url: user/login
   user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
 
+  directory: 'INVRT_CWD/.invrt'
+  config_file: 'INVRT_DIRECTORY/config.yaml'
+  scripts_dir: 'INVRT_DIRECTORY/scripts'
+
+  environment_dir: 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT'
+  profile_dir: 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE'
+  device_dir: 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE'
+
+  data_dir: 'INVRT_DEVICE_DIR'
+  capture_dir: 'INVRT_DEVICE_DIR'
+
+  crawl_dir: 'INVRT_PROFILE_DIR'
+  cookies_file: 'INVRT_CRAWL_DIR/cookies'
+  crawl_log: 'INVRT_CRAWL_DIR/logs/crawl.log'
+  clone_dir: 'INVRT_CRAWL_DIR/clone'
+  crawl_file: 'INVRT_CRAWL_DIR/crawled_urls.txt'
+  exclude_file: 'INVRT_CRAWL_DIR/exclude_paths.txt'
+
 environments:
   local:
     name: Local

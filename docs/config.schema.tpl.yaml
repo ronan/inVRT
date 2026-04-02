@@ -18,8 +18,13 @@ properties:
   settings:
     description: Base-layer defaults. Values here are overridden by environments, profiles, and devices.
     type: object
-    allOf:
-      - $ref: "#/$defs/configKeys"
+##each settings.properties
+      item_key: 
+        type: "item_type"
+        ##if item_value
+        default: "item_value"
+        ##/if
+##/end
 
   environments:
     type: object
@@ -69,7 +74,9 @@ $defs:
           - http://localhost
       login_url:
         type: string
-        description: URL of the login page. Defaults to <url>/user/login when not set.
+        description: >
+          URL of the login page. Defaults to <url>/user/login when not set.
+          Can be a full URL or a path relative to url.
         examples:
           - https://example.com/user/login
           - user/login
@@ -79,10 +86,22 @@ $defs:
       password:
         type: string
         description: Login password.
-      cookie:
-        type: string
-        description: Cookie string to send with requests for authenticated sessions.
-
+      viewport_width:
+        type: integer
+        minimum: 1
+        description: Browser viewport width in pixels.
+        default: 1024
+        examples:
+          - 1920
+          - 375
+      viewport_height:
+        type: integer
+        minimum: 1
+        description: Browser viewport height in pixels.
+        default: 768
+        examples:
+          - 1080
+          - 667
       max_crawl_depth:
         type: integer
         minimum: 1
@@ -102,26 +121,6 @@ $defs:
         minimum: 1
         description: Number of parallel screenshot captures.
         default: 5
-
-
-      viewport_width:
-        type: integer
-        minimum: 1
-        description: Browser viewport width in pixels.
-        default: 1024
-        examples:
-          - 1920
-          - 1024
-          - 375
-      viewport_height:
-        type: integer
-        minimum: 1
-        description: Browser viewport height in pixels.
-        default: 768
-        examples:
-          - 1080
-          - 768
-          - 667
 
       directory:
         type: string
@@ -165,6 +164,7 @@ $defs:
         type: string
         description: Directory where inVRT stores captured screenshots for this device.
         default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE
+
 
   # ------------------------------------------------------------------
   # Section definitions — each extends configKeys with its own fields

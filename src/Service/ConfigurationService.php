@@ -29,7 +29,6 @@ class ConfigurationService
         return array_keys($this->defaults());
     }
 
-
     /**
      * Set the passed in options. This will affect what is loaded later.
      *
@@ -61,25 +60,6 @@ class ConfigurationService
 
         $base['INVRT_CWD']              = getenv('INVRT_CWD') ?: (string) getcwd();
 
-        $base['INVRT_DIRECTORY']        = 'INVRT_CWD/.invrt';
-        $base['INVRT_CONFIG_FILE']      = 'INVRT_DIRECTORY/config.yaml';
-        $base['INVRT_SCRIPTS_DIR']      = 'INVRT_DIRECTORY/scripts';
-
-        $base['INVRT_ENVIRONMENT_DIR']  = 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT';
-        $base['INVRT_PROFILE_DIR']      = 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE';
-        $base['INVRT_DEVICE_DIR']       = 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE';
-
-        $base['INVRT_DATA_DIR']         = 'INVRT_DEVICE_DIR';
-        $base['INVRT_CAPTURE_DIR']      = 'INVRT_DEVICE_DIR';
-
-        $base['INVRT_CRAWL_DIR']        = 'INVRT_PROFILE_DIR';
-        $base['INVRT_COOKIES_FILE']     = 'INVRT_CRAWL_DIR/cookies';
-        $base['INVRT_CRAWL_LOG']        = 'INVRT_CRAWL_DIR/logs/crawl.log';
-        $base['INVRT_CLONE_DIR']        = 'INVRT_CRAWL_DIR/clone';
-        $base['INVRT_CRAWL_FILE']       = 'INVRT_CRAWL_DIR/crawled_urls.txt';
-        $base['INVRT_EXCLUDE_FILE']     = 'INVRT_CRAWL_DIR/exclude_paths.txt';
-
-
         $base['INVRT_COOKIE']           = '';
 
         return $base;
@@ -87,14 +67,10 @@ class ConfigurationService
 
     protected function interpolate(array $config): array
     {
-        // $last = [];
-        // $last = $config;
-        // // while ($config !== $last) {
-        // // }
+        // Run the translation 3 times to allow nested placeholders to be replaced
         for ($i = 0; $i < 3; $i++) {
             $config = array_map(fn($value) => is_string($value) ? strtr($value, $config) : $value, $config);
         }
-        // Run the translation over and over until no more replacements occur
         return $config;
     }
 
@@ -119,11 +95,11 @@ class ConfigurationService
 
         // Combine the sources of config in most to least preference order.
         $combined  = $getenv
-                + $device
-                + $profile
-                + $environment
-                + $settings
-                + $defaults;
+                    + $device
+                    + $profile
+                    + $environment
+                    + $settings
+                    + $defaults;
 
         // One last key clean and replace INVRT_XXX placeholders with the resolved values
         $cleaned = array_filter($combined, fn($key) => strpos($key, 'INVRT_') === 0, ARRAY_FILTER_USE_KEY);
@@ -197,58 +173,5 @@ class ConfigurationService
         }
 
         return $out;
-    }
-
-    /**
-     * Initialise environment, load + resolve config, export env vars for subprocesses.
-     *
-     * @throws \RuntimeException when $requireConfig is true and file is missing/invalid
-     */
-    public function get(): array
-    {
-        $base = [];
-
-        // Passed in arguments take precedence over environment variables
-        $base['profile']            = $this->profile ?: getenv('INVRT_PROFILE');
-        $base['device']             = $this->device ?: getenv('INVRT_DEVICE');
-        $base['environment']        = $this->environment ?: getenv('INVRT_ENVIRONMENT');
-
-        // Add the defaults, prioritize the environment values.
-        $base += $this->defaults();
-
-        // Parse the persistent configuration file
-        $final = $this->load();
-
-        return [
-            'INVRT_PROFILE'                 => (string) $final['profile'],
-            'INVRT_DEVICE'                  => (string) $final['device'],
-            'INVRT_ENVIRONMENT'             => (string) $final['environment'],
-
-            'INVRT_CWD'                     => (string) $final['cwd'],
-            'INVRT_DIRECTORY'               => (string) $final['directory'],
-            'INVRT_PROFILE_DIR'             => (string) $final['profile_dir'],
-            'INVRT_ENVIRONMENT_DIR'         => (string) $final['environment_dir'],
-            'INVRT_EXCLUDE_FILE'            => (string) $final['exclude_file'],
-            'INVRT_DATA_DIR'                => (string) $final['data_dir'],
-            'INVRT_CLONE_DIR'               => (string) $final['clone_dir'],
-            'INVRT_SCRIPTS_DIR'             => (string) $final['scripts_dir'],
-            'INVRT_COOKIES_FILE'            => (string) $final['cookies_file'],
-            'INVRT_CRAWL_DIR'               => (string) $final['crawl_dir'],
-            'INVRT_CRAWL_FILE'              => (string) $final['crawl_file'],
-            'INVRT_CRAWL_LOG'               => (string) $final['crawl_log'],
-            'INVRT_COOKIE'                  => (string) $final['cookie'],
-            'INVRT_CONFIG_FILE'             => (string) $final['config_file'],
-
-            'INVRT_URL'                     => (string) $final['url'],
-            'INVRT_LOGIN_URL'               => (string) $final['login_url'],
-            'INVRT_USERNAME'                => (string) $final['username'],
-            'INVRT_PASSWORD'                => (string) $final['password'],
-            'INVRT_VIEWPORT_WIDTH'          => (string) $final['viewport_width'],
-            'INVRT_VIEWPORT_HEIGHT'         => (string) $final['viewport_height'],
-            'INVRT_MAX_CRAWL_DEPTH'         => (string) $final['max_crawl_depth'],
-            'INVRT_MAX_PAGES'               => (string) $final['max_pages'],
-            'INVRT_USER_AGENT'              => (string) $final['user_agent'],
-            'INVRT_MAX_CONCURRENT_REQUESTS' => (string) $final['max_concurrent_requests'],
-        ];
     }
 }
