@@ -1,5 +1,11 @@
 scratch
-node_modules
-vendor
 tooling
+plans
+chats
+node_modules
+.vscode
+.invrt
+.github
+.devcontainer
+.agents
 .git

@@ -3,10 +3,38 @@
 #ddev-generated
 
 config_path="$DDEV_APPROOT/.ddev/.invrt/config.yaml"
+dry_run=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run)
+      dry_run=1
+      ;;
+    *)
+      echo "Unknown option: $arg" >&2
+      exit 1
+      ;;
+  esac
+done
+
+output_target="$config_path"
+if (( dry_run )); then
+  output_target="/dev/stderr"
+fi
+
+has_drush=0
+if [[ "$DDEV_PROJECT_TYPE" == "drupal11" ]] && ddev drush --version >/dev/null 2>&1; then
+  has_drush=1
+fi
+
+has_bee=0
+if [[ "$DDEV_PROJECT_TYPE" == "backdrop" ]] && ddev bee --help >/dev/null 2>&1; then
+  has_bee=1
+fi
 
 echo "Auto-configuring InVRT for $DDEV_HOSTNAME ($DDEV_PROJECT_TYPE)"
 
-if [[ -f "$config_path" ]] && ! grep -q "#ddev-generated" "$config_path"; then
+if (( ! dry_run )) && [[ -f "$config_path" ]] && ! grep -q "#ddev-generated" "$config_path"; then
   echo "InVRT configuration already exists at $config_path and is not marked as ddev-generated." >&2
   exit 1
 fi
@@ -16,18 +44,22 @@ echo "Configuring InVRT for $DDEV_HOSTNAME"
   echo "#ddev-generated"
   # shellcheck disable=SC2016
   echo '# `ddev invrt autoconfigure`';
+  if (( has_drush )); then
+    echo "title: $(ddev drush config:get system.site name --format=list)"
+  fi
   echo "
-title: $(ddev drush config:get system.site name --format=list)
+url: http://$DDEV_HOSTNAME
+type: $DDEV_PROJECT_TYPE
 
 environments:
-
   local:
     name: DDEV Local
     url: http://$DDEV_HOSTNAME"
 
-    pantheon_site=$(ddev exec echo \$DDEV_PANTHEON_SITE)
-    if [ -n "$pantheon_site" ]; then
-      echo "\
+    if [[ -v DDEV_PANTHEON_SITE ]]; then
+        pantheon_site=$(ddev exec echo \$DDEV_PANTHEON_SITE)
+        if [ -n "$pantheon_site" ]; then
+        echo "\
   dev:
     name: Pantheon Dev
     url: https://dev-$pantheon_site.pantheon.io
@@ -38,16 +70,16 @@ environments:
     name: Pantheon Live
     url: https://live-$DDEV_PANTHEON_SITE.pantheon.io
     "
+        fi
     fi
+
 
 echo "
 profiles:
-
   anonymous:
     name: Anonymous user
-
 "
-  if [ "$DDEV_PROJECT_TYPE" == "drupal11" ]; then
+  if (( has_drush )); then
 
     echo "\
     # Drupal roles from $DDEV_PROJECT
@@ -60,7 +92,7 @@ profiles:
     password: password"
     done
 
-  elif [ "$DDEV_PROJECT_TYPE" == "backdrop" ]; then
+  elif (( has_bee )); then
 
     echo "# Backdrop roles from $DDEV_PROJECT\n"
 
@@ -71,13 +103,12 @@ profiles:
     username: invrt-$role
     password: password"
     done
-  elif [ "$DDEV_PROJECT_TYPE" == "wordpress" ]; then
+  elif [[ "$DDEV_PROJECT_TYPE" == "wordpress" ]]; then
     echo "# No profiles detected for wordpress"
   fi
 echo "
 
 devices:
-
   mobile:
     name: Mobile
     viewport_width: 375
@@ -88,11 +119,11 @@ devices:
     viewport_width: 1280
     viewport_height: 800"
 
-  if [[ "$DDEV_PROJECT_TYPE" == "drupal11" ]]; then
+    if (( has_drush )); then
       echo "
   # Drupal theme breakpoints from $DDEV_PROJECT"
       ddev drush php:script .ddev/invrt-build/drupal-breakpoints.php
   fi
-} > "$DDEV_APPROOT/.ddev/.invrt/config.yaml"
+} > "$output_target"
 
 

@@ -1,14 +1,23 @@
 version: '3'
 
 tasks:
+
+
+  install:dev:
+    desc: Install development dependencies
+    cmds:
+      - composer install
+      - npm install
+
+  install:dist:
+    desc: Install production dependencies
+    cmds:
+      - composer install --no-dev --no-scripts --prefer-dist
+      - npm install --production
+
   test:
     desc: Run all tests and quality checks
-    cmds:
-      - task: test:schema
-      - task: fix:modernize
-      - task: fix:lint
-      - task: test:phpstan
-      - task: test:php
+    deps: [test:schema, fix:modernize, fix:lint, test:phpstan, test:php]
 
   livecode:
     desc: Run the live coding session
@@ -19,16 +28,11 @@ tasks:
   watch:
     desc: Watch for file changes and rerun tasks
     watch: true
-    cmds:
-      - task: fix:lint
-      - task: test:php:unit
-      - task: build:templates
+    deps: [fix:lint, test:php:unit, build:templates]
  
   fix:
     desc: Run all code fixes (modernize, lint)
-    cmds:
-      - task: fix:modernize
-      - task: fix:lint
+    deps: [fix:modernize, fix:lint]
 
   build:
     desc: Build the project
@@ -40,7 +44,14 @@ tasks:
   build:docker:
     desc: Build Docker image
     cmds:
-      - docker build -t ronan4000/invrt .
+      - task: install:dist
+      - docker build --build-arg WITH_PLAYWRIGHT=true --build-arg WITH_DEVTOOLS=false -t ronan4000/invrt .
+
+  publish:docker:
+    desc: Publish Docker image to Docker Hub
+    cmds:
+      - task: build:docker
+      - docker push ronan4000/invrt
 
   build:templates:
     desc: Generate PHP files from Handlebars templates and the config schema

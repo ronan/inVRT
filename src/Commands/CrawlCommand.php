@@ -51,8 +51,6 @@ class CrawlCommand extends BaseCommand
             return Command::FAILURE;
         }
 
-        $filesystem->touch('file.txt');
-
         $io->writeln(
             "🕸️ Crawling '$INVRT_ENVIRONMENT' environment ($INVRT_URL) with profile: '$INVRT_PROFILE' to depth: $INVRT_MAX_CRAWL_DEPTH, max pages: $INVRT_MAX_PAGES",
             OutputInterface::VERBOSITY_VERBOSE,

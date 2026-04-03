@@ -26,6 +26,6 @@ ddev bee download-core
 echo "Installing site"
 ddev bee si --username=admin --password=Password123 --db-name=db --db-user=db --db-pass=db --db-host=db --auto
 echo "Installing invrt addon"
-ddev add-on get ../ddev-invrt
+ddev add-on get ../../ddev-invrt
 ddev restart
 echo "DDEV invrt addon setup complete."
