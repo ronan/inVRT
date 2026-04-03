@@ -1,7 +1,6 @@
 version: '3'
 
 tasks:
-
   test:
     desc: Run all tests and quality checks
     cmds:
@@ -50,7 +49,6 @@ tasks:
       - 'docs/config.schema.yaml'
     cmds:
       - node tooling/scripts/build-config-definition.mjs
-
 
   test:php:
     desc: Run all tests with PHPUnit
@@ -123,7 +121,6 @@ tasks:
       - composer audit
       - npm audit
 
-
   test:schema:
     desc: Validate config JSON Schema and example config file
     cmds:
@@ -133,7 +130,6 @@ tasks:
     desc: Run tasks to clean up the repository structure
     cmds:
       - chmod a+x tooling/scripts/*
-      - chmod a+x .devcontainer/install*.sh
 
   publish:ddev-addon:
     desc: Publish the invrt-ddev addon to GitHub

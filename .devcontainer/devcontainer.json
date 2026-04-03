@@ -1,23 +1,27 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-	"name": "InVRT Development Container",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+    "name": "InVRT Development Container",
+    // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+    // "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
     "build": {
-        "dockerfile": "Dockerfile"
+        "dockerfile": "Dockerfile",
+        "args": {
+            "NODE_IMAGE": "node:24-bookworm",
+            "PHP_IMAGE": "php:8-cli-bookworm",
+            "WITH_DEVTOOLS": "true",
+            "WITH_PLAYWRIGHT": "false"
+        }
     },
-	"features": {
-        "ghcr.io/devcontainers/features/common-utils:2": {},
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-		// "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
-	},
-	// "postCreateCommand": "tooling/scripts/install-dev.sh",
-	"remoteEnv": {
-    	"PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/bin",
-		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
-  	},
-
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils": {},
+        "ghcr.io/devcontainers/features/docker-in-docker": {},
+        "ghcr.io/ddev/ddev/install-ddev:latest": {}
+    },
+    "remoteEnv": {
+        "PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/bin",
+        "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+      },
     // Configure tool-specific properties.
     "customizations": {
         "vscode": {
@@ -27,5 +31,5 @@
             ]
         }
     },
-    "remoteUser": "root"
+    "remoteUser": "vscode"
 }

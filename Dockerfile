@@ -1,34 +1,32 @@
-FROM php:8.5-bookworm
+ARG NODE_IMAGE=node:24-bookworm
+ARG PHP_IMAGE=php:8.5-cli-bookworm
 
+FROM $NODE_IMAGE AS nodesrc
+ARG WITH_PLAYWRIGHT=false
+
+RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npx -y playwright install --with-deps; fi
+
+FROM $PHP_IMAGE
+ARG WITH_DEVTOOLS=true
+
+# Node.js
+COPY --from=nodesrc /usr/local/bin /usr/local/bin
+COPY --from=nodesrc /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+# System dependencies
 ARG DEBIAN_FRONTEND=noninteractive
-ARG NODE_VERSION=24
+RUN apt-get update && apt-get install -y sudo curl wget gpg ca-certificates && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# Task and Composer
+RUN if [ "$WITH_DEVTOOLS" = "true" ]; then \
+        sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin && \
+        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
+        php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
+        rm -f composer-setup.php; \
+    fi
 
-# Install Node.js
-RUN apt-get update && \
-    apt-get install -y curl wget gpg ca-certificates openssh-client && \
-    mkdir -p /etc/apt/keyrings && \
-    curl -sL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" >> /etc/apt/sources.list.d/nodesource.list && \
-    apt-get update && \
-    apt-get install -y nodejs && \
-    apt-get install -y --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN npx playwright install-deps && npx playwright install
-
-# Install Composer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-    php -r "unlink('composer-setup.php');"
-
-COPY . .
-
-# Install PHP dependencies and Node.js dependencies
-RUN composer install --no-dev --optimize-autoloader
-RUN npm install
+COPY . /app
 
 WORKDIR /dir
-
-ENTRYPOINT [ "/app/bin/invrt" ]
+ENV PATH="/app/bin:${PATH}"
+ENTRYPOINT [ "invrt" ]

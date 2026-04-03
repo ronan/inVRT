@@ -1,24 +1,30 @@
-FROM php:8.5-bookworm
+ARG NODE_IMAGE=node:24-bookworm
+ARG PHP_IMAGE=php:8-cli-bookworm
+ARG WITH_DEVTOOLS=true
+ARG WITH_PLAYWRIGHT=false
+
+FROM $NODE_IMAGE AS nodesrc
+
+RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npx -y playwright install --with-deps; fi
+
+FROM $PHP_IMAGE
+
+ENV PATH="/app/bin:${PATH}"
+
+# Node.js
+COPY --from=nodesrc /usr/local/bin /usr/local/bin
+COPY --from=nodesrc /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+ARG WITH_DEVTOOLS
+ARG WITH_PLAYWRIGHT
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG NODE_VERSION=24
+RUN apt-get update && apt-get install -y sudo curl wget gpg ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# Install prerequisites and task
-RUN curl -1sLf 'https://dl.cloudsmith.io/public/task/task/setup.deb.sh' | sudo -E bash && \
-    apt-get update && apt-get install -y curl wget gpg ca-certificates taskfile
-
-# Install Node.js
-RUN mkdir -p /etc/apt/keyrings && \
-    curl -sL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
-    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" >> /etc/apt/sources.list.d/nodesource.list && \
-    apt-get update && apt-get install -y nodejs
-
-# Install Playwright
-RUN npx playwright install-deps && npx playwright install
-
-# Install Composer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-
-# Clean up apt cache to reduce image size
-RUN rm -rf /var/lib/apt/lists/* && rm -f composer-setup.php
+# Task and Composer
+RUN if [ "$WITH_DEVTOOLS" = "true" ]; then \
+        sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin && \
+        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
+        php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
+        rm -f composer-setup.php; \
+    fi
