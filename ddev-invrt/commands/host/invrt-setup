@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#ddev-generated
+
+if [ "$DDEV_PROJECT_TYPE" == "drupal11" ]; then
+
+  username=$(ddev invrt config "$@" | grep INVRT_USERNAME | awk '{print $2}')
+  password=$(ddev invrt config "$@" | grep INVRT_PASSWORD | awk '{print $2}')
+
+
+  if [[ -n "$username" && -n "$password" ]]; then
+    if ! ddev drush user:info "$username" --field=uid > /dev/null 2>&1; then
+      ddev drush user-create "$username" --password="$password" --mail="$username@example.com" >&2
+    fi
+  fi
+fi

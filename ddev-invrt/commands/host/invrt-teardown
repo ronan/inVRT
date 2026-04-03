@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#ddev-generated
+
+if [ "$DDEV_PROJECT_TYPE" == "drupal11" ]; then
+  echo "Tearing down InVRT users for $DDEV_HOSTNAME"
+
+  # Delete the test user if it exists.
+  username=$(ddev invrt config "$@" | grep INVRT_USERNAME | awk '{print $2}')
+  password=$(ddev invrt config "$@" | grep INVRT_PASSWORD | awk '{print $2}')
+  
+  if [[ -n "$username" && -n "$password" ]]; then
+    ddev drush user:cancel "$username" --delete-content --yes
+  else
+    echo "No credentials found. No users will be removed."
+  fi
+fi

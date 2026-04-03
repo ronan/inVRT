@@ -1,0 +1,23 @@
+#ddev-generated
+services:
+  invrt:
+    container_name: ddev-${DDEV_SITENAME}-invrt
+    build:
+      context: './invrt-build'
+    image: ronan4000/invrt:latest-${DDEV_SITENAME}-built
+    entrypoint: [ /entrypoint.sh ]
+    environment:
+      INVRT_DIRECTORY: '/mnt/ddev_config/.invrt'
+      DDEV_HOSTNAME: $DDEV_HOSTNAME
+      DDEV_PRIMARY_URL: $DDEV_PRIMARY_URL
+      DDEV_APPROOT: $DDEV_APPROOT
+      DDEV_SITENAME: $DDEV_SITENAME
+
+    # These labels ensure this service is discoverable by DDEV.
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+
+    volumes:
+      - ".:/mnt/ddev_config"
+      - "ddev-global-cache:/mnt/ddev-global-cache"

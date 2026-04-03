@@ -1,0 +1,6 @@
+#!/bin/bash
+#ddev-generated
+
+ddev invrt-setup "$@"
+ddev invrt test "$@"
+ddev invrt-teardown "$@"

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+#ddev-generated
+
+ddev invrt reference "$@"
+ddev invrt test "$@"

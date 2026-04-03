@@ -1,0 +1,98 @@
+#!/bin/bash
+
+#ddev-generated
+
+config_path="$DDEV_APPROOT/.ddev/.invrt/config.yaml"
+
+echo "Auto-configuring InVRT for $DDEV_HOSTNAME ($DDEV_PROJECT_TYPE)"
+
+if [[ -f "$config_path" ]] && ! grep -q "#ddev-generated" "$config_path"; then
+  echo "InVRT configuration already exists at $config_path and is not marked as ddev-generated." >&2
+  exit 1
+fi
+
+echo "Configuring InVRT for $DDEV_HOSTNAME"
+{
+  echo "#ddev-generated"
+  # shellcheck disable=SC2016
+  echo '# `ddev invrt autoconfigure`';
+  echo "
+title: $(ddev drush config:get system.site name --format=list)
+
+environments:
+
+  local:
+    name: DDEV Local
+    url: http://$DDEV_HOSTNAME"
+
+    pantheon_site=$(ddev exec echo \$DDEV_PANTHEON_SITE)
+    if [ -n "$pantheon_site" ]; then
+      echo "\
+  dev:
+    name: Pantheon Dev
+    url: https://dev-$pantheon_site.pantheon.io
+  test:
+    name: Pantheon Test
+    url: https://test-$DDEV_PANTHEON_SITE.pantheon.io
+  live:
+    name: Pantheon Live
+    url: https://live-$DDEV_PANTHEON_SITE.pantheon.io
+    "
+    fi
+
+echo "
+profiles:
+
+  anonymous:
+    name: Anonymous user
+
+"
+  if [ "$DDEV_PROJECT_TYPE" == "drupal11" ]; then
+
+    echo "\
+    # Drupal roles from $DDEV_PROJECT
+    "
+    for role in $(ddev drush role:list --field=rid --filter="rid!=anonymous"); do
+      echo "
+  $role:
+    name: $(ddev drush role:list --filter=rid="$role" --field=label)
+    username: invrt-$role
+    password: password"
+    done
+
+  elif [ "$DDEV_PROJECT_TYPE" == "backdrop" ]; then
+
+    echo "# Backdrop roles from $DDEV_PROJECT\n"
+
+    for role in $(ddev bee roles-list | grep -iv "^anonymous$" | sed 's/\:.*//' | sed '/^$/d'); do
+      echo "
+  $role:
+    name: $role
+    username: invrt-$role
+    password: password"
+    done
+  elif [ "$DDEV_PROJECT_TYPE" == "wordpress" ]; then
+    echo "# No profiles detected for wordpress"
+  fi
+echo "
+
+devices:
+
+  mobile:
+    name: Mobile
+    viewport_width: 375
+    viewport_height: 667
+    
+  desktop:
+    name: Desktop
+    viewport_width: 1280
+    viewport_height: 800"
+
+  if [[ "$DDEV_PROJECT_TYPE" == "drupal11" ]]; then
+      echo "
+  # Drupal theme breakpoints from $DDEV_PROJECT"
+      ddev drush php:script .ddev/invrt-build/drupal-breakpoints.php
+  fi
+} > "$DDEV_APPROOT/.ddev/.invrt/config.yaml"
+
+
