@@ -2,16 +2,6 @@ version: '3'
 
 tasks:
 
-  install:dev:
-    desc: Install development dependencies
-    cmds:
-      - ./scripts/install-dev.sh
-
-  install:runtime:
-    desc: Install runtime dependencies
-    cmds:
-      - ./scripts/install-base.sh
-
   test:
     desc: Run all tests and quality checks
     cmds:

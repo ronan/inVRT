@@ -3,13 +3,16 @@
 {
 	"name": "InVRT Development Container",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+	// "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
 	"features": {
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-		"ghcr.io/devcontainers/features/php:1": {},
-		"ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
+        "ghcr.io/devcontainers/features/common-utils:2": {},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+		// "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
 	},
-	"postCreateCommand": "tooling/scripts/install-dev.sh",
+	// "postCreateCommand": "tooling/scripts/install-dev.sh",
 	"remoteEnv": {
     	"PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/bin",
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
@@ -23,5 +26,6 @@
                 "EditorConfig.EditorConfig"
             ]
         }
-    }
+    },
+    "remoteUser": "root"
 }
