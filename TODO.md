@@ -50,7 +50,8 @@ _(none yet)_
 
 ## Developer Experience
 
-- [ ] Add script called (tooling/scrupts/generate-schema.mjs) to generate `docs/config.schema.yaml` from `docs/config.example.yaml`
+- [x] Add better debugging output to the cli when run with `-vvv` (https://symfony.com/doc/current/console/verbosity.html)
+- [#] Add script called (tooling/scrupts/generate-schema.mjs) to generate `docs/config.schema.yaml` from `docs/config.example.yaml`
 - [ ] Add ddev-invrt addon into main repo
 
 ## Tests

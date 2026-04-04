@@ -22,12 +22,13 @@ class LoginService
     ): int {
         try {
             if (empty($username) && empty($password)) {
+                $output->writeln('[debug] No credentials provided; skipping login.', OutputInterface::VERBOSITY_DEBUG);
                 return Command::SUCCESS;
             }
 
             // Check if URL is configured
             if (empty($url)) {
-                $output->writeln("<error>❌ Profile has credentials but no URL configured. Cannot login.</error>");
+                $output->writeln("<error>❌ Profile has credentials but no URL configured. Cannot login.</error>", OutputInterface::VERBOSITY_QUIET);
                 return Command::FAILURE;
             }
 
@@ -43,13 +44,15 @@ class LoginService
                 $loginUrl = $url . "/user/login";
             }
 
-            $output->writeln("🔐 Logging in with provided credentials...");
+            $output->writeln("🔐 Logging in with provided credentials...", OutputInterface::VERBOSITY_NORMAL);
+            $output->writeln("[debug] Login URL: $loginUrl", OutputInterface::VERBOSITY_DEBUG);
+            $output->writeln("[debug] Cookies output file: $cookiesFile.json", OutputInterface::VERBOSITY_DEBUG);
 
             // Execute Playwright login script
             $script = dirname(__DIR__) . "/playwright-login.js";
 
             if (!file_exists($script)) {
-                $output->writeln("<error>❌ Playwright login script not found at $script</error>");
+                $output->writeln("<error>❌ Playwright login script not found at $script</error>", OutputInterface::VERBOSITY_QUIET);
                 return Command::FAILURE;
             }
 
@@ -60,24 +63,28 @@ class LoginService
                 'INVRT_COOKIES_FILE' => $cookiesFile,
             ];
 
-            $process = Process::fromShellCommandline('node ' . escapeshellarg($script), null, $env);
+            $cmd = 'node ' . escapeshellarg($script);
+            $output->writeln("[debug] Login command: $cmd", OutputInterface::VERBOSITY_DEBUG);
+
+            $process = Process::fromShellCommandline($cmd, null, $env);
             $process->setTimeout(null);
             $process->run(fn($type, $buffer) => $output->write($buffer));
             $exitCode = $process->getExitCode() ?? 0;
+            $output->writeln("[debug] Login command exit code: $exitCode", OutputInterface::VERBOSITY_DEBUG);
 
             if ($exitCode !== 0) {
-                $output->writeln("<error>❌ Playwright login failed with exit code $exitCode</error>");
+                $output->writeln("<error>❌ Playwright login failed with exit code $exitCode</error>", OutputInterface::VERBOSITY_QUIET);
                 return Command::FAILURE;
             }
 
-            $output->writeln("<info>✅ Login successful!</info>");
+            $output->writeln("<info>✅ Login successful!</info>", OutputInterface::VERBOSITY_NORMAL);
 
             // Convert cookies to wget format
             CookieService::convertToNetscapeFormat("$cookiesFile.json");
 
             return Command::SUCCESS;
         } catch (\Exception $error) {
-            $output->writeln("<error>❌ Login failed: " . $error->getMessage() . "</error>");
+            $output->writeln("<error>❌ Login failed: " . $error->getMessage() . "</error>", OutputInterface::VERBOSITY_QUIET);
             return Command::FAILURE;
         }
     }

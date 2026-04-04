@@ -45,6 +45,19 @@ class ReferenceCommandTest extends WebCommandTestCase
         }
     }
 
+    public function testReferenceCommandShowsDebugOutputAtVvv(): void
+    {
+        $this->setupFixture();
+        $this->fixture->writeCrawledUrlsFile('local', 'anonymous', ['/']);
+
+        $this->executeCommand('reference', [], ['verbosity' => OutputInterface::VERBOSITY_DEBUG]);
+        $this->assertCommandSuccess();
+
+        $this->assertOutputContains('[debug] Bootstrapping command');
+        $this->assertOutputContains('[debug] Running BackstopJS command');
+        $this->assertOutputContains('[debug] BackstopJS exit code: 0');
+    }
+
     /** @return string[] */
     private function findPngs(string $dir): array
     {

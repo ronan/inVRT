@@ -7,6 +7,7 @@ use App\Service\ConfigurationService;
 use App\Service\LoginService;
 use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
@@ -31,17 +32,39 @@ abstract class BaseCommand
      */
     protected function boot(InvrtInput $opts, SymfonyStyle $io): int
     {
+        $io->writeln(
+            sprintf(
+                '[debug] Bootstrapping command (environment=%s, profile=%s, device=%s)',
+                $opts->environment,
+                $opts->profile,
+                $opts->device,
+            ),
+            OutputInterface::VERBOSITY_DEBUG,
+        );
+
         try {
             $this->resolveConfig($opts);
+
+            $io->writeln(
+                sprintf(
+                    '[debug] Resolved config (config=%s, data_dir=%s, url=%s)',
+                    $this->config['INVRT_CONFIG_FILE'] ?? '(not set)',
+                    $this->config['INVRT_DATA_DIR'] ?? '(not set)',
+                    $this->config['INVRT_URL'] ?? '(not set)',
+                ),
+                OutputInterface::VERBOSITY_DEBUG,
+            );
         } catch (FileLocatorFileNotFoundException $e) {
             if ($this->requiresConfig) {
-                $io->writeln('# Configuration file not found at: ' . getenv('INVRT_CONFIG_FILE'));
-                $io->writeln("# Run '<comment>invrt init</comment>' to create a new configuration.");
+                $io->writeln('# Configuration file not found at: ' . getenv('INVRT_CONFIG_FILE'), OutputInterface::VERBOSITY_QUIET);
+                $io->writeln("# Run '<comment>invrt init</comment>' to create a new configuration.", OutputInterface::VERBOSITY_QUIET);
+                $io->writeln('[debug] Config resolution exception: ' . $e->getMessage(), OutputInterface::VERBOSITY_DEBUG);
             }
             return Command::FAILURE;
         } catch (\Exception $e) {
             if ($this->requiresConfig) {
-                $io->writeln('# Error reading config file at: `' . getenv('INVRT_CONFIG_FILE') . '`');
+                $io->writeln('# Error reading config file at: `' . getenv('INVRT_CONFIG_FILE') . '`', OutputInterface::VERBOSITY_QUIET);
+                $io->writeln('[debug] Config read exception: ' . $e->getMessage(), OutputInterface::VERBOSITY_DEBUG);
             }
             return Command::FAILURE;
         }
@@ -84,6 +107,16 @@ abstract class BaseCommand
      */
     protected function loginIfNeeded(array $env, SymfonyStyle $io): int
     {
+        $io->writeln(
+            sprintf(
+                '[debug] Login pre-check (username=%s, has_password=%s, cookies_file=%s)',
+                empty($env['INVRT_USERNAME']) ? 'no' : 'yes',
+                empty($env['INVRT_PASSWORD']) ? 'no' : 'yes',
+                $env['INVRT_COOKIES_FILE'] ?? '(not set)',
+            ),
+            OutputInterface::VERBOSITY_DEBUG,
+        );
+
         $result = LoginService::loginIfCredentialsExist(
             $env['INVRT_USERNAME'] ?? '',
             $env['INVRT_PASSWORD'] ?? '',
@@ -101,15 +134,21 @@ abstract class BaseCommand
      */
     protected function runBackstop(string $mode, array $env, SymfonyStyle $io): int
     {
+        $cmd = 'node ' . escapeshellarg(__DIR__ . '/../backstop.js') . ' ' . $mode;
+        $io->writeln('[debug] Running BackstopJS command: ' . $cmd, OutputInterface::VERBOSITY_DEBUG);
+
         $process = Process::fromShellCommandline(
-            'node ' . escapeshellarg(__DIR__ . '/../backstop.js') . ' ' . $mode,
+            $cmd,
             null,
             $env,
         );
         $process->setTimeout(null);
         $process->run(fn($type, $buffer) => $io->write($buffer));
 
-        return $process->getExitCode() ?? Command::SUCCESS;
+        $exitCode = $process->getExitCode() ?? Command::SUCCESS;
+        $io->writeln('[debug] BackstopJS exit code: ' . $exitCode, OutputInterface::VERBOSITY_DEBUG);
+
+        return $exitCode;
     }
 
     /**
@@ -123,12 +162,16 @@ abstract class BaseCommand
     protected function executeScript(string $scriptName, array $env, SymfonyStyle $io): int
     {
         $cmd = 'bash ' . escapeshellarg(Path::join(__DIR__ . '/..', $scriptName));
+        $io->writeln('[debug] Running script: ' . $cmd, OutputInterface::VERBOSITY_DEBUG);
 
         $process = Process::fromShellCommandline($cmd, null, $env);
         $process->setTimeout(null);
         $process->run(fn($type, $buffer) => $io->write($buffer));
 
-        return $process->getExitCode() ?? Command::SUCCESS;
+        $exitCode = $process->getExitCode() ?? Command::SUCCESS;
+        $io->writeln('[debug] Script exit code: ' . $exitCode, OutputInterface::VERBOSITY_DEBUG);
+
+        return $exitCode;
     }
 
     /**

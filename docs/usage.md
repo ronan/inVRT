@@ -276,6 +276,20 @@ invrt crawl -p admin -d mobile -e staging
 invrt crawl --profile=admin --device=mobile --environment=staging
 ```
 
+### Output verbosity
+
+inVRT uses Symfony Console verbosity levels. Add `-v`, `-vv`, or `-vvv` to any command to increase output detail.
+
+- `-v`: extra progress details.
+- `-vv`: very verbose command details.
+- `-vvv`: debug-level output, including resolved configuration context and subprocess command/exit details.
+
+```bash
+invrt crawl -vvv
+invrt reference --profile=admin --environment=dev -vvv
+invrt test -vvv
+```
+
 ---
 
 ## Authentication
