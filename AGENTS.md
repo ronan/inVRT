@@ -20,6 +20,8 @@ Write the plan before you begin the implementation. Ask for permission before im
 
 Never commit anything to git.
 
+When writing commit messages don't add `chore:`, `feat:` etc.
+
 ## Track tasks with the todo file
 
 The todo file is a markdown file with checkbox syntax.

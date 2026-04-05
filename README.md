@@ -1,4 +1,4 @@
-# inVRT
+# inVRT v1.0.2
 
 A CLI tool for Visual Regression Testing (VRT) of CMS-driven websites as an authenticated or anonymous user.
 
@@ -60,5 +60,28 @@ For more details see the [Dockerfile](./Dockerfile)
 
 ```bash
 task test
+```
+
+### Release Automation
+
+Patch releases are automated by task runner commands:
+
+```bash
+task version:bump
+```
+
+This command will:
+- bump to the next patch version,
+- update version references in tracked files,
+- run `task test`,
+- build and publish Docker images (`:latest` and `:<version>`),
+- publish the `ddev-invrt` addon and push a matching git tag.
+
+Required environment variables:
+
+```bash
+export DOCKERHUB_USERNAME=your-user
+export DOCKERHUB_TOKEN=your-token
+export GITHUB_TOKEN=your-github-token
 ```
 

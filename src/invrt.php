@@ -27,7 +27,7 @@ $container->autowire(InitCommand::class)->setPublic(true);
 
 $container->compile();
 
-$app = new Application('📖 inVRT CLI - Visual Regression Testing Tool', '1.0.0');
+$app = new Application('📖 inVRT CLI - Visual Regression Testing Tool', '1.0.2');
 
 $app->addCommand($container->get(InitCommand::class));
 $app->addCommand($container->get(CrawlCommand::class));

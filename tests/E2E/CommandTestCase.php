@@ -40,7 +40,7 @@ abstract class CommandTestCase extends TestCase
         $this->setUpFixture();
 
         // Create application with all commands
-        $this->app = new Application('inVRT CLI', '1.0.0');
+        $this->app = new Application('inVRT CLI', '1.0.2');
         $cs = new ConfigurationService();
         $in = new InvrtInput();
         $in->environment = 'local';

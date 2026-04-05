@@ -1,0 +1,43 @@
+{
+  "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
+  "git": {
+    "requireCleanWorkingDir": true,
+    "requireUpstream": true,
+    "commitMessage": "Release v${version}",
+    "tagName": "v${version}",
+    "push": true,
+    "pushArgs": [
+      "--follow-tags"
+    ]
+  },
+  "npm": {
+    "publish": false
+  },
+  "github": {
+    "release": false
+  },
+  "hooks": {
+    "before:bump": "task release:prepare",
+    "after:release": "task release:publish"
+  },
+  "plugins": {
+    "@release-it/bumper": {
+      "in": "package.json",
+      "out": [
+        "composer.json",
+        {
+          "file": "src/invrt.php",
+          "type": "text/php"
+        },
+        {
+          "file": "tests/e2e/CommandTestCase.php",
+          "type": "text/php"
+        },
+        {
+          "file": "README.md",
+          "type": "text/markdown"
+        }
+      ]
+    }
+  }
+}

@@ -50,7 +50,7 @@ For AI agents and human developers.
 
 - [x] Add better debugging output to the cli when run with `-vvv` (https://symfony.com/doc/current/console/verbosity.html)
 - [x] Add ddev-invrt addon into main repo
-- [ ] Add automatic versioning
+- [x] Add automatic versioning
     - Use semantic versioning (eg. 1.0.1 etc)
     - Create a version:bump task to
         - Bump to the next patch version

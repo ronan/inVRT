@@ -1,6 +1,6 @@
 {
   "name": "invrt",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "An auth-enabled VRT for Drupal and Backdrop web sites and apps",
   "bin": {
     "invrt": "./bin/invrt"
@@ -25,14 +25,16 @@
   },
   "homepage": "https://github.com/ronan/inVRT#readme",
   "dependencies": {
-      "backstopjs": "^6.3.25",
-      "js-yaml": "^4.1.1",
-      "playwright": "^1.58.2"
-    },
+    "backstopjs": "^6.3.25",
+    "js-yaml": "^4.1.1",
+    "playwright": "^1.58.2"
+  },
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^15.3.4",
+    "@release-it/bumper": "^7.0.5",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
-    "handlebars": "^4.7.9"
+    "handlebars": "^4.7.9",
+    "release-it": "^19.2.4"
   }
 }

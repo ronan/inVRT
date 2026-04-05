@@ -1,5 +1,9 @@
 version: '3'
 
+vars:
+  VERSION:
+    sh: node -p "require('./package.json').version"
+
 tasks:
 
   install:playwright:
@@ -50,14 +54,30 @@ tasks:
     aliases: [docker:build]
     deps: [install:dist]
     cmds:
-      - docker build --no-cache --progress=plain --build-arg WITH_PLAYWRIGHT=true -t ronan4000/invrt .
+      - docker build --no-cache --progress=plain --build-arg WITH_PLAYWRIGHT=true -t ronan4000/invrt:{{.VERSION}} -t ronan4000/invrt:latest .
 
   publish:docker:
     desc: Publish Docker image to Docker Hub
     aliases: [docker:publish]
     deps: [build:docker]
     cmds:
-      - docker push ronan4000/invrt
+      - bash ./tooling/scripts/publish-docker.sh
+
+  version:show:
+    desc: Show the current project version
+    cmds:
+      - echo {{.VERSION}}
+
+  version:bump:
+    desc: Bump patch version
+    cmds:
+      - npx release-it patch --ci --config tooling/.release-it.json
+
+  release:publish:
+    desc: Publish Docker image and ddev addon for current version
+    cmds:
+      - task publish:docker
+      - task publish:ddev-addon
 
   build:templates:
     desc: Generate PHP files from Handlebars templates and the config schema
@@ -163,7 +183,7 @@ tasks:
     desc: Publish the invrt-ddev addon to GitHub
     aliases: [ddev-addon:publish]
     cmds:
-      - ./tooling/scripts/publish-ddev-addon.sh
+      - bash ./tooling/scripts/publish-ddev-addon.sh
 
   help:
     desc: Show all available tasks
