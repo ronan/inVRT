@@ -1,23 +1,22 @@
 ARG NODE_IMAGE=node:24-bookworm
-ARG PHP_IMAGE=php:8-cli-bookworm
-ARG WITH_DEVTOOLS=true
+ARG PHP_IMAGE=php:8.5-cli-bookworm
 ARG WITH_PLAYWRIGHT=false
+ARG WITH_DEVTOOLS=true
 
 FROM $NODE_IMAGE AS nodesrc
-
-RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npx -y playwright install --with-deps; fi
-
 FROM $PHP_IMAGE
-
-ENV PATH="/app/bin:${PATH}"
+ARG WITH_PLAYWRIGHT
+ARG WITH_DEVTOOLS
 
 # Node.js
 COPY --from=nodesrc /usr/local/bin /usr/local/bin
 COPY --from=nodesrc /usr/local/lib/node_modules /usr/local/lib/node_modules
 
-ARG WITH_DEVTOOLS
-ARG WITH_PLAYWRIGHT
+# Playwright
+COPY package*.json ./
+RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npm install && npx -y playwright install --with-deps; fi
 
+# System dependencies
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y sudo curl wget gpg ca-certificates && rm -rf /var/lib/apt/lists/*
 
@@ -28,3 +27,9 @@ RUN if [ "$WITH_DEVTOOLS" = "true" ]; then \
         php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
         rm -f composer-setup.php; \
     fi
+
+COPY . /app
+ENV PATH="/app/bin:${PATH}"
+
+WORKDIR /dir
+ENTRYPOINT [ "invrt" ]

@@ -16,6 +16,8 @@ Save implementation plans to the `plans/` directory so they are tracked with the
 
 Track objectives in the [todo file](TODO.md).
 
+Write the plan before you begin the implementation. Ask for permission before implementing the plan. Do not ask until the plan is in the `plans/` diretory.
+
 Never commit anything to git.
 
 ## Track tasks with the todo file

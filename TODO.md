@@ -9,7 +9,9 @@ For AI agents and human developers.
 
 ## Bugs
 
-_(none yet)_
+- [ ] The path of playwright-onbefore.js and playwright-onload.js are incorrect
+
+        We're looking in the user-scripts directory but it's in the app source code directory.
 
 ## Tech Debt
 
@@ -51,8 +53,19 @@ _(none yet)_
 ## Developer Experience
 
 - [x] Add better debugging output to the cli when run with `-vvv` (https://symfony.com/doc/current/console/verbosity.html)
-- [#] Add script called (tooling/scrupts/generate-schema.mjs) to generate `docs/config.schema.yaml` from `docs/config.example.yaml`
-- [ ] Add ddev-invrt addon into main repo
+- [x] Add ddev-invrt addon into main repo
+- [ ] Add automatic versioning
+
+    - Use semantic versioning (eg. 1.0.1 etc)
+    - Create a version:bump task to
+        - Bump to the next patch version
+        - Update the documentation
+        - Build, tag and publish a new docker build
+        - Build and publish the ddev-invrt addon to github
+
+- [ ] Generate the schema automatically
+
+        Add script called (tooling/scrupts/generate-schema.mjs) to generate `docs/config.schema.yaml` from `docs/config.example.yaml`
 
 ## Tests
 
@@ -62,17 +75,17 @@ _(none yet)_
 
 - [x] Improve e2e tests/E2E/CrawlCommandTest.php
 
-        Use the same test fixture website that are used in tests/E2E/ReferenceCommandTest.php
-        and tests/E2E/TestCommandTest.php. Expand the test website to include 5 web pages to crawl.
+      Use the same test fixture website that are used in tests/E2E/ReferenceCommandTest.php and tests/E2E/TestCommandTest.php. Expand the test website to include 5 web pages to crawl.
 
 - [x] Slim down test suite
 
-         Reduce the number of PHP tests in tests/. Leave only the tests of the core functionality. Don't test error handling. Don't test yaml parsing ot cookie handling. Simplify the config handling. Look for other ways to simplify and improve tests.
+      Reduce the number of PHP tests in tests/. Leave only the tests of the core functionality. Don't test error handling. Don't test yaml parsing ot cookie handling. Simplify the config handling. Look for other ways to simplify and improve tests.
 
 - [x] Clean up tests
-        - [x] Rename the tests/E2E directory to tests/e2e and update references
-        - [x] Combine e2e tests to reduce the number of times the command needs to be run
-                use tests/e2e/CrawlCommandTest.php as an example
+    - [x] Rename the tests/E2E directory to tests/e2e and update references
+    - [x] Combine e2e tests to reduce the number of times the command needs to be run    
+
+        - use tests/e2e/CrawlCommandTest.php as an example
 
 ### CMS-Specific Testing
   - [ ] Set up ddev to run during tests
@@ -80,6 +93,14 @@ _(none yet)_
   - [ ] Test backdrop support
 
 ## Features
+
+### General operations
+
+ - [ ] Add an `invrt info` command that returns nicely formatted info about the current project
+
+        The output should include: current config, environments, devices, profiles, 
+        number of crawled pages, number of captured screenshots and the last few 
+        lines of the crawl.log
 
 ### Baseline/Test/Report flow
 

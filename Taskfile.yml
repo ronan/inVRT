@@ -2,6 +2,10 @@ version: '3'
 
 tasks:
 
+  install:playwright:
+    desc: Install Playwright dependencies
+    cmds:
+      - npx playwright install --with-deps
 
   install:dev:
     desc: Install development dependencies
@@ -13,11 +17,11 @@ tasks:
     desc: Install production dependencies
     cmds:
       - composer install --no-dev --no-scripts --prefer-dist
-      - npm install --production
+      - npm install
 
   test:
     desc: Run all tests and quality checks
-    deps: [test:schema, fix:modernize, fix:lint, test:phpstan, test:php]
+    deps: [fix:modernize, fix:lint, test:phpstan, test:php]
 
   livecode:
     desc: Run the live coding session
@@ -43,14 +47,16 @@ tasks:
 
   build:docker:
     desc: Build Docker image
+    aliases: [docker:build]
+    deps: [install:dist]
     cmds:
-      - task: install:dist
-      - docker build --build-arg WITH_PLAYWRIGHT=true --build-arg WITH_DEVTOOLS=false -t ronan4000/invrt .
+      - docker build --no-cache --progress=plain --build-arg WITH_PLAYWRIGHT=true -t ronan4000/invrt .
 
   publish:docker:
     desc: Publish Docker image to Docker Hub
+    aliases: [docker:publish]
+    deps: [build:docker]
     cmds:
-      - task: build:docker
       - docker push ronan4000/invrt
 
   build:templates:
@@ -63,6 +69,7 @@ tasks:
 
   test:php:
     desc: Run all tests with PHPUnit
+    deps: [install:dev]
     dir: /tmp
     cmds:
       - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox --stop-on-failure {{.TASKFILE_DIR}}/tests {{.CLI_ARGS}}
@@ -73,6 +80,7 @@ tasks:
   test:php:unit:
     desc: Run unit tests with PHPUnit
     dir: /tmp
+    deps: [install:dev]
     cmds:
       - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/Unit {{.CLI_ARGS}}
     sources:
@@ -82,6 +90,7 @@ tasks:
   test:php:e2e:
     desc: Run integration tests with PHPUnit
     dir: /tmp
+    deps: [install:dev]
     cmds:
       - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/e2e {{.CLI_ARGS}}
     sources:
@@ -90,36 +99,44 @@ tasks:
 
   test:coverage:
     desc: Run tests with code coverage report
+    deps: [install:dev]
     cmds:
       - XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=tooling/phpunit.xml --coverage-text --coverage-html=reports/coverage/
 
   test:modernize:
     desc: Dry-run Rector code modernization
+    deps: [install:dev]
     cmds:
       - vendor/bin/rector process src --config=tooling/rector.php --dry-run
 
   fix:modernize:
     desc: Run Rector code modernization (applies safe rules)
+    deps: [install:dev]
     cmds:
       - vendor/bin/rector process src --config=tooling/rector.php
 
   test:phpstan:
     desc: Run PHPStan static analysis
+    deps: [install:dev]
     cmds:
       - vendor/bin/phpstan analyse --configuration=tooling/phpstan.neon
 
   baseline:phpstan:
     desc: Generate PHPStan baseline for current violations
+    deps: [install:dev]
     cmds:
       - vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline --configuration=tooling/phpstan.neon
 
   test:lint:
     desc: Check code style with PHP CS Fixer
+    deps: [install:dev]
     cmds:
       - php ./vendor/bin/php-cs-fixer check --diff --config=tooling/.php-cs-fixer.php
 
   fix:lint:
     desc: Auto-fix code style with PHP CS Fixer
+    aliases: [lint]
+    deps: [install:dev]
     sources:
       - 'src/**/*.php'
       - 'tests/**/*.php'
@@ -144,6 +161,7 @@ tasks:
 
   publish:ddev-addon:
     desc: Publish the invrt-ddev addon to GitHub
+    aliases: [ddev-addon:publish]
     cmds:
       - ./tooling/scripts/publish-ddev-addon.sh
 

@@ -10,7 +10,7 @@
             "NODE_IMAGE": "node:24-bookworm",
             "PHP_IMAGE": "php:8-cli-bookworm",
             "WITH_DEVTOOLS": "true",
-            "WITH_PLAYWRIGHT": "false"
+            "WITH_PLAYWRIGHT": "true"
         }
     },
     "features": {

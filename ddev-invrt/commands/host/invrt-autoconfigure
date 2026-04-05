@@ -48,8 +48,7 @@ echo "Configuring InVRT for $DDEV_HOSTNAME"
     echo "title: $(ddev drush config:get system.site name --format=list)"
   fi
   echo "
-url: http://$DDEV_HOSTNAME
-type: $DDEV_PROJECT_TYPE
+settings:
 
 environments:
   local:

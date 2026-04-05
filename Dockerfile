@@ -1,17 +1,20 @@
 ARG NODE_IMAGE=node:24-bookworm
 ARG PHP_IMAGE=php:8.5-cli-bookworm
+ARG WITH_PLAYWRIGHT=false
+ARG WITH_DEVTOOLS=true
 
 FROM $NODE_IMAGE AS nodesrc
-ARG WITH_PLAYWRIGHT=false
-
-RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npx -y playwright install --with-deps; fi
-
 FROM $PHP_IMAGE
-ARG WITH_DEVTOOLS=true
+ARG WITH_PLAYWRIGHT
+ARG WITH_DEVTOOLS
 
 # Node.js
 COPY --from=nodesrc /usr/local/bin /usr/local/bin
 COPY --from=nodesrc /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+# Playwright
+COPY package*.json ./
+RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npm install && npx -y playwright install --with-deps; fi
 
 # System dependencies
 ARG DEBIAN_FRONTEND=noninteractive
@@ -26,7 +29,7 @@ RUN if [ "$WITH_DEVTOOLS" = "true" ]; then \
     fi
 
 COPY . /app
+ENV PATH="/app/bin:${PATH}"
 
 WORKDIR /dir
-ENV PATH="/app/bin:${PATH}"
 ENTRYPOINT [ "invrt" ]
