@@ -5,7 +5,7 @@ For AI agents and human developers.
 
 ## Checkbox status key
 
-- `- [ ]` open · `- [x]` done. `- [-]` partially completed. `- [.]` in progress.
+- `- [ ]` open · `- [x]` done. `- [-]` partially completed. `- [.]` in progress. `- [#]` not ready
 
 ## Bugs
 
@@ -44,24 +44,23 @@ For AI agents and human developers.
         Use DI/Service container and autowiring to pass the config object to commands
         Remove the $this->withEnv pattern and simplofy the controllers as much as possible
 
-
 - [x] Do a manual refactor of the config/options system to get rid of the last of the code smells
-
-
-
 
 ## Developer Experience
 
 - [x] Add better debugging output to the cli when run with `-vvv` (https://symfony.com/doc/current/console/verbosity.html)
 - [x] Add ddev-invrt addon into main repo
 - [ ] Add automatic versioning
-
     - Use semantic versioning (eg. 1.0.1 etc)
     - Create a version:bump task to
         - Bump to the next patch version
         - Update the documentation
         - Build, tag and publish a new docker build
         - Build and publish the ddev-invrt addon to github
+- [ ] Add support for using remote playwright connection
+    - Allow remote connections with a given URL
+    - Default to using a local running docker container
+    - Use ddev playwright addon when running ddv
 
 - [ ] Generate the schema automatically
 
@@ -107,10 +106,16 @@ For AI agents and human developers.
   - [x] Auto trigger `invrt reference` when `invrt test` is run for first time
   - [.] Return error when `invrt crawl` finds no usable urls.
 
-          Show the last 5 lines of the crawl.log
-          Don'r create an empty crawled_urls.txt file
+        - Show the last 5 lines of the crawl.log
+        - Create an empty crawled_urls.txt file to indicate to the 
+            reference command that crawl has run and failed so that it doesnt' trigger another crawl.
 
   - [ ] Auto trigger `invrt crawl` when `invrt reference` is run for the first time
+  - [ ] Return error when `invrt reference` finds no crawled urls
+    
+        If invrt_crawl has already run but there are no urls in the crawled_urls.txt
+        file invrt reference should return with an error.
+
   - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
   - [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
   - [ ] Implement an interactive init mode

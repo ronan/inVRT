@@ -99,14 +99,14 @@ class CrawlCommand extends BaseCommand
         $paths = $this->parseUrlsFromLog($INVRT_CRAWL_LOG, $INVRT_URL);
         $count = count($paths);
 
+        file_put_contents($INVRT_CRAWL_FILE, implode("\n", $paths));
+
         if ($count === 0) {
             $io->writeln('No usable URLs were found during crawl. See crawl log details below:', OutputInterface::VERBOSITY_NORMAL);
             $this->writeCrawlLogTail($io, $INVRT_CRAWL_LOG);
-
             return Command::FAILURE;
         }
 
-        file_put_contents($INVRT_CRAWL_FILE, implode("\n", $paths) . "\n");
 
         $io->writeln("Crawling completed. Found $count unique paths. Results saved to $INVRT_CRAWL_FILE", OutputInterface::VERBOSITY_NORMAL);
 
@@ -142,7 +142,7 @@ class CrawlCommand extends BaseCommand
         $paths = array_unique($paths);
         sort($paths);
 
-        return array_values($paths);
+        return $paths;
     }
 
     private function writeCrawlLogTail(SymfonyStyle $io, string $logFile, int $lineCount = 5): void

@@ -68,7 +68,8 @@ class CrawlCommandTest extends WebCommandTestCase
         $this->assertOutputContains('Last 5 lines of crawl log:');
 
         $urlsFile = $this->fixture->getInvrtDir() . '/data/local/anonymous/crawled_urls.txt';
-        $this->assertFileDoesNotExist($urlsFile);
+        $this->assertFileExists($urlsFile);
+        $this->assertSame('', file_get_contents($urlsFile));
     }
 
     /** Write config pointing at the test webserver — no pre-seeded URL list needed. */

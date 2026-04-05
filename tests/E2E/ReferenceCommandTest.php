@@ -58,6 +58,16 @@ class ReferenceCommandTest extends WebCommandTestCase
         $this->assertOutputContains('[debug] BackstopJS exit code: 0');
     }
 
+    public function testReferenceFailsWhenCrawlFileIsEmpty(): void
+    {
+        $this->setupFixture();
+        $this->fixture->writeCrawledUrlsFile('local', 'anonymous', []);
+
+        $this->executeCommand('reference', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+        $this->assertCommandFailure();
+        $this->assertOutputContains('No crawled URLs are available. Crawl has run but found no usable URLs.');
+    }
+
     /** @return string[] */
     private function findPngs(string $dir): array
     {

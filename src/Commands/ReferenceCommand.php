@@ -27,6 +27,27 @@ class ReferenceCommand extends BaseCommand
             OutputInterface::VERBOSITY_VERBOSE,
         );
 
+        if (($crawlValidation = $this->validateCrawledUrls($io)) !== Command::SUCCESS) {
+            return $crawlValidation;
+        }
+
         return $this->runBackstop('reference', $this->config, $io);
+    }
+
+    private function validateCrawledUrls(SymfonyStyle $io): int
+    {
+        $crawlFile = $this->config['INVRT_CRAWL_FILE'] ?? '';
+        if ($crawlFile === '' || !is_readable($crawlFile)) {
+            $io->writeln('No crawled URLs file found. Run `invrt crawl` first.', OutputInterface::VERBOSITY_NORMAL);
+            return Command::FAILURE;
+        }
+
+        $lines = file($crawlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false || $lines === []) {
+            $io->writeln('No crawled URLs are available. Crawl has run but found no usable URLs.', OutputInterface::VERBOSITY_NORMAL);
+            return Command::FAILURE;
+        }
+
+        return Command::SUCCESS;
     }
 }
