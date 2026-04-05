@@ -55,6 +55,7 @@ class ReferenceCommandTest extends WebCommandTestCase
 
         $this->assertOutputContains('[debug] Bootstrapping command');
         $this->assertOutputContains('[debug] Running BackstopJS command');
+        $this->assertOutputContains('Using Playwright engine scripts from:');
         $this->assertOutputContains('[debug] BackstopJS exit code: 0');
     }
 

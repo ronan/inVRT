@@ -22,6 +22,20 @@ const op = process.argv[2] || 'test';
 console.log(`🎯 Using profile: ${INVRT_PROFILE}, device: ${INVRT_DEVICE}${INVRT_ENVIRONMENT ? `, environment: ${INVRT_ENVIRONMENT}` : ''}`);
 console.log(`📂 Data directory: ${INVRT_CAPTURE_DIR}. Operation: ${op}`);
 
+const builtInScriptsDir = __dirname;
+const preferredScriptsDir = INVRT_SCRIPTS_DIR || builtInScriptsDir;
+const requiredHookScripts = ['playwright-onbefore.js', 'playwright-onready.js'];
+
+const hasRequiredHooks = (scriptsDir) => requiredHookScripts.every((script) => fs.existsSync(path.join(scriptsDir, script)));
+
+const engineScriptsDir = hasRequiredHooks(preferredScriptsDir) ? preferredScriptsDir : builtInScriptsDir;
+
+if (preferredScriptsDir !== engineScriptsDir) {
+  console.log(`⚠️ Playwright hooks not found in INVRT_SCRIPTS_DIR (${preferredScriptsDir}). Falling back to built-in scripts in ${engineScriptsDir}.`);
+}
+
+console.log(`🧩 Using Playwright engine scripts from: ${engineScriptsDir}`);
+
 const config = {
   "dynamicTestId": 'latest',
   "viewports": [
@@ -33,7 +47,7 @@ const config = {
   ],
   "scenarios": [],
   "paths": {
-    "engine_scripts":     INVRT_SCRIPTS_DIR,
+    "engine_scripts":     engineScriptsDir,
     "html_report":        INVRT_CAPTURE_DIR + "/reports/html",
     "ci_report":          INVRT_CAPTURE_DIR + "/reports/ci",
     "json_report":        INVRT_CAPTURE_DIR + "/reports/json",

@@ -9,7 +9,7 @@ For AI agents and human developers.
 
 ## Bugs
 
-- [ ] The path of playwright-onbefore.js and playwright-onload.js are incorrect
+- [x] The path of playwright-onbefore.js and playwright-onload.js are incorrect
 
         We're looking in the user-scripts directory but it's in the app source code directory.
 
