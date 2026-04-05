@@ -39,7 +39,9 @@ class CrawlCommand extends BaseCommand
 
         $filesystem = new Filesystem();
         $this->config['INVRT_CRAWL_LOG'] && $filesystem->dumpFile($this->config['INVRT_CRAWL_LOG'], '');
-        $this->config['INVRT_CRAWL_FILE'] && $filesystem->dumpFile($this->config['INVRT_CRAWL_FILE'], '');
+        if ($this->config['INVRT_CRAWL_FILE'] && $filesystem->exists($this->config['INVRT_CRAWL_FILE'])) {
+            $filesystem->remove($this->config['INVRT_CRAWL_FILE']);
+        }
 
         if (empty($INVRT_URL)) {
             $io->error('INVRT_URL must be set');
@@ -94,7 +96,17 @@ class CrawlCommand extends BaseCommand
             // return $exitCode;
         }
 
-        $count = $this->parseUrlsFromLog($INVRT_CRAWL_LOG, $INVRT_URL, $INVRT_CRAWL_FILE);
+        $paths = $this->parseUrlsFromLog($INVRT_CRAWL_LOG, $INVRT_URL);
+        $count = count($paths);
+
+        if ($count === 0) {
+            $io->writeln('No usable URLs were found during crawl. See crawl log details below:', OutputInterface::VERBOSITY_NORMAL);
+            $this->writeCrawlLogTail($io, $INVRT_CRAWL_LOG);
+
+            return Command::FAILURE;
+        }
+
+        file_put_contents($INVRT_CRAWL_FILE, implode("\n", $paths) . "\n");
 
         $io->writeln("Crawling completed. Found $count unique paths. Results saved to $INVRT_CRAWL_FILE", OutputInterface::VERBOSITY_NORMAL);
 
@@ -102,10 +114,11 @@ class CrawlCommand extends BaseCommand
     }
 
     /**
-     * Parse crawled URLs from the wget log, sort and deduplicate, write to output file.
-     * Returns the number of unique paths found.
+     * Parse crawled URLs from the wget log, sort and deduplicate, then return unique paths.
+     *
+     * @return list<string>
      */
-    private function parseUrlsFromLog(string $logFile, string $baseUrl, string $outputFile): int
+    private function parseUrlsFromLog(string $logFile, string $baseUrl): array
     {
         $lines = file_exists($logFile)
             ? (file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [])
@@ -129,9 +142,26 @@ class CrawlCommand extends BaseCommand
         $paths = array_unique($paths);
         sort($paths);
 
-        file_put_contents($outputFile, implode("\n", $paths) . (count($paths) > 0 ? "\n" : ''));
+        return array_values($paths);
+    }
 
-        return count($paths);
+    private function writeCrawlLogTail(SymfonyStyle $io, string $logFile, int $lineCount = 5): void
+    {
+        if (!is_readable($logFile)) {
+            $io->writeln("Unable to read crawl log at $logFile", OutputInterface::VERBOSITY_NORMAL);
+            return;
+        }
+
+        $lines = file($logFile, FILE_IGNORE_NEW_LINES);
+        if ($lines === false || $lines === []) {
+            $io->writeln('Crawl log is empty.', OutputInterface::VERBOSITY_NORMAL);
+            return;
+        }
+
+        $io->writeln("Last $lineCount lines of crawl log:", OutputInterface::VERBOSITY_NORMAL);
+        foreach (array_slice($lines, -$lineCount) as $line) {
+            $io->writeln($line, OutputInterface::VERBOSITY_NORMAL);
+        }
     }
 
     /**

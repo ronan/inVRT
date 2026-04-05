@@ -112,8 +112,16 @@ invrt crawl --profile=anonymous --device=mobile --environment=prod
 ```
 🕸️ Crawling 'local' environment (https://example.com) with profile: 'anonymous' to depth: 3, max pages: 100
 No cookie provided. Crawling without authentication.
-Crawling finished. Parsing logs for unique urls...
-Crawling completed. Results saved to .invrt/data/anonymous/local/crawled_urls.txt
+Crawling completed. Found 5 unique paths. Results saved to .invrt/data/anonymous/local/crawled_urls.txt
+```
+
+**Failure output (no usable URLs):**
+
+```
+No usable URLs were found during crawl. See crawl log details below:
+Last 5 lines of crawl log:
+failed: Connection refused.
+Giving up.
 ```
 
 ---

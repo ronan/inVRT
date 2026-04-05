@@ -104,10 +104,15 @@ For AI agents and human developers.
 
 ### Baseline/Test/Report flow
 
-  - [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
   - [x] Auto trigger `invrt reference` when `invrt test` is run for first time
+  - [.] Return error when `invrt crawl` finds no usable urls.
+
+          Show the last 5 lines of the crawl.log
+          Don'r create an empty crawled_urls.txt file
+
   - [ ] Auto trigger `invrt crawl` when `invrt reference` is run for the first time
   - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
+  - [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
   - [ ] Implement an interactive init mode
 
 

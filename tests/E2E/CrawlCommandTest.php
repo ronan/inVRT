@@ -52,6 +52,25 @@ class CrawlCommandTest extends WebCommandTestCase
         $this->assertCommandSuccess();
     }
 
+    public function testCrawlFailsWhenNoUsableUrlsAreFound(): void
+    {
+        $this->setUpFixture(true);
+        $this->fixture->writeConfig([
+            'environments' => [
+                'local' => ['url' => 'http://127.0.0.1:1'],
+            ],
+        ]);
+
+        $this->executeCommand('crawl', [], ['verbosity' => OutputInterface::VERBOSITY_DEBUG]);
+
+        $this->assertCommandFailure();
+        $this->assertOutputContains('No usable URLs were found during crawl.');
+        $this->assertOutputContains('Last 5 lines of crawl log:');
+
+        $urlsFile = $this->fixture->getInvrtDir() . '/data/local/anonymous/crawled_urls.txt';
+        $this->assertFileDoesNotExist($urlsFile);
+    }
+
     /** Write config pointing at the test webserver — no pre-seeded URL list needed. */
     private function setupCrawlFixture(): void
     {
