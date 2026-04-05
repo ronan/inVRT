@@ -5,7 +5,7 @@
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
     // "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
     "build": {
-        "dockerfile": "Dockerfile",
+        "dockerfile": "../Dockerfile",
         "args": {
             "NODE_IMAGE": "node:24-bookworm",
             "PHP_IMAGE": "php:8-cli-bookworm",
@@ -15,14 +15,15 @@
     },
     "features": {
         "ghcr.io/devcontainers/features/common-utils": {},
-        "ghcr.io/devcontainers/features/docker-in-docker": {},
+        "ghcr.io/devcontainers/features/docker-outside-of-docker": {},
         "ghcr.io/ddev/ddev/install-ddev:latest": {}
     },
     "remoteEnv": {
         "PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/bin",
         "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
-      },
-    // Configure tool-specific properties.
+    },
+    "postCreateCommand": "task install:dev",
+
     "customizations": {
         "vscode": {
             "extensions": [

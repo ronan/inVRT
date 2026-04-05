@@ -13,8 +13,7 @@ COPY --from=nodesrc /usr/local/bin /usr/local/bin
 COPY --from=nodesrc /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # Playwright
-COPY package*.json ./
-RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npm install && npx -y playwright install --with-deps; fi
+RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npx playwright install --with-deps chromium; fi
 
 # System dependencies
 ARG DEBIAN_FRONTEND=noninteractive
@@ -23,9 +22,7 @@ RUN apt-get update && apt-get install -y sudo curl wget gpg ca-certificates && r
 # Task and Composer
 RUN if [ "$WITH_DEVTOOLS" = "true" ]; then \
         sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin && \
-        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-        php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-        rm -f composer-setup.php; \
+        curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer; \
     fi
 
 COPY . /app

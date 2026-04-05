@@ -1,6 +1,6 @@
 ARG NODE_IMAGE=node:24-bookworm
 ARG PHP_IMAGE=php:8.5-cli-bookworm
-ARG WITH_PLAYWRIGHT=false
+ARG WITH_PLAYWRIGHT=true
 ARG WITH_DEVTOOLS=true
 
 FROM $NODE_IMAGE AS nodesrc
@@ -8,24 +8,21 @@ FROM $PHP_IMAGE
 ARG WITH_PLAYWRIGHT
 ARG WITH_DEVTOOLS
 
+# System dependencies
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y sudo curl wget gpg ca-certificates && rm -rf /var/lib/apt/lists/*
+
 # Node.js
 COPY --from=nodesrc /usr/local/bin /usr/local/bin
 COPY --from=nodesrc /usr/local/lib/node_modules /usr/local/lib/node_modules
 
 # Playwright
-COPY package*.json ./
-RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npm install && npx -y playwright install --with-deps; fi
-
-# System dependencies
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y sudo curl wget gpg ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npx playwright install --with-deps chromium; fi
 
 # Task and Composer
 RUN if [ "$WITH_DEVTOOLS" = "true" ]; then \
-        sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin && \
-        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-        php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
-        rm -f composer-setup.php; \
+      sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin && \
+      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer; \
     fi
 
 COPY . /app
