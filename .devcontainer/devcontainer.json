@@ -5,23 +5,34 @@
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
     // "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
     "build": {
-        "dockerfile": "../Dockerfile",
+        "dockerfile": "Dockerfile",
         "args": {
             "NODE_IMAGE": "node:24-bookworm",
             "PHP_IMAGE": "php:8-cli-bookworm",
             "WITH_DEVTOOLS": "true",
-            "WITH_PLAYWRIGHT": "true"
+            "WITH_PLAYWRIGHT": "false"
         }
     },
+    "runArgs": [
+      "--network=ddev_default"
+    ],
+    "mounts": [
+      // "source=/var/run/docker.sock,target=//var/run/docker.sock,type=bind",
+      // "source=ddev-global-cache,target=/mnt/ddev-global-cache,type=volume",
+      // "source=${localEnv:HOME}/.ddev,target=/home/vscode/.ddev,type=bind"
+    ],
+    "updateRemoteUserUID": true,
+    "remoteUser": "vscode",
     "features": {
-        "ghcr.io/devcontainers/features/common-utils": {},
-        "ghcr.io/devcontainers/features/docker-outside-of-docker": {},
-        "ghcr.io/ddev/ddev/install-ddev:latest": {}
+      "ghcr.io/devcontainers/features/common-utils:2": {},
+      "ghcr.io/devcontainers/features/docker-outside-of-docker:latest": {}
     },
     "remoteEnv": {
         "PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/bin",
         "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
     },
+    "workspaceFolder": "${localWorkspaceFolder}",
+    "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
     "postCreateCommand": "task install:dev",
 
     "customizations": {
@@ -32,5 +43,4 @@
             ]
         }
     },
-    "remoteUser": "vscode"
-}
+  }
