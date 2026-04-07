@@ -21,6 +21,7 @@ const op = process.argv[2] || 'test';
 
 console.log(`🎯 Using profile: ${INVRT_PROFILE}, device: ${INVRT_DEVICE}${INVRT_ENVIRONMENT ? `, environment: ${INVRT_ENVIRONMENT}` : ''}`);
 console.log(`📂 Data directory: ${INVRT_CAPTURE_DIR}. Operation: ${op}`);
+console.log(`🍪 Cookies file: ${INVRT_COOKIES_FILE}.json`);
 
 const builtInScriptsDir = __dirname;
 const preferredScriptsDir = INVRT_SCRIPTS_DIR || builtInScriptsDir;
@@ -83,10 +84,11 @@ try {
                   {
                     "label":          url,
                     "url":            `${INVRT_URL}${url}`,
-                    "cookiePath":     INVRT_COOKIES_FILE
+                    "cookiePath":     INVRT_COOKIES_FILE + '.json'
                   }
                 );
               });
+  fs.writeFileSync(path.join(INVRT_CAPTURE_DIR, 'backstop-config.json'), JSON.stringify(config, null, 2));
 
   backstop(op, {config: config}).then(() => {
       console.log('Test complete');

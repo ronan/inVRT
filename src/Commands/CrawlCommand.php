@@ -63,7 +63,7 @@ class CrawlCommand extends BaseCommand
         }
 
         $args = array_values(array_filter([
-            $this->resolveExcludeWGETArg($io, $INVRT_EXCLUDE_FILE),
+            // $this->resolveExcludeWGETArg($io, $INVRT_EXCLUDE_FILE),
             $this->resolveCookieWGETArg($io),
             "--level=$INVRT_MAX_CRAWL_DEPTH",
             "--domains=" . (parse_url($INVRT_URL, PHP_URL_HOST) ?? ''),
@@ -74,7 +74,8 @@ class CrawlCommand extends BaseCommand
             '--ignore-length',
             '--no-verbose',
             '--no-check-certificate',
-            '--reject=css,js,woff,jpg,png,gif,svg',
+            '--reject=css,js,woff,jpg,png,gif,svg,ico',
+            '--reject-regex=(.*\/logout$)',
             '--no-host-directories',
             '--execute',
             'robots=off',
@@ -84,7 +85,7 @@ class CrawlCommand extends BaseCommand
         $cmd = 'wget ' . implode(' ', array_map('escapeshellarg', $args))
             . ' 2> ' . escapeshellarg($INVRT_CRAWL_LOG);
 
-        $io->writeLn("Running command: $cmd", OutputInterface::VERBOSITY_DEBUG);
+        $io->writeLn("Running command: \n wget " . implode("\\\n  ", array_map('escapeshellarg', $args)), OutputInterface::VERBOSITY_DEBUG);
 
         exec($cmd, $stdout, $exitCode);
 
@@ -194,7 +195,7 @@ class CrawlCommand extends BaseCommand
     private function resolveExcludeWGETArg(SymfonyStyle $io, string $excludeFile): string
     {
         if (!file_exists($excludeFile)) {
-            $defaults = '/files,/sites,/user/logout';
+            $defaults = '/user/*';
             $io->writeln("No exclude_urls.txt found at $excludeFile. Excluding defaults: $defaults", OutputInterface::VERBOSITY_VERBOSE);
             return "--exclude-directories=$defaults";
         }
