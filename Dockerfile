@@ -1,32 +1,32 @@
-ARG NODE_IMAGE=node:24-bookworm
-ARG PHP_IMAGE=php:8.5-cli-bookworm
-ARG WITH_PLAYWRIGHT=true
-ARG WITH_DEVTOOLS=true
+# Composer install
+FROM composer:latest AS composer
+WORKDIR /app
+COPY composer.json composer.lock /app/
+RUN composer install --no-dev --prefer-dist --optimize-autoloader
 
-FROM $NODE_IMAGE AS nodesrc
-FROM $PHP_IMAGE
-ARG WITH_PLAYWRIGHT
-ARG WITH_DEVTOOLS
-
-# System dependencies
+# Final runtime image
+FROM debian:bookworm AS build
+# ARG WITH_PLAYWRIGHT=true
 ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y sudo curl wget gpg ca-certificates && rm -rf /var/lib/apt/lists/*
 
-# Node.js
-COPY --from=nodesrc /usr/local/bin /usr/local/bin
-COPY --from=nodesrc /usr/local/lib/node_modules /usr/local/lib/node_modules
+FROM mcr.microsoft.com/playwright:v1.58.2-noble
 
-# Playwright
-RUN if [ "$WITH_PLAYWRIGHT" = "true" ]; then npx playwright install --with-deps chromium; fi
+# Install dependencies and add the PHP repository
+# Install PHP 8.5
+RUN apt-get update \
+ && apt-get install -y \
+      software-properties-common \
+      curl \
+ && add-apt-repository ppa:ondrej/php -y \
+ && apt-get update \
+ && apt-get install -y php8.5 \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# Task and Composer
-RUN if [ "$WITH_DEVTOOLS" = "true" ]; then \
-      sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin && \
-      curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer; \
-    fi
-
+COPY --from=composer /app /app
+WORKDIR /app
 COPY . /app
-ENV PATH="/app/bin:${PATH}"
-
+RUN npm install --omit=dev
+    
 WORKDIR /dir
-ENTRYPOINT [ "invrt" ]
+ENTRYPOINT [ "/app/bin/invrt" ]
