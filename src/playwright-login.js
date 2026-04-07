@@ -37,9 +37,10 @@ async function loginAndSaveCookies(
     // Launch browser
     console.log('Launching browser...');
     browser = await chromium.launch({ headless: true });
+    chromium.ignoreHTTPSErrors = true;
 
     // Create context to preserve cookies
-    const context = await browser.newContext();
+    const context = await browser.newContext({ ignoreHTTPSErrors: true });
     const page = await context.newPage();
 
     const match = loginUrl.match(/\/\/(.+\.pantheonsite\.io)/);
@@ -59,7 +60,8 @@ async function loginAndSaveCookies(
     // Navigate to login page
     console.log(`Navigating to ${loginUrl}...`);
     await page.goto(loginUrl, { waitUntil: 'networkidle', timeout });
-    await page.screenshot({ path: 'screenshot.png' });
+    // TODO: Save the screenshot to the data direecory
+    // await page.screenshot({ path: 'login-before.png' });
 
     // Fill in username
     console.log('Entering username...');
@@ -81,6 +83,8 @@ async function loginAndSaveCookies(
       // Wait for network to be idle after login
       await page.waitForLoadState('networkidle', { timeout });
     }
+    // TODO: Save the screenshot to the data direecory
+    // await page.screenshot({ path: 'login-after.png' });
 
     console.log('Login successful!');
 
