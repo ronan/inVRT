@@ -175,6 +175,25 @@ abstract class BaseCommand
     }
 
     /**
+     * Create dir if absent, or remove all contents if present.
+     */
+    protected function prepareDirectory(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+            return;
+        }
+
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST,
+        );
+        foreach ($items as $item) {
+            $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+        }
+    }
+
+    /**
      * Get a resolved configuration value by key from the loaded configuration array, returning
      * the provided default if the key is not set.
      *

@@ -58,12 +58,12 @@ class CrawlCommand extends BaseCommand
             OutputInterface::VERBOSITY_VERBOSE,
         );
 
-        foreach (["$INVRT_CLONE_DIR", dirname($INVRT_CRAWL_LOG)] as $dir) {
+        foreach ([$INVRT_CLONE_DIR, dirname($INVRT_CRAWL_LOG)] as $dir) {
             $this->prepareDirectory($dir);
         }
 
         $args = array_values(array_filter([
-            // $this->resolveExcludeWGETArg($io, $INVRT_EXCLUDE_FILE),
+            $this->resolveExcludeWGETArg($io, $INVRT_EXCLUDE_FILE),
             $this->resolveCookieWGETArg($io),
             "--level=$INVRT_MAX_CRAWL_DEPTH",
             "--domains=" . (parse_url($INVRT_URL, PHP_URL_HOST) ?? ''),
@@ -74,8 +74,8 @@ class CrawlCommand extends BaseCommand
             '--ignore-length',
             '--no-verbose',
             '--no-check-certificate',
-            '--reject=css,js,woff,jpg,png,gif,svg,ico',
-            '--reject-regex=(.*\/logout$)',
+            '--reject=css,js,woff,jpg,png,gif,svg,ico,pdf,ppt,pptx,doc,docx,xls,xlsx',
+            '--reject-regex=(edit|devel|delete|logout|webform|files|file|login|register)',
             '--no-host-directories',
             '--execute',
             'robots=off',
@@ -94,7 +94,6 @@ class CrawlCommand extends BaseCommand
         if ($exitCode !== Command::SUCCESS) {
             $io->writeln("There were errors during the crawl. See logs at $INVRT_CRAWL_LOG", OutputInterface::VERBOSITY_QUIET);
             $io->writeln("Crawl exit code: $exitCode", OutputInterface::VERBOSITY_QUIET);
-            // return $exitCode;
         }
 
         $paths = $this->parseUrlsFromLog($INVRT_CRAWL_LOG, $INVRT_URL);
@@ -107,7 +106,6 @@ class CrawlCommand extends BaseCommand
             $this->writeCrawlLogTail($io, $INVRT_CRAWL_LOG);
             return Command::FAILURE;
         }
-
 
         $io->writeln("Crawling completed. Found $count unique paths. Results saved to $INVRT_CRAWL_FILE", OutputInterface::VERBOSITY_NORMAL);
 
@@ -205,24 +203,5 @@ class CrawlCommand extends BaseCommand
         $excludeUrls = implode(',', $lines);
         $io->writeln("Excluding URLs: $excludeUrls", OutputInterface::VERBOSITY_VERBOSE);
         return "--exclude-directories=$excludeUrls";
-    }
-
-    /**
-     * Create dir if absent, or remove all contents if present.
-     */
-    private function prepareDirectory(string $dir): void
-    {
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-            return;
-        }
-
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST,
-        );
-        foreach ($items as $item) {
-            $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
-        }
     }
 }

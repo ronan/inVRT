@@ -13,14 +13,15 @@ const {
   INVRT_CRAWL_FILE, 
   INVRT_VIEWPORT_WIDTH, 
   INVRT_VIEWPORT_HEIGHT,
-  INVRT_COOKIES_FILE
+  INVRT_COOKIES_FILE,
+  INVRT_MAX_PAGES
 } = process.env;
 
 
 const op = process.argv[2] || 'test';
 
 console.log(`🎯 Using profile: ${INVRT_PROFILE}, device: ${INVRT_DEVICE}${INVRT_ENVIRONMENT ? `, environment: ${INVRT_ENVIRONMENT}` : ''}`);
-console.log(`📂 Data directory: ${INVRT_CAPTURE_DIR}. Operation: ${op}`);
+console.log(`📂 Capture directory: ${INVRT_CAPTURE_DIR}. Operation: ${op}`);
 console.log(`🍪 Cookies file: ${INVRT_COOKIES_FILE}.json`);
 
 const builtInScriptsDir = __dirname;
@@ -55,8 +56,8 @@ const config = {
     "bitmaps_reference":  INVRT_CAPTURE_DIR + "/bitmaps/reference",
     "bitmaps_test":       INVRT_CAPTURE_DIR + "/bitmaps/test"
   },
-  // "fileNameTemplate": '{scenarioIndex}_{selectorIndex}_{selectorLabel}_{viewportLabel}',
-  "report": ["json"],
+  // "fileNameTemplate": '{scenarioIndex}',
+  "report": ["html","json"],
   "engine": "playwright",
   "onReadyScript": "playwright-onready.js",
   "onBeforeScript": "playwright-onbefore.js",
@@ -79,7 +80,8 @@ try {
   fs
     .readFileSync(INVRT_CRAWL_FILE, 'utf-8')
     .split(/\n/)
-    .forEach((url) => {
+    .slice(0, INVRT_MAX_PAGES || 100)
+        .forEach((url) => {
                 config.scenarios.push(
                   {
                     "label":          url,
@@ -88,7 +90,7 @@ try {
                   }
                 );
               });
-  fs.writeFileSync(path.join(INVRT_CAPTURE_DIR, 'backstop-config.json'), JSON.stringify(config, null, 2));
+  // fs.writeFileSync(path.join(INVRT_CAPTURE_DIR, 'backstop-config.json'), JSON.stringify(config, null, 2));
 
   backstop(op, {config: config}).then(() => {
       console.log('Test complete');

@@ -22,14 +22,24 @@ class ReferenceCommand extends BaseCommand
             return Command::FAILURE;
         }
 
+        [
+            $INVRT_ENVIRONMENT,
+            $INVRT_URL,
+            $INVRT_PROFILE,
+            $INVRT_CAPTURE_DIR,
+        ] = array_fill(0, 10, '');
+        extract($this->config, EXTR_IF_EXISTS);
+
         $io->writeln(
-            "📸 Capturing references from '{$this->config['INVRT_ENVIRONMENT']}' environment ({$this->config['INVRT_URL']}) with profile: '{$this->config['INVRT_PROFILE']}' and device: '{$this->config['INVRT_DEVICE']}'",
+            "📸 Capturing references from '{$INVRT_ENVIRONMENT}' environment ({$INVRT_URL}) with profile: '{$INVRT_PROFILE}' and device: '{$INVRT_DEVICE}'",
             OutputInterface::VERBOSITY_VERBOSE,
         );
 
         if (($crawlValidation = $this->validateCrawledUrls($io)) !== Command::SUCCESS) {
             return $crawlValidation;
         }
+
+        $this->prepareDirectory($INVRT_CAPTURE_DIR);
 
         return $this->runBackstop('reference', $this->config, $io);
     }
