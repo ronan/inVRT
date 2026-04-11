@@ -13,6 +13,8 @@ For AI agents and human developers.
 
         We're looking in the user-scripts directory but it's in the app source code directory.
 
+- [ ] Backstop fails when urls (and therefore file paths) are too long
+
 ## Tech Debt
 
 - [x] Update AGENTS.md new command guidance for Symfony 8 command patterns
@@ -62,10 +64,6 @@ For AI agents and human developers.
     - Default to using a local running docker container
     - Use ddev playwright addon when running ddv
 
-- [ ] Generate the schema automatically
-
-        Add script called (tooling/scrupts/generate-schema.mjs) to generate `docs/config.schema.yaml` from `docs/config.example.yaml`
-
 ## Tests
 
 - [x] **E2E: ReferenceCommandTest**
@@ -87,9 +85,13 @@ For AI agents and human developers.
         - use tests/e2e/CrawlCommandTest.php as an example
 
 ### CMS-Specific Testing
-  - [ ] Set up ddev to run during tests
-  - [ ] Test drupal auth support
+
   - [ ] Test backdrop support
+  - [ ] Test drupal auth support
+  - [ ] Set up ddev to run during tests
+    
+        Challenges: Can we use docker-outside-of-docker to control ddev?
+        DDev doesn't want to be root but it get's permission errors.
 
 ## Features
 
@@ -119,9 +121,14 @@ For AI agents and human developers.
   - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
   - [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
   - [ ] Implement an interactive init mode
+  - [ ] Allow testing without a config file (relying on env vars if set)
+  - [ ] Implement `invrt check` to load the homepage and retrieve the site title
+  
 
 
 ### Options and Configuration (`invrt contig`)
+
+- [ ] Load the config from `./.ddev/.invrt/config.yaml` as well as `./.invrt/config.yaml`
 
 - [ ] Retrieve a specific config key or multiple keys
 
@@ -147,3 +154,11 @@ For AI agents and human developers.
   - [ ] Allow differences to be approved
   - [ ] Allow comparison of different environments
   - [ ] Allow comparison of different profiles
+- [ ] Allow user comments on report to capture decisions and actions
+- [ ] Change 'exclude_urls' to 'exclude_paths' and make sure it works
+- [ ] Better debug output during crawl
+- [ ] Rewrite the crawler
+        - Make the max_pages limit meaninful
+        - Make exclude_paths work and provide defaults for drupal/backdrop
+        - add a max_width to go with max_depth
+        - 
