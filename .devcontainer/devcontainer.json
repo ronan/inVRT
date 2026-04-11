@@ -13,19 +13,20 @@
             "WITH_PLAYWRIGHT": "false"
         }
     },
-    "runArgs": [
-      "--network=ddev_default"
-    ],
+    // "runArgs": [
+    //   // "--network=ddev_default"
+    // ],
     "mounts": [
       // "source=/var/run/docker.sock,target=//var/run/docker.sock,type=bind",
       // "source=ddev-global-cache,target=/mnt/ddev-global-cache,type=volume",
+      // "source=ddev-router-cert-cache,target=/usr/share/ca-certificates/ddev,type=volume",
       // "source=${localEnv:HOME}/.ddev,target=/home/vscode/.ddev,type=bind"
     ],
     "updateRemoteUserUID": true,
     "remoteUser": "vscode",
     "features": {
       "ghcr.io/devcontainers/features/common-utils:2": {},
-      "ghcr.io/devcontainers/features/docker-outside-of-docker:latest": {}
+      "ghcr.io/devcontainers/features/docker-in-docker:latest": {}
     },
     "remoteEnv": {
         "PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/bin",
