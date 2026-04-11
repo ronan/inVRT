@@ -19,7 +19,7 @@ RUN apt-get update \
       curl \
  && add-apt-repository ppa:ondrej/php -y \
  && apt-get update \
- && apt-get install -y php8.5 \
+ && apt-get install -y php8.5 php8.5-cli php8.5-common php8.5-curl \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
