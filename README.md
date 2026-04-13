@@ -10,7 +10,7 @@
                   ◀ █ ▶
 ```
 
-# inVRT v0.0.1
+# inVRT v0.0.2
 
 A CLI tool for Visual Regression Testing (VRT) of CMS-driven websites as an authenticated or anonymous user.
 
