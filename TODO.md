@@ -48,6 +48,10 @@ For AI agents and human developers.
 
 - [x] Do a manual refactor of the config/options system to get rid of the last of the code smells
 
+## Documentation
+
+- [x] Create `docs/APP_SUMMARY.md` — a brief, agent-optimized application summary
+
 ## Developer Experience
 
 - [x] Add better debugging output to the cli when run with `-vvv` (https://symfony.com/doc/current/console/verbosity.html)
