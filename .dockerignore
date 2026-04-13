@@ -8,3 +8,5 @@ chats
 .devcontainer
 .agents
 .git
+node_modules
+vendor

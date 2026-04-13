@@ -73,8 +73,13 @@ tasks:
   build:docker:
     desc: Build Docker image
     aliases: [docker:build]
+    sources:
+      - 'src/**/*'
+      - 'tooling/**/*'
+      - 'Dockerfile'
+      - '.dockerignore'
     cmds:
-      - docker build --progress=plain --build-arg WITH_PLAYWRIGHT=true -t ronan4000/invrt:{{.VERSION}} -t ronan4000/invrt:latest .
+      - docker build --progress=plain -t ronan4000/invrt:{{.VERSION}} -t ronan4000/invrt:latest .
 
   publish:docker:
     desc: Publish Docker image to Docker Hub
