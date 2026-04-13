@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-VERSION="0.0.1"
+VERSION=$(<VERSION.txt)
 TAG="v${VERSION}"
 REPO_URL="https://github.com/ronan/ddev-invrt.git"
 
@@ -17,11 +17,11 @@ cd scratch/ddev-invrt
 
 # git config user.name "${GIT_AUTHOR_NAME:-invrt-release-bot}"
 # git config user.email "${GIT_AUTHOR_EMAIL:-invrt-release-bot@users.noreply.github.com}"
-git config set advice.addIgnoredFile false
+git config advice.addIgnoredFile false
 git add .
 
 if [[ -n "$(git status --porcelain)" ]]; then
-    git commit -m "Release ${TAG}: sync ddev-invrt addon"
+    git commit -m "Release ${TAG}: sync ddev-invrt addon from github.com/ronan/invrt"
 else
     echo "No addon content changes detected; skipping commit"
 fi
