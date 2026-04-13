@@ -55,7 +55,7 @@ environments:
     name: DDEV Local
     url: http://$DDEV_HOSTNAME"
 
-    if [[ -v DDEV_PANTHEON_SITE ]]; then
+    if [ -n "${DDEV_PANTHEON_SITE+set}" ]; then
         pantheon_site=$(ddev exec echo \$DDEV_PANTHEON_SITE)
         if [ -n "$pantheon_site" ]; then
         echo "\
