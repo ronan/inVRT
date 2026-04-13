@@ -91,6 +91,8 @@ For AI agents and human developers.
     - [x] Write BATS tests (https://bats-core.readthedocs.io/en/stable/) to cover the cli commands
         - Refer to /docs/APP_SUMMARY.md for app behavior to test
         - Add task commnands to install bats and to run the tests
+    
+    - [x] Replace the e2e phpunit tests with BATS tests
 
 ### CMS-Specific Testing
 
