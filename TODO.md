@@ -13,6 +13,8 @@ For AI agents and human developers.
 
         We're looking in the user-scripts directory but it's in the app source code directory.
 
+- [x] INVRT_MAX_PAGES is not being applied during reference and test
+
 - [ ] Backstop fails when urls (and therefore file paths) are too long
 
 ## Tech Debt
@@ -63,7 +65,7 @@ For AI agents and human developers.
         - Update the documentation
         - Build, tag and publish a new docker build
         - Build and publish the ddev-invrt addon to github
-- [ ] Add support for using remote playwright connection
+- [#] Add support for using remote playwright connection
     - Allow remote connections with a given URL
     - Default to using a local running docker container
     - Use ddev playwright addon when running ddv
@@ -109,31 +111,29 @@ For AI agents and human developers.
 
  - [ ] Add an `invrt info` command that returns nicely formatted info about the current project
 
-        The output should include: current config, environments, devices, profiles, 
-        number of crawled pages, number of captured screenshots and the last few 
-        lines of the crawl.log
+        The output should include: current config, environments, devices, profiles, number of crawled pages, number of captured screenshots and the last few lines of the crawl.log
 
 ### Baseline/Test/Report flow
 
   - [x] Auto trigger `invrt reference` when `invrt test` is run for first time
-  - [.] Return error when `invrt crawl` finds no usable urls.
-
-        - Show the last 5 lines of the crawl.log
-        - Create an empty crawled_urls.txt file to indicate to the 
-            reference command that crawl has run and failed so that it doesnt' trigger another crawl.
-
+  - [x] Return error when `invrt crawl` finds no usable urls.
+    - Show the last 5 lines of the crawl.log
+    - Create an empty crawled_urls.txt file to indicate to the 
+        reference command that crawl has run and failed so that it doesnt' trigger another crawl.
   - [ ] Auto trigger `invrt crawl` when `invrt reference` is run for the first time
   - [ ] Return error when `invrt reference` finds no crawled urls
-    
+ 
         If invrt_crawl has already run but there are no urls in the crawled_urls.txt
         file invrt reference should return with an error.
 
   - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
   - [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
   - [ ] Implement an interactive init mode
+
+    - Prompt the user for a url
+
   - [ ] Allow testing without a config file (relying on env vars if set)
   - [ ] Implement `invrt check` to load the homepage and retrieve the site title
-  
 
 
 ### Options and Configuration (`invrt contig`)
@@ -160,15 +160,14 @@ For AI agents and human developers.
 
 - [ ] Create a 1 page html report for all existing test results
 - [ ] Create an "Interactive" report
-  - [ ] Allow tests to be re-run
-  - [ ] Allow differences to be approved
-  - [ ] Allow comparison of different environments
-  - [ ] Allow comparison of different profiles
+    - [ ] Allow tests to be re-run
+    - [ ] Allow differences to be approved
+    - [ ] Allow comparison of different environments
+    - [ ] Allow comparison of different profiles
 - [ ] Allow user comments on report to capture decisions and actions
 - [ ] Change 'exclude_urls' to 'exclude_paths' and make sure it works
 - [ ] Better debug output during crawl
 - [ ] Rewrite the crawler
-        - Make the max_pages limit meaninful
-        - Make exclude_paths work and provide defaults for drupal/backdrop
-        - add a max_width to go with max_depth
-        - 
+    - Make exclude_paths work and provide defaults for drupal/backdrop
+    - add a max_width to go with max_depth
+    - 

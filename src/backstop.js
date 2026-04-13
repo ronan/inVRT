@@ -20,10 +20,6 @@ const {
 
 const op = process.argv[2] || 'test';
 
-console.log(`🎯 Using profile: ${INVRT_PROFILE}, device: ${INVRT_DEVICE}${INVRT_ENVIRONMENT ? `, environment: ${INVRT_ENVIRONMENT}` : ''}`);
-console.log(`📂 Capture directory: ${INVRT_CAPTURE_DIR}. Operation: ${op}`);
-console.log(`🍪 Cookies file: ${INVRT_COOKIES_FILE}.json`);
-
 const builtInScriptsDir = __dirname;
 const preferredScriptsDir = INVRT_SCRIPTS_DIR || builtInScriptsDir;
 const requiredHookScripts = ['playwright-onbefore.js', 'playwright-onready.js'];
@@ -32,11 +28,11 @@ const hasRequiredHooks = (scriptsDir) => requiredHookScripts.every((script) => f
 
 const engineScriptsDir = hasRequiredHooks(preferredScriptsDir) ? preferredScriptsDir : builtInScriptsDir;
 
-if (preferredScriptsDir !== engineScriptsDir) {
-  console.log(`⚠️ Playwright hooks not found in INVRT_SCRIPTS_DIR (${preferredScriptsDir}). Falling back to built-in scripts in ${engineScriptsDir}.`);
-}
+console.log(`🎯 Running '${op}'. profile: ${INVRT_PROFILE}, environment: ${INVRT_ENVIRONMENT} device: ${INVRT_DEVICE} (${INVRT_VIEWPORT_WIDTH}x${INVRT_VIEWPORT_HEIGHT})`);
+console.log(`📂 Capture directory: ${INVRT_CAPTURE_DIR}. Script Directory: ${engineScriptsDir}`);
+console.log(`📄 Max Pages: ${INVRT_MAX_PAGES}`);
+console.log(`🍪 Cookies file: ${INVRT_COOKIES_FILE}.json`);
 
-console.log(`🧩 Using Playwright engine scripts from: ${engineScriptsDir}`);
 
 const config = {
   "dynamicTestId": 'latest',
@@ -80,7 +76,7 @@ try {
   fs
     .readFileSync(INVRT_CRAWL_FILE, 'utf-8')
     .split(/\n/)
-    .slice(0, INVRT_MAX_PAGES || 100)
+    .slice(0, INVRT_MAX_PAGES)
         .forEach((url) => {
                 config.scenarios.push(
                   {
