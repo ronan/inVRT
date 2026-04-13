@@ -12,6 +12,11 @@ tasks:
     cmds:
       - tooling/scripts/install-ddev.sh
 
+  install:bats:
+    desc: Install BATS test dependencies
+    cmds:
+      - npm install --save-dev bats
+
   install:playwright:
     desc: Install Playwright dependencies
     cmds:
@@ -41,7 +46,7 @@ tasks:
 
   test:
     desc: Run all tests and quality checks
-    deps: [fix, test:phpstan, test:php]
+    deps: [fix, test:phpstan, test:php, test:bats]
 
   livecode:
     desc: Run the live coding session
@@ -100,6 +105,11 @@ tasks:
       - 'docs/config.schema.yaml'
     cmds:
       - node tooling/scripts/build-config-definition.mjs
+
+  test:bats:
+    desc: Run BATS CLI tests
+    cmds:
+      - node_modules/.bin/bats tests/bats/
 
   test:php:
     desc: Run all tests with PHPUnit
