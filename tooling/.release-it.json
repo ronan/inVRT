@@ -17,8 +17,6 @@
     "release": false
   },
   "hooks": {
-    "before:bump": "task release:prepare",
-    "after:release": "task release:publish"
   },
   "plugins": {
     "@release-it/bumper": {

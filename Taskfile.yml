@@ -97,6 +97,7 @@ tasks:
     cmds:
       - npx release-it patch --ci --config tooling/.release-it.json
 
+
   release:publish:
     desc: Publish Docker image and ddev addon for current version
     cmds:
