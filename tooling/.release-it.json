@@ -22,8 +22,9 @@
   },
   "plugins": {
     "@release-it/bumper": {
-      "in": "package.json",
+      "in": "VERSION.txt",
       "out": [
+        "package.json",
         "composer.json",
         {
           "file": "src/invrt.php",

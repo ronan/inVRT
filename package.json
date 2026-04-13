@@ -1,6 +1,6 @@
 {
   "name": "invrt",
-  "version": "1.0.2",
+  "version": "0.0.1",
   "description": "An auth-enabled VRT for Drupal and Backdrop web sites and apps",
   "bin": {
     "invrt": "./bin/invrt"

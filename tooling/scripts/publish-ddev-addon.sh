@@ -2,27 +2,22 @@
 
 set -euo pipefail
 
-if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-    echo "Missing GITHUB_TOKEN"
-    exit 1
-fi
-
-VERSION="$(node -p "require('./package.json').version")"
+VERSION="0.0.1"
 TAG="v${VERSION}"
-REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/ronan/ddev-invrt.git"
+REPO_URL="https://github.com/ronan/ddev-invrt.git"
 
 if [ -d "scratch/ddev-invrt" ]; then
     rm -rf scratch/ddev-invrt
 fi
 
 git clone "$REPO_URL" scratch/ddev-invrt
-rsync -a --delete ddev-invrt/ scratch/ddev-invrt/
+rsync -a ddev-invrt/ scratch/ddev-invrt/
 
 cd scratch/ddev-invrt
 
-git config user.name "${GIT_AUTHOR_NAME:-invrt-release-bot}"
-git config user.email "${GIT_AUTHOR_EMAIL:-invrt-release-bot@users.noreply.github.com}"
-
+# git config user.name "${GIT_AUTHOR_NAME:-invrt-release-bot}"
+# git config user.email "${GIT_AUTHOR_EMAIL:-invrt-release-bot@users.noreply.github.com}"
+git config set advice.addIgnoredFile false
 git add .
 
 if [[ -n "$(git status --porcelain)" ]]; then
