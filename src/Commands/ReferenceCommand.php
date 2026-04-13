@@ -27,6 +27,7 @@ class ReferenceCommand extends BaseCommand
             $INVRT_URL,
             $INVRT_PROFILE,
             $INVRT_CAPTURE_DIR,
+            $INVRT_DEVICE,
         ] = array_fill(0, 10, '');
         extract($this->config, EXTR_IF_EXISTS);
 
