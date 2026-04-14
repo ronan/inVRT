@@ -129,11 +129,9 @@ For AI agents and human developers.
   - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
   - [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
   - [ ] Implement an interactive init mode
-
     - Prompt the user for a url
-
-  - [ ] Allow testing without a config file (relying on env vars if set)
   - [ ] Implement `invrt check` to load the homepage and retrieve the site title
+  - [#] Allow testing without a config file (relying on env vars if set)
 
 
 ### Options and Configuration (`invrt contig`)
