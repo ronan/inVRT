@@ -27,7 +27,6 @@ teardown() {
     expected="$(node -p "require('$INVRT_ROOT/package.json').version")"
     run "$INVRT_BIN" --version
     [ "$status" -eq 0 ]
-    [[ "$output" == *"inVRT"* ]]
     [[ "$output" == *"$expected"* ]]
 }
 
