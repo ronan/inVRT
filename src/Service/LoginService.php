@@ -32,12 +32,6 @@ class LoginService
                 return Command::FAILURE;
             }
 
-            // Check if cookies file already exists
-            // if (file_exists("$cookiesFile.json")) {
-            //     $output->writeln("<comment>⚠️ Cookies file already exists at $cookiesFile.json. Skipping login to avoid overwriting existing cookies.</comment>", OutputInterface::VERBOSITY_VERBOSE);
-            //     return Command::SUCCESS;
-            // }
-
             // Set default login URL if not provided
             $loginUrl = getenv('INVRT_LOGIN_URL');
             if (!$loginUrl) {

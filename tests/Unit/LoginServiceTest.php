@@ -25,23 +25,6 @@ class LoginServiceTest extends TestCase
         array_map('unlink', glob($this->tempDir . '/*') ?: []);
         rmdir($this->tempDir);
     }
-
-    public function testSkipsLoginWhenCookiesFileExists(): void
-    {
-        $output = new BufferedOutput(BufferedOutput::VERBOSITY_VERBOSE);
-        file_put_contents($this->tempDir . '/cookies.json', json_encode([]));
-
-        $result = LoginService::loginIfCredentialsExist(
-            'user',
-            'password',
-            'https://example.com',
-            $this->tempDir . '/cookies',
-            $output,
-        );
-
-        $this->assertEquals(Command::SUCCESS, $result);
-        $this->assertStringContainsString('already exists', $output->fetch());
-    }
 }
 
 
