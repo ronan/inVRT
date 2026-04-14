@@ -48,9 +48,10 @@ abstract class CommandTestCase extends TestCase
         $in->device = 'desktop';
         $cs->options('local', 'anonymous', 'desktop');
 
+        $crawl = new CrawlCommand($cs);
         $this->app->addCommand(new InitCommand($cs));
-        $this->app->addCommand(new CrawlCommand($cs));
-        $this->app->addCommand(new ReferenceCommand($cs));
+        $this->app->addCommand($crawl);
+        $this->app->addCommand(new ReferenceCommand($cs, $crawl));
         $this->app->addCommand(new TestCommand($cs));
         $this->app->addCommand(new ConfigCommand($cs));
 

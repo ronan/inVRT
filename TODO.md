@@ -120,7 +120,7 @@ For AI agents and human developers.
     - Show the last 5 lines of the crawl.log
     - Create an empty crawled_urls.txt file to indicate to the 
         reference command that crawl has run and failed so that it doesnt' trigger another crawl.
-  - [ ] Auto trigger `invrt crawl` when `invrt reference` is run for the first time
+  - [x] Auto trigger `invrt crawl` when `invrt reference` is run for the first time
   - [ ] Return error when `invrt reference` finds no crawled urls
  
         If invrt_crawl has already run but there are no urls in the crawled_urls.txt
