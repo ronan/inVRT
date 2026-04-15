@@ -27,6 +27,7 @@
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js"></script>
     <style>
       :root {
         --bg: #0d1117;
@@ -217,14 +218,22 @@
                   ◀ █ ▶ v0.0.2</pre>
 
         <p class="tagline">
-          A CLI tool for Visual Regression Testing (VRT) of CMS-driven websites as an authenticated or anonymous user.
+          A zero-config CLI tool for Visual Regression Testing (VRT) of 
+          `<a href="https://drupal.org">Drupal</a>` and `<a href="https://backdropcms.org">Backdrop CMS</a>` web sites 
+          as an authenticated or anonymous user using <a href="https://playwright.dev">Playwright</a>.
         </p>
 
         <h2 class="section-title">$ quick-start</h2>
         <div class="cmd-wrap">
-          <button class="copy-btn" id="copy-btn" type="button">Copy</button>
+          <button class="copy-btn" id="copy-btn" data-clipboard-target="#quick-start" type="button">Copy</button>
           <pre class="commands" id="quick-start"><code>docker run -it --volume .:/dir ronan4000/invrt init
-docker run -it --volume .:/dir ronan4000/invrt test --profile=authenticated</code></pre>
+docker run -it --volume .:/dir ronan4000/invrt test</code></pre>
+        </div>
+        <h2 class="section-title">$ quick-start --using-ddev</h2>
+        <div class="cmd-wrap">
+          <button class="copy-btn" id="copy-btn" data-clipboard-target="#quick-start-ddev" type="button">Copy</button>
+          <pre class="commands" id="quick-start-ddev"><code>ddev addon get ronan/invrt && ddev restart
+ddev invrt test</code></pre>
         </div>
 
         <nav class="links" aria-label="Project links">
