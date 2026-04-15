@@ -96,6 +96,7 @@ For AI agents and human developers.
     
     - [x] Replace the e2e phpunit tests with BATS tests
 
+
 ### CMS-Specific Testing
 
   - [ ] Test backdrop support
@@ -115,24 +116,26 @@ For AI agents and human developers.
 
 ### Baseline/Test/Report flow
 
-  - [x] Auto trigger `invrt reference` when `invrt test` is run for first time
-  - [x] Return error when `invrt crawl` finds no usable urls.
-    - Show the last 5 lines of the crawl.log
-    - Create an empty crawled_urls.txt file to indicate to the 
-        reference command that crawl has run and failed so that it doesnt' trigger another crawl.
-  - [ ] Auto trigger `invrt crawl` when `invrt reference` is run for the first time
-  - [ ] Return error when `invrt reference` finds no crawled urls
- 
-        If invrt_crawl has already run but there are no urls in the crawled_urls.txt
-        file invrt reference should return with an error.
+- [x] Auto trigger `invrt reference` when `invrt test` is run for first time
+- [x] Return error when `invrt crawl` finds no usable urls.
+  - Show the last 5 lines of the crawl.log
+  - Create an empty crawled_urls.txt file to indicate to the 
+      reference command that crawl has run and failed so that it doesnt' trigger another crawl.
+- [ ] Auto trigger `invrt crawl` when `invrt reference` is run for the first time
+- [ ] Return error when `invrt reference` finds no crawled urls
 
-  - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
-  - [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
-  - [ ] Implement an interactive init mode
-    - Prompt the user for a url
-  - [ ] Implement `invrt check` to load the homepage and retrieve the site title
-  - [#] Allow testing without a config file (relying on env vars if set)
+      If invrt_crawl has already run but there are no urls in the crawled_urls.txt
+      file invrt reference should return with an error.
 
+- [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
+- [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
+- [ ] Implement an interactive init mode
+  - Prompt the user for a url
+- [ ] Implement `invrt check` to load the homepage and retrieve the site title
+- [#] Allow testing without a config file (relying on env vars if set)
+- [ ] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
+  - [ ] Name the file 'plan.yml' and put it at the top of the .invrt directory
+  - [ ] Update the document when new paths are found when crawling with different profiles
 
 ### Options and Configuration (`invrt contig`)
 
