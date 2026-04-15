@@ -10,8 +10,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 # Task
 RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 
-# Neovim
-
+# Neovim + shell tools
 RUN apt-get update \
  && apt-get install -y \
       build-essential\
@@ -21,5 +20,12 @@ RUN apt-get update \
  && add-apt-repository ppa:neovim-ppa/unstable -y \
  && apt-get update \
  && apt-get install -y neovim \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Xdebug
+RUN add-apt-repository ppa:ondrej/php -y \
+ && apt-get update \
+ && apt-get install -y php8.5-xdebug \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
