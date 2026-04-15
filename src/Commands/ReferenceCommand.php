@@ -16,6 +16,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class ReferenceCommand extends BaseCommand
 {
+    public function __construct(
+        \App\Service\ConfigurationService $configurationService,
+        private readonly CrawlCommand $crawlCommand,
+    ) {
+        parent::__construct($configurationService);
+    }
+
     public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
         if ($this->boot($opts, $io) !== Command::SUCCESS) {
@@ -35,6 +42,15 @@ class ReferenceCommand extends BaseCommand
             "📸 Capturing references from '{$INVRT_ENVIRONMENT}' environment ({$INVRT_URL}) with profile: '{$INVRT_PROFILE}' and device: '{$INVRT_DEVICE}'",
             OutputInterface::VERBOSITY_VERBOSE,
         );
+
+        $crawlFilePath = $this->config['INVRT_CRAWL_FILE'] ?? '';
+        if ($crawlFilePath === '' || !is_readable($crawlFilePath)) {
+            $io->writeln('🕸️ No crawled URLs found — running crawl first.', OutputInterface::VERBOSITY_NORMAL);
+            $crawlResult = ($this->crawlCommand)($io, $opts);
+            if ($crawlResult !== Command::SUCCESS) {
+                return $crawlResult;
+            }
+        }
 
         if (($crawlValidation = $this->validateCrawledUrls($io)) !== Command::SUCCESS) {
             return $crawlValidation;

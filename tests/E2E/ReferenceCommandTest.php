@@ -24,10 +24,8 @@ class ReferenceCommandTest extends WebCommandTestCase
     public function testReferenceCommandCapturesScreenshots(): void
     {
         $this->setupFixture();
-
-        # Add a fake crawled urls file because we don't yet seem to auto-trigger a crawl.
         $this->fixture->writeCrawledUrlsFile('local', 'anonymous', ['/', '/about.html']);
-        
+
         $this->executeCommand('reference', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
         $this->assertCommandSuccess();
 
@@ -40,6 +38,30 @@ class ReferenceCommandTest extends WebCommandTestCase
         $this->assertDirectoryExists($refDir);
         $pngs = $this->findPngs($refDir);
         $this->assertGreaterThanOrEqual(2, count($pngs));
+        foreach ($pngs as $png) {
+            $this->assertGreaterThan(0, filesize($png), "PNG $png should not be empty");
+        }
+    }
+
+    public function testReferenceAutoTriggersCrawlWhenNoCrawlFileExists(): void
+    {
+        $this->setupFixture();
+
+        // No crawled_urls.txt — reference should auto-trigger crawl first
+        $this->executeCommand('reference', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+        $this->assertCommandSuccess();
+
+        // Crawl auto-trigger message
+        $this->assertOutputContains('🕸️ No crawled URLs found — running crawl first.');
+
+        // Reference proceeded after crawl
+        $this->assertOutputContains('📸 Capturing references');
+
+        // PNGs created
+        $refDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/bitmaps/reference';
+        $this->assertDirectoryExists($refDir);
+        $pngs = $this->findPngs($refDir);
+        $this->assertGreaterThanOrEqual(1, count($pngs));
         foreach ($pngs as $png) {
             $this->assertGreaterThan(0, filesize($png), "PNG $png should not be empty");
         }
