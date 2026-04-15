@@ -236,7 +236,7 @@ docker run -it --volume .:/dir ronan4000/invrt test --profile=authenticated</cod
 
     <script>
       const copyButton = document.getElementById('copy-btn');
-      const quickStart = document.getElementById('quick-start').innerText.trim();
+      const quickStartCommands = document.getElementById('quick-start').textContent.trim();
 
       const setButtonText = text => {
         copyButton.textContent = text;
@@ -247,18 +247,7 @@ docker run -it --volume .:/dir ronan4000/invrt test --profile=authenticated</cod
 
       copyButton.addEventListener('click', async () => {
         try {
-          if (navigator.clipboard?.writeText) {
-            await navigator.clipboard.writeText(quickStart);
-            setButtonText('Copied!');
-            return;
-          }
-
-          const temp = document.createElement('textarea');
-          temp.value = quickStart;
-          document.body.appendChild(temp);
-          temp.select();
-          document.execCommand('copy');
-          temp.remove();
+          await navigator.clipboard.writeText(quickStartCommands);
           setButtonText('Copied!');
         } catch {
           setButtonText('Press Ctrl/Cmd+C');
