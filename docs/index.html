@@ -170,7 +170,7 @@
         margin-top: 1.2rem;
         display: flex;
         flex-wrap: wrap;
-        gap: 0.9rem;
+        gap: rem;
       }
 
       a {
@@ -220,7 +220,8 @@
         <p class="tagline">
           A zero-config CLI tool for Visual Regression Testing (VRT) of 
           `<a href="https://drupal.org">Drupal</a>` and `<a href="https://backdropcms.org">Backdrop CMS</a>` web sites 
-          as an authenticated or anonymous user using <a href="https://playwright.dev">Playwright</a>.
+          as an authenticated or anonymous user using <a href="https://playwright.dev">Playwright</a>. 
+          Integrates with `<a href="https://ddev.com">ddev</a>`
         </p>
 
         <h2 class="section-title">$ quick-start</h2>
@@ -242,26 +243,9 @@ ddev invrt test</code></pre>
         </nav>
       </section>
     </main>
-
-    <script>
-      const copyButton = document.getElementById('copy-btn');
-      const quickStartCommands = document.getElementById('quick-start').textContent.trim();
-
-      const setButtonText = text => {
-        copyButton.textContent = text;
-        setTimeout(() => {
-          copyButton.textContent = 'Copy';
-        }, 1500);
-      };
-
-      copyButton.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(quickStartCommands);
-          setButtonText('Copied!');
-        } catch {
-          setButtonText('Press Ctrl/Cmd+C');
-        }
-      });
-    </script>
   </body>
+  <script>
+    // Initialize
+    new ClipboardJS('.copy-btn');
+  </script>
 </html>
