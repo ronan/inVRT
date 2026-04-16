@@ -96,7 +96,16 @@ tasks:
     desc: Bump patch version
     cmds:
       - npx release-it patch --ci --config tooling/.release-it.json
+  
+  version:bump:minor:
+    desc: Bump minor version
+    cmds:
+      - npx release-it minor --ci --config tooling/.release-it.json
 
+  version:bump:major:
+    desc: Bump major version
+    cmds:
+      - npx release-it major --ci --config tooling/.release-it.json
 
   release:publish:
     desc: Publish Docker image and ddev addon for current version
