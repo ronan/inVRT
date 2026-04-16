@@ -160,11 +160,13 @@ For AI agents and human developers.
   - Prompt the user for a url
 
 ### Advanced flow
+- [ ] Save reference output to 'INVRT_CAPTURE_DIR/reference_results.txt', save test results to 'INVRT_CAPTURE_DIR/test_results.txt'
+    - [ ] Use the new files to determine which steps have run.
 - [#] Implement `invrt check` to load the homepage and retrieve the site title
 - [#] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
-
   - [ ] Name the file 'plan.yml' and put it at the top of the .invrt directory
   - [ ] Update the document when new paths are found when crawling with different profiles
+  - [ ] Turn 'plan.yml' into 'test.json' with backstop test config in it.
 
 ### Options and Configuration (`invrt contig`)
 
@@ -194,8 +196,8 @@ For AI agents and human developers.
     - [ ] Allow differences to be approved
     - [ ] Allow comparison of different environments
     - [ ] Allow comparison of different profiles
-- [ ] Allow user comments on report to capture decisions and actions
-- [ ] Change 'exclude_urls' to 'exclude_paths' and make sure it works
+
+### Future Features
 - [ ] Better debug output during crawl
 - [ ] Rewrite the crawler
     - Make exclude_paths work and provide defaults for drupal/backdrop
