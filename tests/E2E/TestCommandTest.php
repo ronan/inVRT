@@ -54,6 +54,24 @@ class TestCommandTest extends WebCommandTestCase
         $this->assertGreaterThan(0, count($pngs));
     }
 
+    public function testTestAutoTriggersReferenceAndCrawlOnFirstRun(): void
+    {
+        $this->setUpFixture(true);
+
+        // No crawled_urls.txt and no reference bitmaps yet.
+        $this->executeCommand('test', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+        $this->assertCommandSuccess();
+
+        $this->assertOutputContains('📸 No reference screenshots found — capturing references first.');
+        $this->assertOutputContains('🕸️ No crawled URLs found — running crawl first.');
+
+        $dataDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/desktop/bitmaps';
+        $this->assertDirectoryExists($dataDir . '/reference');
+        $this->assertDirectoryExists($dataDir . '/test');
+        $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/reference')));
+        $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/test')));
+    }
+
     /** @return string[] */
     private function findPngs(string $dir): array
     {

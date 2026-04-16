@@ -259,7 +259,8 @@ YAML;
 
         if ($this->referencesAreMissing($captureDir)) {
             $this->logger->notice('📸 No reference screenshots found — capturing references first.');
-            if (($result = $this->runBackstop('reference', $env)) !== 0) {
+            // Reuse reference() so first-run prerequisites (crawl + URL validation) are enforced.
+            if (($result = $this->reference()) !== 0) {
                 return $result;
             }
         }
