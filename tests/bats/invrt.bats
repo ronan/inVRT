@@ -34,6 +34,8 @@ teardown() {
     run "$INVRT_BIN" list
     [ "$status" -eq 0 ]
     [[ "$output" == *"init"* ]]
+    [[ "$output" == *"approve"* ]]
+    [[ "$output" == *"baseline"* ]]
     [[ "$output" == *"crawl"* ]]
     [[ "$output" == *"reference"* ]]
     [[ "$output" == *"test"* ]]
@@ -45,7 +47,7 @@ teardown() {
 # ---------------------------------------------------------------------------
 
 @test "init: creates .invrt directory structure" {
-    run "$INVRT_BIN" init
+    run "$INVRT_BIN" init https://example.test
     [ "$status" -eq 0 ]
     [ -d "$TEST_DIR/.invrt" ]
     [ -f "$TEST_DIR/.invrt/config.yaml" ]
@@ -54,9 +56,11 @@ teardown() {
     [ -f "$TEST_DIR/.invrt/exclude_urls.txt" ]
 }
 
-@test "init: config.yaml contains environments, profiles, and devices sections" {
-    "$INVRT_BIN" init > /dev/null 2>&1
+@test "init: config.yaml contains the selected url and core sections" {
+    "$INVRT_BIN" init https://example.test --environment=stage > /dev/null 2>&1
     run grep -l "environments:" "$TEST_DIR/.invrt/config.yaml"
+    [ "$status" -eq 0 ]
+    run grep "https://example.test" "$TEST_DIR/.invrt/config.yaml"
     [ "$status" -eq 0 ]
     run grep "profiles:" "$TEST_DIR/.invrt/config.yaml"
     [ "$status" -eq 0 ]
@@ -65,15 +69,15 @@ teardown() {
 }
 
 @test "init: outputs success message" {
-    run "$INVRT_BIN" init
+    run "$INVRT_BIN" init https://example.test
     [ "$status" -eq 0 ]
     [[ "$output" == *"Initializing InVRT"* ]]
     [[ "$output" == *"initialized"* ]]
 }
 
 @test "init: fails when already initialized" {
-    "$INVRT_BIN" init > /dev/null 2>&1
-    run "$INVRT_BIN" init
+    "$INVRT_BIN" init https://example.test > /dev/null 2>&1
+    run "$INVRT_BIN" init https://example.test
     [ "$status" -ne 0 ]
     [[ "$output" == *"already initialized"* ]]
 }
@@ -90,7 +94,7 @@ teardown() {
 }
 
 @test "config: shows resolved configuration after init" {
-    "$INVRT_BIN" init > /dev/null 2>&1
+    "$INVRT_BIN" init https://example.test > /dev/null 2>&1
     run "$INVRT_BIN" config
     [ "$status" -eq 0 ]
     [[ "$output" == *"INVRT_URL"* ]]
@@ -99,7 +103,7 @@ teardown() {
 }
 
 @test "config: reflects custom URL from config file" {
-    "$INVRT_BIN" init > /dev/null 2>&1
+    "$INVRT_BIN" init https://example.test > /dev/null 2>&1
     cat > "$TEST_DIR/.invrt/config.yaml" << 'EOF'
 name: Test Project
 environments:
@@ -119,7 +123,7 @@ EOF
 }
 
 @test "config: fails on invalid YAML" {
-    "$INVRT_BIN" init > /dev/null 2>&1
+    "$INVRT_BIN" init https://example.test > /dev/null 2>&1
     echo ": invalid: yaml: [[[" > "$TEST_DIR/.invrt/config.yaml"
     run "$INVRT_BIN" config
     [ "$status" -ne 0 ]
@@ -127,23 +131,30 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# crawl / reference / test — require config
+# crawl / reference / test — auto init needs a url
 # ---------------------------------------------------------------------------
 
-@test "crawl: fails without config file" {
+@test "crawl: fails without config file when no url is available" {
+    run bash -lc "printf '\n' | \"$INVRT_BIN\" crawl"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"A URL is required to initialize inVRT."* ]]
+}
+
+@test "reference: fails without config file when no url is available" {
+    run bash -lc "printf '\n' | \"$INVRT_BIN\" reference"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"A URL is required to initialize inVRT."* ]]
+}
+
+@test "test: fails without config file when no url is available" {
+    run bash -lc "printf '\n' | \"$INVRT_BIN\" test"
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"A URL is required to initialize inVRT."* ]]
+}
+
+@test "crawl: auto initializes when INVRT_URL is provided" {
+    export INVRT_URL="https://example.test"
     run "$INVRT_BIN" crawl
     [ "$status" -ne 0 ]
-    [[ "$output" == *"Configuration file not found"* ]]
-}
-
-@test "reference: fails without config file" {
-    run "$INVRT_BIN" reference
-    [ "$status" -ne 0 ]
-    [[ "$output" == *"Configuration file not found"* ]]
-}
-
-@test "test: fails without config file" {
-    run "$INVRT_BIN" test
-    [ "$status" -ne 0 ]
-    [[ "$output" == *"Configuration file not found"* ]]
+    [[ "$output" == *"Initializing InVRT"* ]]
 }

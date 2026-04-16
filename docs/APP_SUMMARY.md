@@ -7,10 +7,12 @@ inVRT is a CLI tool for Visual Regression Testing (VRT) of CMS-driven websites (
 ## Core Workflow
 
 ```
-invrt init        # One-time project setup
+invrt init <url>  # One-time project setup
 invrt crawl       # Discover URLs by crawling the site
 invrt reference   # Capture baseline screenshots
 invrt test        # Compare current screenshots against the baseline
+invrt approve     # Approve the latest test images
+invrt baseline    # Ensure reference + test exist, then approve
 ```
 
 Re-run `invrt reference` after intentional visual changes. Re-run `invrt crawl && invrt reference` after structural site changes.
@@ -20,16 +22,22 @@ Re-run `invrt reference` after intentional visual changes. Re-run `invrt crawl &
 ## Commands
 
 ### `init`
-Scaffolds `.invrt/` in the current directory. Creates `config.yaml`, `exclude_urls.txt`, `data/`, and `scripts/`. Fails if already initialized.
+Scaffolds `.invrt/` in the current directory. Creates `config.yaml`, `exclude_urls.txt`, `data/`, and `scripts/`. Saves the provided URL to `environments.<selected-environment>.url`. If no URL argument is provided in an interactive terminal, prompts for one. Fails if already initialized.
+
+### `approve`
+Runs BackstopJS approve for the current profile/device/environment combination.
+
+### `baseline`
+Ensures reference screenshots exist, ensures test screenshots exist, then runs approve for the current profile/device/environment combination.
 
 ### `crawl`
-Recursively crawls `INVRT_URL` using `wget`. Outputs a URL list to `.invrt/data/<profile>/<env>/crawled_urls.txt`. Respects `max_crawl_depth` and `max_pages`. Skips patterns in `exclude_urls.txt`. Authenticates first if profile has credentials. Errors if no usable URLs are found (shows last 5 lines of crawl log).
+Recursively crawls `INVRT_URL` using `wget`. Outputs a URL list to `.invrt/data/<profile>/<env>/crawled_urls.txt`. Respects `max_crawl_depth` and `max_pages`. Skips patterns in `exclude_urls.txt`. Authenticates first if profile has credentials. If no config exists yet, initializes the project first. Errors if no usable URLs are found (shows last 5 lines of crawl log).
 
 ### `reference`
-Reads the crawled URL list and captures a Playwright/Chromium screenshot of each page. Stores screenshots in `.invrt/data/<profile>/<env>/bitmaps/reference/`.
+Reads the crawled URL list and captures a Playwright/Chromium screenshot of each page. Stores screenshots in `.invrt/data/<profile>/<env>/bitmaps/reference/`. If no config exists yet, initializes the project first.
 
 ### `test`
-Captures fresh screenshots and compares them against reference images using BackstopJS (ResembleJS). Outputs an HTML report to `.invrt/data/<profile>/<env>/reports/index.html`. If no reference exists, runs `reference` automatically first. Exits `0` on pass, non-zero on failure.
+Captures fresh screenshots and compares them against reference images using BackstopJS (ResembleJS). Outputs an HTML report to `.invrt/data/<profile>/<env>/reports/index.html`. If no config exists yet, initializes the project first. If no reference exists, runs `reference` automatically first. Exits `0` on pass, non-zero on failure.
 
 ### `config`
 Displays the resolved configuration for the given options. Useful for verifying settings before a run. Prints guidance to run `invrt init` if no config file exists.

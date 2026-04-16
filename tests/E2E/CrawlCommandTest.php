@@ -72,6 +72,21 @@ class CrawlCommandTest extends WebCommandTestCase
         $this->assertSame('', file_get_contents($urlsFile));
     }
 
+    public function testCrawlAutoInitializesWhenConfigIsMissing(): void
+    {
+        $this->fixture->deleteInvrtDirectory();
+        $this->executeCommandWithInputs('crawl', [$this->webserverUrl()], [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+
+        $this->assertCommandSuccess();
+        $this->assertOutputContains('No configuration file found. Initializing inVRT first.');
+        $this->assertOutputContains('What URL should inVRT use?');
+
+        $urlsFile = $this->fixture->getInvrtDir() . '/data/local/anonymous/crawled_urls.txt';
+        $this->assertFileExists($urlsFile);
+        $this->assertGreaterThan(0, count(array_filter(explode("\n", (string) file_get_contents($urlsFile)))));
+        $this->assertConfigValue('environments.local.url', $this->webserverUrl());
+    }
+
     /** Write config pointing at the test webserver — no pre-seeded URL list needed. */
     private function setupCrawlFixture(): void
     {
@@ -83,4 +98,3 @@ class CrawlCommandTest extends WebCommandTestCase
         ]);
     }
 }
-

@@ -7,6 +7,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Core orchestration layer for inVRT operations.
@@ -26,14 +27,23 @@ class Runner
     // -------------------------------------------------------------------------
 
     /** Initialize a new inVRT project directory with default config. */
-    public function init(): int
+    public function init(?string $url = null): int
     {
         $cwd        = $this->config->get('INVRT_CWD', '');
         $directory  = $this->config->get('INVRT_DIRECTORY', '');
         $configFile = $this->config->get('INVRT_CONFIG_FILE', '');
+        $environment = $this->config->get('INVRT_ENVIRONMENT', 'local');
+        $profile     = $this->config->get('INVRT_PROFILE', 'anonymous');
+        $device      = $this->config->get('INVRT_DEVICE', 'desktop');
 
         if (empty($cwd)) {
             $this->logger->error("⚠️  I can't make a directory here because I don't know where I am.");
+            return 1;
+        }
+
+        $url = trim((string) $url);
+        if ($url === '') {
+            $this->logger->error('A URL is required to initialize inVRT.');
             return 1;
         }
 
@@ -61,50 +71,21 @@ class Runner
         }
         $this->logger->info('✓ Created data directories for generated data, and user scripts.');
 
-        $configContent = <<<'YAML'
-# InVRT Configuration File
-# This file is used to store configuration settings for InVRT.
-# You can customize the settings below as needed.
-
-name: My InVRT Project
-
-environments:
-  local:
-    name: Local
-    url: http://localhost
-
-  dev:
-    name: Development
-    url: https://dev.example.com
-
-  prod:
-    name: Production
-    url: https://prod.example.com
-
-profiles:
-  anonymous:
-    name: Anonymous Visitor Profile
-    description: Test the site as an anonymous visitor with no special permissions.
-
-  admin:
-    name: Admin Profile
-    description: A profile with admin privileges.
-    username: admin
-    password: password123
-
-devices:
-  desktop:
-    name: Desktop Viewport
-    description: A desktop sized viewport for testing.
-    viewport_width: 1920
-    viewport_height: 1080
-
-  mobile:
-    name: Mobile Viewport
-    description: A viewport for mobile testing.
-    viewport_width: 375
-    viewport_height: 667
-YAML;
+        $configContent = Yaml::dump([
+            'name' => basename($cwd) ?: 'My InVRT Project',
+            'settings' => [],
+            'environments' => [
+                $environment => [
+                    'url' => $url,
+                ],
+            ],
+            'profiles' => [
+                $profile => [],
+            ],
+            'devices' => [
+                $device => [],
+            ],
+        ], 4, 2);
 
         if (file_put_contents($configFile, $configContent) === false) {
             $this->logger->error('Failed to create config.yaml');
@@ -268,6 +249,42 @@ YAML;
         return $this->runBackstop('test', $env);
     }
 
+    /** Approve the latest BackstopJS test results. */
+    public function approve(): int
+    {
+        $env         = $this->config->all();
+        $url         = $env['INVRT_URL']         ?? '';
+        $profile     = $env['INVRT_PROFILE']     ?? '';
+        $device      = $env['INVRT_DEVICE']      ?? '';
+        $environment = $env['INVRT_ENVIRONMENT'] ?? '';
+
+        $this->logger->notice("✅ Approving latest results for '$environment' environment ($url) with profile: '$profile' and device: '$device'");
+
+        return $this->runBackstop('approve', $env);
+    }
+
+    /** Create or refresh the approved visual baseline. */
+    public function baseline(): int
+    {
+        $captureDir = $this->config->get('INVRT_CAPTURE_DIR', '');
+
+        if ($this->referencesAreMissing($captureDir)) {
+            $this->logger->notice('📸 No reference screenshots found — capturing references first.');
+            if (($result = $this->reference()) !== 0) {
+                return $result;
+            }
+        }
+
+        if ($this->testResultsAreMissing($captureDir)) {
+            $this->logger->notice('🔬 No test screenshots found — running test first.');
+            if (($result = $this->test()) !== 0) {
+                return $result;
+            }
+        }
+
+        return $this->approve();
+    }
+
     /** Attempt login using credentials from the resolved config. */
     public function login(): int
     {
@@ -383,15 +400,26 @@ YAML;
 
     private function referencesAreMissing(string $captureDir): bool
     {
-        $refDir = $captureDir . '/bitmaps/reference';
-        if (!is_dir($refDir)) {
+        return $this->captureImagesAreMissing($captureDir . '/bitmaps/reference');
+    }
+
+    private function testResultsAreMissing(string $captureDir): bool
+    {
+        return $this->captureImagesAreMissing($captureDir . '/bitmaps/test');
+    }
+
+    private function captureImagesAreMissing(string $dir): bool
+    {
+        if (!is_dir($dir)) {
             return true;
         }
-        foreach (new \FilesystemIterator($refDir) as $entry) {
+
+        foreach (new \FilesystemIterator($dir) as $entry) {
             if ($entry->isFile() && strtolower($entry->getExtension()) === 'png') {
                 return false;
             }
         }
+
         return true;
     }
 

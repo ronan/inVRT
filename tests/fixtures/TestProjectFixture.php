@@ -232,6 +232,15 @@ class TestProjectFixture
         return $this;
     }
 
+    public function deleteInvrtDirectory(): self
+    {
+        if (is_dir($this->invrtDir)) {
+            $this->rmdirRecursive($this->invrtDir);
+        }
+
+        return $this;
+    }
+
     /**
      * Create data directory structure for a profile/environment
      */

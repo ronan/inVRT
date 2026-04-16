@@ -12,13 +12,13 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ReferenceCommandTest extends WebCommandTestCase
 {
-    public function testRequiresConfig(): void
+    public function testFailsWhenConfigIsMissingAndNoUrlIsProvided(): void
     {
         $this->setupFixture();
         $this->fixture->deleteConfig();
         $this->executeCommand('reference');
         $this->assertCommandFailure(1);
-        $this->assertOutputContains('Configuration file not found');
+        $this->assertOutputContains('A URL is required to initialize inVRT.');
     }
 
     public function testReferenceCommandCapturesScreenshots(): void

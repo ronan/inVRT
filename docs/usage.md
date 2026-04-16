@@ -11,6 +11,8 @@ inVRT is a CLI tool for running Visual Regression Testing (VRT) against CMS-driv
   - [Workflow Overview](#workflow-overview)
   - [Commands](#commands)
     - [`init`](#init)
+    - [`approve`](#approve)
+    - [`baseline`](#baseline)
     - [`crawl`](#crawl)
     - [`reference`](#reference)
     - [`test`](#test)
@@ -23,11 +25,13 @@ inVRT is a CLI tool for running Visual Regression Testing (VRT) against CMS-driv
 
 ## Workflow Overview
 
-```
-invrt init        # One-time setup — creates .invrt/ and config.yaml
+``` 
+invrt init <url>  # One-time setup — creates .invrt/ and saves the site URL
 invrt crawl       # Discover URLs by crawling the site
 invrt reference   # Capture baseline screenshots
 invrt test        # Compare current screenshots against the baseline
+invrt approve     # Promote the latest test screenshots to the approved baseline
+invrt baseline    # Ensure reference + test exist, then approve them
 ```
 
 Run `invrt crawl && invrt reference` to discover the site structure  and establish a visual baseline.
@@ -47,7 +51,7 @@ Re-run `invrt crawl && invrt reference` whenever intentional site structire chan
 Scaffold a new inVRT project in the current directory.
 
 ```
-invrt init
+invrt init <url> [--environment=<name>] [--profile=<name>] [--device=<name>]
 ```
 
 Creates the following structure:
@@ -60,7 +64,9 @@ Creates the following structure:
 └── scripts/              # Optional user-defined hook scripts
 ```
 
-The generated `config.yaml` includes example environments, profiles, and devices. Edit it before running other commands.
+The generated `config.yaml` is intentionally minimal. It writes the URL to `environments.<selected-environment>.url` and creates the selected environment, profile, and device keys.
+
+If you omit the URL argument in an interactive terminal, inVRT prompts for it.
 
 **Output:**
 
@@ -78,6 +84,26 @@ The generated `config.yaml` includes example environments, profiles, and devices
 ⚠️  InVRT is already initialized for this project. Please remove the .invrt directory if you want to re-initialize.
 ```
 
+### `approve`
+
+Approve the latest test images for the current profile/device/environment combination.
+
+```
+invrt approve [--profile=<name>] [--device=<name>] [--environment=<name>]
+```
+
+This runs `backstop approve` against the current capture directory.
+
+### `baseline`
+
+Create or refresh an approved baseline in one command.
+
+```
+invrt baseline [--profile=<name>] [--device=<name>] [--environment=<name>]
+```
+
+If reference screenshots are missing, `baseline` runs `reference`. If test screenshots are missing, it runs `test`. It then runs `approve`.
+
 ---
 
 ### `crawl`
@@ -89,6 +115,8 @@ invrt crawl [--profile=<name>] [--device=<name>] [--environment=<name>]
 ```
 
 Uses `wget` to recursively follow links from `INVRT_URL`, respecting `max_crawl_depth` and `max_pages`. The resulting URL list is written to `.invrt/data/<profile>/<environment>/crawled_urls.txt`.
+
+If no config exists yet, `crawl` initializes the project first. When no URL argument or `INVRT_URL` environment variable is available, it prompts for the URL interactively.
 
 If the selected profile has credentials, inVRT logs in first and crawls as the authenticated user (using session cookies).
 
@@ -138,6 +166,8 @@ Reads the URL list produced by `crawl` and captures a screenshot of each page us
 
 If no `crawled_urls.txt` file exists for the current profile/device/environment combination, `crawl` is run automatically before capturing screenshots.
 
+If no config exists yet, `reference` initializes the project first, then continues with the normal first-run flow.
+
 Run this command whenever you make intentional visual changes to establish a new baseline.
 
 **Examples:**
@@ -175,6 +205,8 @@ Captures fresh screenshots of all crawled URLs and compares them against the ref
 If no reference screenshots exist for the current profile/device/environment combination, the
 reference step is run automatically before the test. If crawled URLs are also missing, `reference`
 automatically runs `crawl` first.
+
+If no config exists yet, `test` initializes the project first, then continues through the normal first-run chain.
 
 Exits with code `0` if all comparisons pass, non-zero if any fail.
 

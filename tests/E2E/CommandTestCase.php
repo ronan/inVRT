@@ -2,6 +2,8 @@
 
 namespace Tests\E2E;
 
+use App\Commands\ApproveCommand;
+use App\Commands\BaselineCommand;
 use App\Commands\ConfigCommand;
 use App\Commands\CrawlCommand;
 use App\Commands\InitCommand;
@@ -41,6 +43,8 @@ abstract class CommandTestCase extends TestCase
         $this->app = new Application('inVRT CLI', '1.0.2');
 
         $this->app->addCommand(new InitCommand());
+        $this->app->addCommand(new ApproveCommand());
+        $this->app->addCommand(new BaselineCommand());
         $this->app->addCommand(new CrawlCommand());
         $this->app->addCommand(new ReferenceCommand());
         $this->app->addCommand(new TestCommand());
@@ -92,7 +96,32 @@ abstract class CommandTestCase extends TestCase
         $testInput = array_merge(['command' => $commandName], $input);
 
         // Execute the command
-        $this->commandTester->execute($testInput, $options + ['verbosity' => OutputInterface::VERBOSITY_DEBUG]);
+        $this->commandTester->execute($testInput, $options + [
+            'interactive' => false,
+            'verbosity' => OutputInterface::VERBOSITY_DEBUG,
+        ]);
+
+        return $this->commandTester;
+    }
+
+    /**
+     * Execute a command with interactive answers.
+     *
+     * @param list<string> $inputs Prompt responses for QuestionHelper
+     * @param array<string, mixed> $input
+     * @param array<string, mixed> $options
+     */
+    protected function executeCommandWithInputs(string $commandName, array $inputs, array $input = [], array $options = []): CommandTester
+    {
+        $command = $this->app->find($commandName);
+        $this->commandTester = new CommandTester($command);
+        $this->commandTester->setInputs($inputs);
+
+        $testInput = array_merge(['command' => $commandName], $input);
+        $this->commandTester->execute($testInput, $options + [
+            'interactive' => true,
+            'verbosity' => OutputInterface::VERBOSITY_DEBUG,
+        ]);
 
         return $this->commandTester;
     }
@@ -213,7 +242,12 @@ abstract class CommandTestCase extends TestCase
         $this->assertEquals(
             $expectedValue,
             $value,
-            "Config value mismatch at $key. Expected: $expectedValue, Got: $value",
+            sprintf(
+                'Config value mismatch at %s. Expected: %s, Got: %s',
+                $key,
+                var_export($expectedValue, true),
+                var_export($value, true),
+            ),
         );
     }
 

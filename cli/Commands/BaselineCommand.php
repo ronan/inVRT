@@ -10,11 +10,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'test',
-    description: 'Run visual regression tests',
-    help: 'Runs visual regression tests comparing current screenshots against reference screenshots.',
+    name: 'baseline',
+    description: 'Create or refresh the approved visual baseline',
+    help: 'Ensures reference and test artifacts exist, then approves the latest visual results.',
 )]
-class TestCommand extends BaseCommand
+class BaselineCommand extends BaseCommand
 {
     public function __invoke(InputInterface $input, SymfonyStyle $io, #[MapInput] InvrtInput $opts): int
     {
@@ -22,6 +22,6 @@ class TestCommand extends BaseCommand
             return $result;
         }
 
-        return $this->runner->test() === 0 ? Command::SUCCESS : Command::FAILURE;
+        return $this->runner->baseline() === 0 ? Command::SUCCESS : Command::FAILURE;
     }
 }

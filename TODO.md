@@ -66,6 +66,8 @@ For AI agents and human developers.
     - Move the rest of the Console app into a directory called /cli and rewrite it to use the new core library.
     - Make sure all of the existing tests still pass.
 
+  - [ ] Move js source into `core/js` and refactor and hardcode the path in the php code. 
+
 ## Documentation
 
 - [x] Create `docs/APP_SUMMARY.md` — a brief, agent-optimized application summary
@@ -143,24 +145,24 @@ For AI agents and human developers.
       If invrt_crawl has already run but there are no urls in the crawled_urls.txt
       file invrt reference should return with an error.
 
-- [ ] Add a url argument to the `invrt init` command
+- [x] Add a url argument to the `invrt init` command
     - Remove the code that adds the default config file.
     - Save the passed in url to a new fresh config.yaml.
     - Respect the passed in config parameters to seve it to the right section of config.yaml
-- [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
-- [ ] Implement `invrt approve` which:
+- [x] Auto trigger `invrt init` when `invrt crawl` is run for the first time
+- [x] Implement `invrt approve` which:
     - runs `backstop approve`
-- [ ] Make a `invrt baseline` command which:
+- [x] Make a `invrt baseline` command which:
     - runs `invrt reference` if needed 
     - runs `invrt test` if needed
     - runs `invrt approve`
-- [ ] Implement an interactive init mode
+- [x] Implement an interactive init mode
   - Prompt the user for a url
-- [#] Implement `invrt check` to load the homepage and retrieve the site title
-- [#] Allow testing without a config file (relying on env vars if set)
 
 ### Advanced flow
+- [#] Implement `invrt check` to load the homepage and retrieve the site title
 - [#] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
+
   - [ ] Name the file 'plan.yml' and put it at the top of the .invrt directory
   - [ ] Update the document when new paths are found when crawling with different profiles
 
