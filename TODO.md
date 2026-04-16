@@ -143,13 +143,18 @@ For AI agents and human developers.
       If invrt_crawl has already run but there are no urls in the crawled_urls.txt
       file invrt reference should return with an error.
 
+- [ ] Add a url argument to the `invrt init` command
+    - Remove the code that adds the default config file.
+    - Save the passed in url to a new fresh config.yaml.
+    - Respect the passed in config parameters to seve it to the right section of config.yaml
 - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
-- [ ] Auto trigger `invrt test` when `invrt report` is run for the first time
 - [ ] Implement an interactive init mode
   - Prompt the user for a url
 - [ ] Implement `invrt check` to load the homepage and retrieve the site title
 - [#] Allow testing without a config file (relying on env vars if set)
-- [ ] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
+
+### Advanced flow
+- [#] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
   - [ ] Name the file 'plan.yml' and put it at the top of the .invrt directory
   - [ ] Update the document when new paths are found when crawling with different profiles
 
