@@ -14,13 +14,11 @@ The codebase is somewhat language agnostic. Use the right language for job at ha
 
 Save implementation plans to the `plans/` directory so they are tracked with the changes.
 
-Track objectives in the [todo file](TODO.md).
+Do not read past plans when implementing new plans as they may not represent the current desired behavior.
 
 Write the plan before you begin the implementation. Ask for permission before implementing the plan. Do not ask until the plan is in the `plans/` diretory.
 
 Never commit anything to git.
-
-When writing commit messages don't add `chore:`, `feat:` etc.
 
 ## Track tasks with the todo file
 
@@ -32,23 +30,15 @@ If you complete a task you can put an 'x' between the square brackets on that li
 
 Don't track todo's or task progress in any other system
 
-## How to communicate with the team
+## Communicating
 
 Use simple clear language. There is no need for niceties and chit chat. Be brief.
 
-Before you act Create a brief outline of your plan of action and ask the user before proceeding.
-
 If you have a question, ask it. If you don't understand something, ask for clarification.
-
-If you see a problem, point it out.
-
-If you have an idea for improvement, share it.
 
 Show the output of terminal commands you run to test your code, so I can see the results and understand your thought process.
 
-Get approval for refactors and new dependencies before implementing them. Ask the user before proceeding, don't just propose and continue.
-
-## How to Write Code for This Project
+## Writing Code
 
 Follow the [Coding Standards](docs/CODING_STANDARDS.md)
 
@@ -70,7 +60,7 @@ Code should pass tests and linting: `task test`
 
 ### PHP/Console Specifics
 
-Add a verbosity level for all calls to $output->writeln.
+Add a verbosity level for all calls to $logger
 
 ## Testing
 
@@ -96,14 +86,13 @@ Clean up after testing. E2E tests should use temporary directories and remove th
 
 Run `task test` in the terminal to test and lint code.
 
-
 ## The Usage Docs (documentation first development)
 
-The functionality of the inVRT app is described in the [usage docs](docs/usage.md).
+`docs/usage.md` is for humans. Keep it brief.
 
-Document new features in the usage docs before building them. Explain all inputs, give examples, show outputs. Use code snippets.
+`docs/APP_SUMMARY.md` is for agents. Describe every new behavior here. Aim to be able to rebuild the application from scratch using this document. Do not describe implementation in this document.
 
-Defer to usage docs for business logic and behavior and suggest updates where there are gaps.
+Document new features in the usage docs before building them. Explain all inputs, give examples, show outputs.
 
 ## Architecture
 
