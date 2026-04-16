@@ -1,11 +1,11 @@
 {
   "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
   "git": {
-    "requireCleanWorkingDir": true,
+    "requireCleanWorkingDir": false,
     "requireUpstream": true,
     "commitMessage": "Release v${version}",
     "tagName": "v${version}",
-    "push": true,
+    "push": false,
     "pushArgs": [
       "--follow-tags"
     ]
@@ -24,7 +24,6 @@
       "out": [
         "VERSION.txt",
         "composer.json",
-        "docs/index.html",
         {
           "file": "cli/invrt.php",
           "type": "text/php"
