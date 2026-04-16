@@ -24,8 +24,9 @@
       "out": [
         "VERSION.txt",
         "composer.json",
+        "docs/index.html",
         {
-          "file": "src/invrt.php",
+          "file": "cli/invrt.php",
           "type": "text/php"
         },
         {
