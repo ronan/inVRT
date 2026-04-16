@@ -1,7 +1,7 @@
 <?php
 
 $finder = (new PhpCsFixer\Finder())
-    ->in(__DIR__.'/../src')
+    ->in([__DIR__.'/../core/src', __DIR__.'/../cli'])
     ->exclude(['vendor', 'build', 'coverage', 'tests/fixtures'])
     ->notPath('node_modules')
     ;

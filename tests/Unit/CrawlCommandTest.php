@@ -2,28 +2,21 @@
 
 namespace Tests\Unit;
 
-use App\Commands\CrawlCommand;
-use App\Input\InvrtInput;
-use App\Service\ConfigurationService;
+use InVRT\Core\Runner;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tests for CrawlCommand::parseUrlsFromLog()
+ * Tests for Runner::parseUrlsFromLog()
  */
 class CrawlCommandTest extends TestCase
 {
     private string $tempDir;
-    private \ReflectionMethod $method;
-    private CrawlCommand $command;
 
     protected function setUp(): void
     {
         $class = (new \ReflectionClass($this))->getShortName();
         $this->tempDir = dirname(__DIR__, 2) . '/scratch/tests/' . $class . '/' . $this->name();
         mkdir($this->tempDir, 0755, true);
-
-        $this->command = new CrawlCommand(new ConfigurationService());
-        $this->method = new \ReflectionMethod(CrawlCommand::class, 'parseUrlsFromLog');
     }
 
     protected function tearDown(): void
@@ -34,8 +27,7 @@ class CrawlCommandTest extends TestCase
 
     private function parse(string $logFile, string $baseUrl = 'https://example.com'): array
     {
-        $outputFile = "$this->tempDir/urls.txt";
-        return $this->method->invoke($this->command, $logFile, $baseUrl, $outputFile);
+        return Runner::parseUrlsFromLog($logFile, $baseUrl);
     }
 
     public function testParsesAllUrlsFromFixture(): void

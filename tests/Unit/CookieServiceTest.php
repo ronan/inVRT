@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Service\CookieService;
+use InVRT\Core\Service\CookieService;
 use PHPUnit\Framework\TestCase;
 
 /**

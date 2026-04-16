@@ -65,7 +65,7 @@ abstract class WebCommandTestCase extends CommandTestCase
     }
 
     /** Write config + crawled_urls.txt pointing at the test webserver. */
-    protected function setUpFixture(bool $clear = false): void
+    protected function setUpFixture(bool $clear = true): void
     {
         parent::setUpFixture($clear);
         $this->fixture->writeConfig([

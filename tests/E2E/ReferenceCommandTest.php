@@ -34,7 +34,7 @@ class ReferenceCommandTest extends WebCommandTestCase
         $this->assertOutputContains($this->webserverUrl());
 
         // PNGs created
-        $refDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/bitmaps/reference';
+        $refDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/desktop/bitmaps/reference';
         $this->assertDirectoryExists($refDir);
         $pngs = $this->findPngs($refDir);
         $this->assertGreaterThanOrEqual(2, count($pngs));
@@ -58,7 +58,7 @@ class ReferenceCommandTest extends WebCommandTestCase
         $this->assertOutputContains('📸 Capturing references');
 
         // PNGs created
-        $refDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/bitmaps/reference';
+        $refDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/desktop/bitmaps/reference';
         $this->assertDirectoryExists($refDir);
         $pngs = $this->findPngs($refDir);
         $this->assertGreaterThanOrEqual(1, count($pngs));
@@ -77,7 +77,6 @@ class ReferenceCommandTest extends WebCommandTestCase
 
         $this->assertOutputContains('[debug] Bootstrapping command');
         $this->assertOutputContains('[debug] Running BackstopJS command');
-        $this->assertOutputContains('Using Playwright engine scripts from:');
         $this->assertOutputContains('[debug] BackstopJS exit code: 0');
     }
 

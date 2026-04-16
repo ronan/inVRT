@@ -1,15 +1,14 @@
 <?php
 
-### Auto-generated from docs/config.schema.yaml — do not edit directly. Run `task build:templates` to regenerate.
-
-namespace App\Service;
+namespace InVRT\Core;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-class InvrtConfiguration implements ConfigurationInterface
+/** Config schema and hard-coded defaults. Auto-generated from docs/config.schema.yaml — do not edit directly. */
+class ConfigSchema implements ConfigurationInterface
 {
-    /** Hard-coded defaults — applied when key is absent from all config sections. */
+    /** Hard-coded defaults — applied when a key is absent from all config sections. */
     public const DEFAULTS = [
         'url' => '',
         'login_url' => '',
@@ -157,15 +156,5 @@ class InvrtConfiguration implements ConfigurationInterface
             ->end();
 
         return $tb;
-    }
-
-    public function keys(): array
-    {
-        return array_keys(self::DEFAULTS);
-    }
-
-    public function defaults(): array
-    {
-        return self::DEFAULTS;
     }
 }

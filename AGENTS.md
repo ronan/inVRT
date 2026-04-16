@@ -108,34 +108,43 @@ Defer to usage docs for business logic and behavior and suggest updates where th
 ## Architecture
 
 ```
-Symfony Console Commands (src/Commands/)
+Symfony Console Commands (cli/Commands/)
          ↓
-  Service Layer (src/Service/)
+  InVRT\Core\Runner (core/src/Runner.php)
          ↓
-  Bash scripts (src/*.sh)  ←→  Node.js (src/*.js, Playwright, BackstopJS)
+  InVRT\Core\Configuration (core/src/Configuration.php)
+  InVRT\Core\Service\LoginService, CookieService
+         ↓
+  Node.js (src/*.js, Playwright, BackstopJS)
 ```
 
-Most commands extend `BaseCommand` and expose an invokable `__invoke()` method. `EnvironmentService` is injected into `BaseCommand` via constructor DI — the entry point (`src/invrt.php`) uses `symfony/dependency-injection` with a `ContainerBuilder` to wire services and commands automatically. Commands call `$this->boot($opts, $io)` to initialise the environment and handle login, then work directly with the returned env array.
+The codebase is split into two layers:
 
-For process execution, commands should use `executeScript()` for bash-driven flows and `runBackstop()` for BackstopJS flows so subprocess handling stays consistent.
+- **`core/`** (`InVRT\Core\`) — framework-independent business logic. `Configuration` loads, merges, and exports config. `Runner` orchestrates crawl, reference, test, init, and config operations. `Service\LoginService` and `Service\CookieService` are utility services. Core accepts a PSR-3 `LoggerInterface` for output.
+- **`cli/`** (`App\`) — thin Symfony Console wiring. Commands extend `BaseCommand`, call `$this->boot($opts, $io)`, then delegate to `$this->runner`.
 
-**Exceptions:** `InitCommand` is a standalone invokable command because it does not need resolved inVRT environment variables and is registered directly without DI. `ConfigCommand` still extends `BaseCommand`, but calls `$this->boot($opts, $io, requiresConfig: false)` because it needs the project directory without requiring an existing config file.
+`BaseCommand::boot()` creates a `Configuration` from resolved env vars + options, exports it to the process environment, creates a `ConsoleLogger` wrapping the Symfony output, and builds a `Runner`. Commands call `$this->runner->crawl()` etc. and return the exit code.
 
-**Configuration merging** in `EnvironmentService` processes sections in this order — later sections overwrite earlier ones (highest precedence last):
+**Configuration merging** in `Configuration::resolve()` processes sources in this order — earlier sources win (highest precedence first):
 
-1. `environments.<name>` block — applied first
-2. `profiles.<name>` block — overwrites environment values
-3. `devices.<name>` block — applied last, highest precedence
+1. `$env` array passed to constructor (includes INVRT_PROFILE, INVRT_ENVIRONMENT, INVRT_DEVICE from CLI opts + process env)
+2. `devices.<name>` block from YAML
+3. `profiles.<name>` block from YAML
+4. `environments.<name>` block from YAML
+5. `settings` block from YAML
+6. Hard-coded defaults (`ConfigSchema::DEFAULTS`)
 
-Resolved values are exported as `putenv()` environment variables so bash and Node scripts can read them.
+Resolved values are exported as `putenv()` environment variables so Node scripts can read them.
 
 Refer to [The configuration documentation](docs/configuration.md) for details on how configuration works. 
 
 ## Key Conventions
 
 ### Namespaces & File Layout
-- `App\Commands\` → `src/Commands/`
-- `App\Service\` → `src/Service/`
+- `App\Commands\` → `cli/Commands/`
+- `App\Input\` → `cli/Input/`
+- `InVRT\Core\` → `core/src/`
+- `InVRT\Core\Service\` → `core/src/Service/`
 - `Tests\Unit\` → `tests/Unit/`
 - `Tests\E2E\` → `tests/e2e/`
 - `Tests\Fixtures\` → `tests/fixtures/`
@@ -143,16 +152,16 @@ Refer to [The configuration documentation](docs/configuration.md) for details on
 ### Adding a New Command
 1. Use Symfony's attribute-based command registration with `#[AsCommand(name: '...', description: '...', help: '...')]`
 2. Prefer an invokable command class with `public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int`
-3. Extend `BaseCommand` when the command needs resolved inVRT environment variables, config loading, or login handling
-4. Inside `__invoke()`, call `$result = $this->boot($opts, $io)`, check `if (is_int($result)) return $result;`, then work directly with `$result` as the env array
-5. Register the new command in `src/invrt.php` via `$container->autowire(NewCommand::class)->setPublic(true)` and add it to the app loop
-6. Use `executeScript()` for bash-driven commands and `runBackstop()` for BackstopJS flows instead of rebuilding process bootstrapping in each command
+3. Extend `BaseCommand` — it handles config loading, env export, runner creation, and optional login
+4. Inside `__invoke()`, call `$result = $this->boot($opts, $io)`, return if not `Command::SUCCESS`, then call `$this->runner->methodName()`
+5. Add business logic to `InVRT\Core\Runner` as a new method, using `$this->logger` for output
+6. Register the new command in `cli/invrt.php` via `$container->autowire(NewCommand::class)->setPublic(true)` and add it to the app loop
 7. Use `InvrtInput` with `#[MapInput]` for the shared `--profile`, `--device`, and `--environment` options instead of defining those options per command
-8. Return Symfony `Command::SUCCESS` or `Command::FAILURE` codes explicitly and add a verbosity level to every `$io->writeln()` call
-9. Only skip `BaseCommand` for true exceptions that do not need environment bootstrapping, such as `init`
+8. Return Symfony `Command::SUCCESS` or `Command::FAILURE` codes explicitly
+9. Use `$this->requiresLogin = false` in the command class if login should be skipped; pass `requiresConfig: false` to `boot()` if the config file need not exist
 
 ### Static Service Classes
-`LoginService` and `CookieService` are entirely static — no instantiation. Keep new utility-style services static unless state is required.
+`LoginService` and `CookieService` (both in `InVRT\Core\Service\`) are entirely static — no instantiation. Keep new utility-style services static unless state is required.
 
 ### Tests
 

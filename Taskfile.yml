@@ -123,7 +123,8 @@ tasks:
     cmds:
       - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox --stop-on-failure {{.TASKFILE_DIR}}/tests {{.CLI_ARGS}}
     sources:
-      - 'src/**/*.php'
+      - 'core/src/**/*.php'
+      - 'cli/**/*.php'
       - 'tests/**/*.php'
 
   test:php:unit:
@@ -132,7 +133,8 @@ tasks:
     cmds:
       - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/Unit {{.CLI_ARGS}}
     sources:
-      - 'src/**/*.php'
+      - 'core/src/**/*.php'
+      - 'cli/**/*.php'
       - 'tests/**/*.php'
     
   test:php:e2e:
@@ -141,7 +143,8 @@ tasks:
     cmds:
       - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/e2e {{.CLI_ARGS}}
     sources:
-      - 'src/**/*.php'
+      - 'core/src/**/*.php'
+      - 'cli/**/*.php'
       - 'tests/**/*.php'
 
   test:coverage:
@@ -152,12 +155,12 @@ tasks:
   test:modernize:
     desc: Dry-run Rector code modernization
     cmds:
-      - vendor/bin/rector process src --config=tooling/rector.php --dry-run
+      - vendor/bin/rector process --config=tooling/rector.php --dry-run
 
   fix:modernize:
     desc: Run Rector code modernization (applies safe rules)
     cmds:
-      - vendor/bin/rector process src --config=tooling/rector.php
+      - vendor/bin/rector process --config=tooling/rector.php
 
   test:phpstan:
     desc: Run PHPStan static analysis
@@ -178,7 +181,8 @@ tasks:
     desc: Auto-fix code style with PHP CS Fixer
     aliases: [lint]
     sources:
-      - 'src/**/*.php'
+      - 'core/src/**/*.php'
+      - 'cli/**/*.php'
       - 'tests/**/*.php'
     cmds:
       - php ./vendor/bin/php-cs-fixer fix --config=tooling/.php-cs-fixer.php

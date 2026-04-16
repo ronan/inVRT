@@ -50,6 +50,22 @@ For AI agents and human developers.
 
 - [x] Do a manual refactor of the config/options system to get rid of the last of the code smells
 
+- [x] Create a core php library independent of any framework and with minimal dependencies
+    - Refactor all business logic out of the /src directory turn it into reusable classes in the /core directory
+    - Use the namespace InVRT/Core
+    - Provide a Configuration class which takes a filepath (for the config file) and an environment variable array and has the following public methods:
+        - ->get($key, $default);
+        - ->set($key, $value);
+        - ->write();
+    - Provide a Runner class which has the following public methods (each representing a command)
+        - ->init();
+        - ->config();
+        - ->crawl();
+        - ->reference();
+        - ->test();
+    - Move the rest of the Console app into a directory called /cli and rewrite it to use the new core library.
+    - Make sure all of the existing tests still pass.
+
 ## Documentation
 
 - [x] Create `docs/APP_SUMMARY.md` — a brief, agent-optimized application summary

@@ -11,13 +11,10 @@ use App\Commands\CrawlCommand;
 use App\Commands\InitCommand;
 use App\Commands\ReferenceCommand;
 use App\Commands\TestCommand;
-use App\Service\ConfigurationService;
 use Symfony\Component\Console\Application;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 $container = new ContainerBuilder();
-
-$container->autowire(ConfigurationService::class)->setPublic(true);
 
 $container->autowire(CrawlCommand::class)->setPublic(true);
 $container->autowire(ReferenceCommand::class)->setPublic(true);
