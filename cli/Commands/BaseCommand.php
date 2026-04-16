@@ -60,7 +60,7 @@ abstract class BaseCommand
             $config = new Configuration($filepath, $env + $processEnv);
         } catch (\Exception $e) {
             $io->writeln('# Error reading config file at: `' . $filepath . '`', OutputInterface::VERBOSITY_QUIET);
-            $io->writeln('[debug] Config read exception: ' . $e->getMessage(), OutputInterface::VERBOSITY_DEBUG);
+            $io->writeln('[debug] Config read exception: ' . $e->getMessage(), OutputInterface::VERBOSITY_NORMAL);
             return Command::FAILURE;
         }
 
