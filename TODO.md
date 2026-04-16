@@ -148,9 +148,15 @@ For AI agents and human developers.
     - Save the passed in url to a new fresh config.yaml.
     - Respect the passed in config parameters to seve it to the right section of config.yaml
 - [ ] Auto trigger `invrt init` when `invrt crawl` is run for the first time
+- [ ] Implement `invrt approve` which:
+    - runs `backstop approve`
+- [ ] Make a `invrt baseline` command which:
+    - runs `invrt reference` if needed 
+    - runs `invrt test` if needed
+    - runs `invrt approve`
 - [ ] Implement an interactive init mode
   - Prompt the user for a url
-- [ ] Implement `invrt check` to load the homepage and retrieve the site title
+- [#] Implement `invrt check` to load the homepage and retrieve the site title
 - [#] Allow testing without a config file (relying on env vars if set)
 
 ### Advanced flow
