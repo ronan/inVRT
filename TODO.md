@@ -83,10 +83,30 @@ For AI agents and human developers.
         - Update the documentation
         - Build, tag and publish a new docker build
         - Build and publish the ddev-invrt addon to github
-- [#] Add support for using remote playwright connection
-    - Allow remote connections with a given URL
-    - Default to using a local running docker container
-    - Use ddev playwright addon when running ddv
+- [ ] Clean up the repository
+    - Reduce the number of files and directories at the top level of the repository
+    - Make sure special files (AGENTS.md, README.md) which are supposed to live at the repo root remain there.
+    - Any file not required to be at the root should be moved if possible
+    - If moving functional files such as tool configuration, make whatever changes are needed so  that functionality doesn't break.
+    - Remove the chats directory
+    - Ensure all source code is in `src/` separated by lanaguage and focus to make testing/linting/building easier.
+        - `src/core` - Core functionality (php)
+        - `src/js`   - Playwright and other scripts (js)
+        - `src/cli`  - The cli runner code (php, symfony console)
+    - Update testing and linting to point to the correct folders
+    - Clean up `docs/`
+        - End-user documentation should go in `docs/user/en`
+        - Developer documentation should go in `docs/developer/en`
+        - Planning and specification documents should go into `docs/planning/`
+            - AGENTS.md and README.md should remain at the top of the repository
+        - Github pages assets (such as index.html) should go in `docs/website`
+        - Move agent plan documents from `plans/` to `docs/planning/agent-plans`
+            - Update the AGENTS.md and SKILLS.md file to reflect that change and ensure that agents use that directory to save plans.
+    - Clean up `tooling/` directory
+        - Remove unused config files
+        - Move config files into `tooling/config` and update the Taskfile.yml where needed
+    - Move completed todo items into docs/planning/TODO-DONE.md
+    - Make other suggestions that will make the repository cleaner and easier to navigate whithout breaking existing functionality or tools. Use industry best practices for FOSS tools.
 
 ## Tests
 
@@ -160,14 +180,26 @@ For AI agents and human developers.
   - Prompt the user for a url
 
 ### Advanced flow
+- [ ] Implement `invrt check` to load the homepage and retrieve the site title
+    - Have the check function run automatically after init and before crawl if it hasn't been run yet.
+    - Add cms_detector binary to dockerfile to check the cms version/platform.
+    - Create a check.yml file with info from the check including:
+        - Site Title
+        - URL (if the specified url leads to a permament redirect)
+        - Supports https?
+        - CMS/Platform (eg: drupal, backdrop, wordpress) via cms_detector
+        - Last check date
+        - Any other information that may be useful for crawling or capturing screenshots
 - [ ] Save reference output to 'INVRT_CAPTURE_DIR/reference_results.txt', save test results to 'INVRT_CAPTURE_DIR/test_results.txt'
-    - [ ] Use the new files to determine which steps have run.
+- [ ] Use generated config files to determine which steps have been run at least once
+    - Init has run if a 'check.yaml' file exists
+    - Crawl has run if a 'crawled_urls.txt' file exists
+    - Reference has run if a 'reference_results.txt' file exists
+    - Test has run if a 'test_results.txt' file exists
 - [#] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
   - [ ] Name the file 'plan.yaml' and put it at the top of the .invrt directory
   - [ ] Update the document when new paths are found when crawling with different profiles
   - [ ] Turn 'plan.yaml' into 'test.json' with backstop test config in it.
-- [#] Implement `invrt check` to load the homepage and retrieve the site title
-
 
 ### User scripting
 
@@ -185,8 +217,8 @@ For AI agents and human developers.
     - [ ] Allow comparison of different profiles
 
 ### Future Features
+- [ ] Advanced playwright integration
 - [ ] Better debug output during crawl
 - [ ] Rewrite the crawler
     - Make exclude_paths work and provide defaults for drupal/backdrop
     - add a max_width to go with max_depth
-    - 
