@@ -42,6 +42,9 @@ Captures fresh screenshots and compares them against reference images using Back
 ### `config`
 Displays the resolved configuration for the given options. Useful for verifying settings before a run. Prints guidance to run `invrt init` if no config file exists.
 
+### `info`
+Displays a project status summary for the current profile/device/environment: project name, config file path, configured environments/profiles/devices, number of crawled pages, reference screenshot count, test screenshot count, and the last 5 lines of the crawl log. Does not require login. Shows `0` / `(none)` gracefully when crawl or capture data is absent.
+
 ---
 
 ## Shared Options

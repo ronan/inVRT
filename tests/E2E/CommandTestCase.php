@@ -6,6 +6,7 @@ use App\Commands\ApproveCommand;
 use App\Commands\BaselineCommand;
 use App\Commands\ConfigCommand;
 use App\Commands\CrawlCommand;
+use App\Commands\InfoCommand;
 use App\Commands\InitCommand;
 use App\Commands\ReferenceCommand;
 use App\Commands\TestCommand;
@@ -46,6 +47,7 @@ abstract class CommandTestCase extends TestCase
         $this->app->addCommand(new ApproveCommand());
         $this->app->addCommand(new BaselineCommand());
         $this->app->addCommand(new CrawlCommand());
+        $this->app->addCommand(new InfoCommand());
         $this->app->addCommand(new ReferenceCommand());
         $this->app->addCommand(new TestCommand());
         $this->app->addCommand(new ConfigCommand());

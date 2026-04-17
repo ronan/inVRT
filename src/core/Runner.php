@@ -104,6 +104,36 @@ class Runner
         return 0;
     }
 
+    /** Returns a project status summary. */
+    public function info(): array
+    {
+        $env        = $this->config->all();
+        $crawlFile  = $env['INVRT_CRAWL_FILE']  ?? '';
+        $crawlLog   = $env['INVRT_CRAWL_LOG']   ?? '';
+        $captureDir = $env['INVRT_CAPTURE_DIR'] ?? '';
+
+        $crawledPages = 0;
+        if ($crawlFile !== '' && is_readable($crawlFile)) {
+            $lines = file($crawlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $crawledPages = $lines !== false ? count($lines) : 0;
+        }
+
+        return [
+            'name'         => $this->config->getSection('name') ?? '',
+            'config_file'  => $env['INVRT_CONFIG_FILE'] ?? '',
+            'environment'  => $env['INVRT_ENVIRONMENT'] ?? '',
+            'profile'      => $env['INVRT_PROFILE']     ?? '',
+            'device'       => $env['INVRT_DEVICE']      ?? '',
+            'environments' => array_keys((array) ($this->config->getSection('environments') ?? [])),
+            'profiles'     => array_keys((array) ($this->config->getSection('profiles')     ?? [])),
+            'devices'      => array_keys((array) ($this->config->getSection('devices')      ?? [])),
+            'crawled_pages'         => $crawledPages,
+            'reference_screenshots' => $this->countScreenshots($captureDir . '/bitmaps/reference'),
+            'test_screenshots'      => $this->countScreenshots($captureDir . '/bitmaps/test'),
+            'crawl_log_tail'        => $this->readLogTail($crawlLog),
+        ];
+    }
+
     /** Returns the resolved configuration for display or inspection. */
     public function getConfig(): array
     {
@@ -473,5 +503,42 @@ class Runner
         foreach (array_slice($lines, -$lineCount) as $line) {
             $this->logger->notice($line);
         }
+    }
+
+    /** Count PNG files recursively in a directory. */
+    private function countScreenshots(string $dir): int
+    {
+        if (!is_dir($dir)) {
+            return 0;
+        }
+
+        $count = 0;
+        $iter  = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
+        foreach ($iter as $file) {
+            if ($file->isFile() && strtolower($file->getExtension()) === 'png') {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    /**
+     * Read the last N lines of a log file.
+     *
+     * @return list<string>
+     */
+    private function readLogTail(string $logFile, int $lineCount = 5): array
+    {
+        if (!is_readable($logFile)) {
+            return [];
+        }
+
+        $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if ($lines === false || $lines === []) {
+            return [];
+        }
+
+        return array_values(array_slice($lines, -$lineCount));
     }
 }

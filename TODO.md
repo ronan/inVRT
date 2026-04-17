@@ -23,12 +23,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Features
 
-### General operations
-
- - [ ] Add an `invrt info` command that returns nicely formatted info about the current project
-
-        The output should include: current config, environments, devices, profiles, number of crawled pages, number of captured screenshots and the last few lines of the crawl.log
-
 ### Advanced flow
 - [ ] Implement `invrt check` to load the homepage and retrieve the site title
     - Have the check function run automatically after init and before crawl if it hasn't been run yet.

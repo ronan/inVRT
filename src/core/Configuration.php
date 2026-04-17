@@ -50,6 +50,12 @@ class Configuration
         $this->changes[$key]  = $value;
     }
 
+    /** Returns a top-level raw parsed section (e.g. 'environments', 'profiles', 'devices', 'name'). */
+    public function getSection(string $key): mixed
+    {
+        return $this->parsed[$key] ?? null;
+    }
+
     /** Returns the full flat resolved config array. */
     public function all(): array
     {

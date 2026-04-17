@@ -66,6 +66,12 @@ Completed tasks moved from TODO.md.
 
 - [x] Create `docs/APP_SUMMARY.md` — a brief, agent-optimized application summary
 
+## Features
+
+- [x] Add an `invrt info` command that returns nicely formatted info about the current project
+
+        The output should include: current config, environments, devices, profiles, number of crawled pages, number of captured screenshots and the last few lines of the crawl.log
+
 ## Developer Experience
 
 - [x] Add better debugging output to the cli when run with `-vvv` (https://symfony.com/doc/current/console/verbosity.html)

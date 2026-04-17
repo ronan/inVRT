@@ -17,6 +17,7 @@ inVRT is a CLI tool for running Visual Regression Testing (VRT) against CMS-driv
     - [`reference`](#reference)
     - [`test`](#test)
     - [`config`](#config)
+    - [`info`](#info)
   - [Options](#options)
   - [Authentication](#authentication)
   - [Data Layout](#data-layout)
@@ -299,6 +300,41 @@ devices:
     description: Small Desktop/Tablet (1024x768)
     viewport_width: 1024
     viewport_height: 768
+```
+
+### `info`
+
+Display a project status summary.
+
+```
+invrt info [--profile=<name>] [--device=<name>] [--environment=<name>]
+```
+
+Shows the project name, config file path, the active environment/profile/device, all configured environments/profiles/devices, crawl and screenshot counts for the active combination, and the last few lines of the crawl log.
+
+**Example output:**
+
+```
+My Project
+/path/to/.invrt/config.yaml
+
+ Active
+ Environment  local
+ Profile      anonymous
+ Device       desktop
+
+ Configured
+ Environments  local, staging
+ Profiles      anonymous, admin
+ Devices       desktop, mobile
+
+ Data
+ Crawled pages           42
+ Reference screenshots   42
+ Test screenshots        42
+
+ Crawl log (last 5 lines)
+ ...
 ```
 
 ---

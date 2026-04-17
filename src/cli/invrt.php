@@ -10,6 +10,7 @@ use App\Commands\ApproveCommand;
 use App\Commands\BaselineCommand;
 use App\Commands\ConfigCommand;
 use App\Commands\CrawlCommand;
+use App\Commands\InfoCommand;
 use App\Commands\InitCommand;
 use App\Commands\ReferenceCommand;
 use App\Commands\TestCommand;
@@ -24,6 +25,7 @@ $container->autowire(CrawlCommand::class)->setPublic(true);
 $container->autowire(ReferenceCommand::class)->setPublic(true);
 $container->autowire(TestCommand::class)->setPublic(true);
 $container->autowire(ConfigCommand::class)->setPublic(true);
+$container->autowire(InfoCommand::class)->setPublic(true);
 $container->autowire(InitCommand::class)->setPublic(true);
 
 $container->compile();
@@ -41,6 +43,7 @@ $app = new Application('
                     ❚
                   ◀ █ ▶', '0.1.1');
 
+$app->addCommand($container->get(InfoCommand::class));
 $app->addCommand($container->get(InitCommand::class));
 $app->addCommand($container->get(ApproveCommand::class));
 $app->addCommand($container->get(BaselineCommand::class));
