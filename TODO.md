@@ -13,12 +13,13 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### CMS-Specific Testing
 
-  - [ ] Test backdrop support
-  - [ ] Test drupal auth support
-  - [ ] Set up ddev to run during tests
+  - [#] Set up ddev to run during tests
 
         Challenges: Can we use docker-outside-of-docker to control ddev?
         DDev doesn't want to be root but it get's permission errors.
+
+  - [#] Test backdrop support
+  - [#] Test drupal auth support
 
 ## Features
 
