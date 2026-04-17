@@ -7,5 +7,4 @@ reports
 .invrt
 .task
 .DS_Store
-tooling/.php-cs-fixer.cache
-tooling/.phpunit.result.cache
+tooling/cache/*

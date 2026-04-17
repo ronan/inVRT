@@ -4,7 +4,7 @@
 // inVRT CLI - Visual Regression Testing Tool
 // Powered by Symfony Console
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Commands\ApproveCommand;
 use App\Commands\BaselineCommand;

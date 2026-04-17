@@ -55,7 +55,7 @@ Use the `--profile`, `--device`, and `--environment` options to target a specifi
 invrt test --profile=authenticated --device=mobile --environment=production
 ```
 
-For full documentation including all commands, options, configuration reference, and examples see **[docs/usage.md](docs/usage.md)**.
+For full documentation including all commands, options, configuration reference, and examples see **[docs/user/en/usage.md](docs/user/en/usage.md)**.
 
 ---
 

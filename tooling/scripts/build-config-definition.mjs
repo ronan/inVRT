@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Generates src/Input/InvrtConfiguration.php from docs/config.schema.yaml
- * using the Handlebars template at src/Input/InVRTConfiguration.tpl.php.
+ * Generates src/cli/Input/InvrtConfiguration.php from docs/spec/config.schema.yaml
+ * using the Handlebars template at tooling/templates/InVRTConfiguration.hbl.php.
  */
 
 import { readFileSync, writeFileSync } from 'fs';
@@ -14,7 +14,7 @@ import Handlebars from 'handlebars';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '../..');
 
-const schema = yaml.load(readFileSync(resolve(root, 'docs/config.schema.yaml'), 'utf8'));
+const schema = yaml.load(readFileSync(resolve(root, 'docs/spec/config.schema.yaml'), 'utf8'));
 
 // Build configKeys from $defs.configKeys with pre-computed template values.
 const configKeysDef = schema.$defs.configKeys.properties;
@@ -71,6 +71,6 @@ const templateSrc = readFileSync(resolve(root, 'tooling/templates/InVRTConfigura
 const template = Handlebars.compile(templateSrc, { noEscape: true });
 const output = template({ configKeys, sections });
 
-const outPath = resolve(root, 'src/Service/InvrtConfiguration.php');
+const outPath = resolve(root, 'src/cli/Input/InvrtConfiguration.php');
 writeFileSync(outPath, output);
 console.log(`Generated ${outPath}`);

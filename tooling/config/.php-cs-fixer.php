@@ -1,13 +1,13 @@
 <?php
 
 $finder = (new PhpCsFixer\Finder())
-    ->in([__DIR__.'/../core/src', __DIR__.'/../cli'])
+    ->in([__DIR__.'/../../src/core', __DIR__.'/../../src/cli'])
     ->exclude(['vendor', 'build', 'coverage', 'tests/fixtures'])
     ->notPath('node_modules')
     ;
     
 return (new PhpCsFixer\Config())
-    ->setCacheFile(__DIR__.'/.php-cs-fixer.cache')
+    ->setCacheFile(__DIR__.'/../cache/.php-cs-fixer.cache')
     ->setRiskyAllowed(true)
     ->setRules([
         '@PER-CS' => true,

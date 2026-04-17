@@ -12,23 +12,27 @@ The codebase is somewhat language agnostic. Use the right language for job at ha
 
 ## Required documentation:
 
-Save implementation plans to the `plans/` directory so they are tracked with the changes.
+Save implementation plans to the `docs/planning/agent-plans/` directory.
 
 Do not read past plans when implementing new plans as they may not represent the current desired behavior.
 
-Write the plan before you begin the implementation. Ask for permission before implementing the plan. Do not ask until the plan is in the `plans/` diretory.
+Write the plan before you begin the implementation. Ask for permission before implementing the plan. Do not ask until the plan is in `docs/planning/agent-plans/`.
 
 Never commit anything to git.
 
 ## Track tasks with the todo file
 
-The todo file is a markdown file with checkbox syntax.
+The todo file (`TODO.md`) uses markdown checkbox syntax.
 
 Further instructions and requirements for a particular todo item may be indented underneath the item. When creating todo's keep these brief.
 
-If you complete a task you can put an 'x' between the square brackets on that line to indicate a checked box in markdown.
+When you **complete** a task:
+1. Move the item (and any sub-items) to `docs/planning/TODO-DONE.md` under the appropriate section header.
+2. Remove it from `TODO.md`.
 
-Don't track todo's or task progress in any other system
+Do not just check off items in `TODO.md` — move them.
+
+Don't track todo's or task progress in any other system.
 
 ## Communicating
 
@@ -40,7 +44,7 @@ Show the output of terminal commands you run to test your code, so I can see the
 
 ## Writing Code
 
-Follow the [Coding Standards](docs/CODING_STANDARDS.md)
+Follow the [Coding Standards](docs/developer/en/CODING_STANDARDS.md)
 
 Write clean, maintainable and modern code. Favor terse and readable code.
 
@@ -88,29 +92,29 @@ Run `task test` in the terminal to test and lint code.
 
 ## The Usage Docs (documentation first development)
 
-`docs/usage.md` is for humans. Keep it brief.
+`docs/user/en/usage.md` is for humans. Keep it brief.
 
-`docs/APP_SUMMARY.md` is for agents. Describe every new behavior here. Aim to be able to rebuild the application from scratch using this document. Do not describe implementation in this document.
+`docs/developer/en/APP_SUMMARY.md` is for agents. Describe every new behavior here. Aim to be able to rebuild the application from scratch using this document. Do not describe implementation in this document.
 
 Document new features in the usage docs before building them. Explain all inputs, give examples, show outputs.
 
 ## Architecture
 
 ```
-Symfony Console Commands (cli/Commands/)
+Symfony Console Commands (src/cli/Commands/)
          ↓
-  InVRT\Core\Runner (core/src/Runner.php)
+  InVRT\Core\Runner (src/core/Runner.php)
          ↓
-  InVRT\Core\Configuration (core/src/Configuration.php)
+  InVRT\Core\Configuration (src/core/Configuration.php)
   InVRT\Core\Service\LoginService, CookieService
          ↓
-  Node.js (src/*.js, Playwright, BackstopJS)
+  Node.js (src/js/*.js, Playwright, BackstopJS)
 ```
 
 The codebase is split into two layers:
 
-- **`core/`** (`InVRT\Core\`) — framework-independent business logic. `Configuration` loads, merges, and exports config. `Runner` orchestrates crawl, reference, test, init, and config operations. `Service\LoginService` and `Service\CookieService` are utility services. Core accepts a PSR-3 `LoggerInterface` for output.
-- **`cli/`** (`App\`) — thin Symfony Console wiring. Commands extend `BaseCommand`, call `$this->boot($opts, $io)`, then delegate to `$this->runner`.
+- **`src/core/`** (`InVRT\Core\`) — framework-independent business logic. `Configuration` loads, merges, and exports config. `Runner` orchestrates crawl, reference, test, init, and config operations. `Service\LoginService` and `Service\CookieService` are utility services. Core accepts a PSR-3 `LoggerInterface` for output.
+- **`src/cli/`** (`App\`) — thin Symfony Console wiring. Commands extend `BaseCommand`, call `$this->boot($opts, $io)`, then delegate to `$this->runner`.
 
 `BaseCommand::boot()` creates a `Configuration` from resolved env vars + options, exports it to the process environment, creates a `ConsoleLogger` wrapping the Symfony output, and builds a `Runner`. Commands call `$this->runner->crawl()` etc. and return the exit code.
 
@@ -125,15 +129,15 @@ The codebase is split into two layers:
 
 Resolved values are exported as `putenv()` environment variables so Node scripts can read them.
 
-Refer to [The configuration documentation](docs/configuration.md) for details on how configuration works. 
+Refer to [The configuration documentation](docs/user/en/configuration.md) for details on how configuration works.
 
 ## Key Conventions
 
 ### Namespaces & File Layout
-- `App\Commands\` → `cli/Commands/`
-- `App\Input\` → `cli/Input/`
-- `InVRT\Core\` → `core/src/`
-- `InVRT\Core\Service\` → `core/src/Service/`
+- `App\Commands\` → `src/cli/Commands/`
+- `App\Input\` → `src/cli/Input/`
+- `InVRT\Core\` → `src/core/`
+- `InVRT\Core\Service\` → `src/core/Service/`
 - `Tests\Unit\` → `tests/Unit/`
 - `Tests\E2E\` → `tests/e2e/`
 - `Tests\Fixtures\` → `tests/fixtures/`
@@ -144,13 +148,13 @@ Refer to [The configuration documentation](docs/configuration.md) for details on
 3. Extend `BaseCommand` — it handles config loading, env export, runner creation, and optional login
 4. Inside `__invoke()`, call `$result = $this->boot($opts, $io)`, return if not `Command::SUCCESS`, then call `$this->runner->methodName()`
 5. Add business logic to `InVRT\Core\Runner` as a new method, using `$this->logger` for output
-6. Register the new command in `cli/invrt.php` via `$container->autowire(NewCommand::class)->setPublic(true)` and add it to the app loop
+6. Register the new command in `src/cli/invrt.php` via `$container->autowire(NewCommand::class)->setPublic(true)` and add it to the app loop
 7. Use `InvrtInput` with `#[MapInput]` for the shared `--profile`, `--device`, and `--environment` options instead of defining those options per command
 8. Return Symfony `Command::SUCCESS` or `Command::FAILURE` codes explicitly
 9. Use `$this->requiresLogin = false` in the command class if login should be skipped; pass `requiresConfig: false` to `boot()` if the config file need not exist
 
 ### Static Service Classes
-`LoginService` and `CookieService` (both in `InVRT\Core\Service\`) are entirely static — no instantiation. Keep new utility-style services static unless state is required.
+`LoginService` and `CookieService` (both in `InVRT\Core\Service\` → `src/core/Service/`) are entirely static — no instantiation. Keep new utility-style services static unless state is required.
 
 ### Tests
 
@@ -182,4 +186,4 @@ Refer to [The configuration documentation](docs/configuration.md) for details on
 When writing E2E tests, do not manually set `INVRT_DIRECTORY` or `INIT_CWD` — `CommandTestCase.setUp()` handles this via `$this->fixture->setEnvironmentVariable()`.
 
 ### PHPStan
-Level 5, strict. A baseline file (`phpstan-baseline.neon`) tracks accepted violations. Run `task baseline:phpstan` after intentional type changes, not to hide new issues.
+Level 5, strict. A baseline file (`tooling/phpstan-baseline.neon`) tracks accepted violations. Run `task baseline:phpstan` after intentional type changes, not to hide new issues.

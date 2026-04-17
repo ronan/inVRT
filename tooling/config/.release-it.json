@@ -25,7 +25,7 @@
         "VERSION.txt",
         "composer.json",
         {
-          "file": "cli/invrt.php",
+          "file": "src/cli/invrt.php",
           "type": "text/php"
         },
         {

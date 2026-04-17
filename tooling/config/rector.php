@@ -8,13 +8,13 @@ use Rector\Set\ValueObject\LevelSetList;
 
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__ . '/../core/src',
-        __DIR__ . '/../cli',
-        __DIR__ . '/../tests',
+        __DIR__ . '/../../src/core',
+        __DIR__ . '/../../src/cli',
+        __DIR__ . '/../../tests',
     ])
     ->withSkip([
-        __DIR__ . '/vendor',
-        __DIR__ . '/build',
+        __DIR__ . '/../../vendor',
+        __DIR__ . '/../../build',
     ])
     ->withPhpVersion(\Rector\ValueObject\PhpVersion::PHP_74)
     ->withSets([

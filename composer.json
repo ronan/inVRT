@@ -21,8 +21,8 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "cli/",
-            "InVRT\\Core\\": "core/src/"
+            "App\\": "src/cli/",
+            "InVRT\\Core\\": "src/core/"
         }
     },
     "autoload-dev": {
@@ -32,7 +32,7 @@
         }
     },
     "bin": [
-        "cli/invrt.php"
+        "src/cli/invrt.php"
     ],
     "config": {
         "allow-plugins": {}

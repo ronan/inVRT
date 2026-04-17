@@ -75,7 +75,6 @@ tasks:
     aliases: [docker:build]
     sources:
       - 'src/**/*'
-      - 'tooling/**/*'
       - 'Dockerfile'
       - '.dockerignore'
     cmds:
@@ -95,17 +94,17 @@ tasks:
   version:bump:
     desc: Bump patch version
     cmds:
-      - npx release-it patch --ci --config tooling/.release-it.json
+      - npx release-it patch --ci --config tooling/config/.release-it.json
   
   version:bump:minor:
     desc: Bump minor version
     cmds:
-      - npx release-it minor --ci --config tooling/.release-it.json
+      - npx release-it minor --ci --config tooling/config/.release-it.json
 
   version:bump:major:
     desc: Bump major version
     cmds:
-      - npx release-it major --ci --config tooling/.release-it.json
+      - npx release-it major --ci --config tooling/config/.release-it.json
 
   release:publish:
     desc: Publish Docker image and ddev addon for current version
@@ -117,7 +116,7 @@ tasks:
     desc: Generate PHP files from Handlebars templates and the config schema
     sources:
       - 'tooling/templates/*'
-      - 'docs/config.schema.yaml'
+      - 'docs/spec/config.schema.yaml'
     cmds:
       - node tooling/scripts/build-config-definition.mjs
 
@@ -130,71 +129,71 @@ tasks:
     desc: Run all tests with PHPUnit
     dir: /tmp
     cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox --stop-on-failure {{.TASKFILE_DIR}}/tests {{.CLI_ARGS}}
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/config/phpunit.xml --testdox --stop-on-failure {{.TASKFILE_DIR}}/tests {{.CLI_ARGS}}
     sources:
-      - 'core/src/**/*.php'
-      - 'cli/**/*.php'
+      - 'src/core/**/*.php'
+      - 'src/cli/**/*.php'
       - 'tests/**/*.php'
 
   test:php:unit:
     desc: Run unit tests with PHPUnit
     dir: /tmp
     cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/Unit {{.CLI_ARGS}}
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/config/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/Unit {{.CLI_ARGS}}
     sources:
-      - 'core/src/**/*.php'
-      - 'cli/**/*.php'
+      - 'src/core/**/*.php'
+      - 'src/cli/**/*.php'
       - 'tests/**/*.php'
     
   test:php:e2e:
     desc: Run integration tests with PHPUnit
     dir: /tmp
     cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/e2e {{.CLI_ARGS}}
+      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/config/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/e2e {{.CLI_ARGS}}
     sources:
-      - 'core/src/**/*.php'
-      - 'cli/**/*.php'
+      - 'src/core/**/*.php'
+      - 'src/cli/**/*.php'
       - 'tests/**/*.php'
 
   test:coverage:
     desc: Run tests with code coverage report
     cmds:
-      - XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=tooling/phpunit.xml --coverage-text --coverage-html=reports/coverage/
+      - XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=tooling/config/phpunit.xml --coverage-text --coverage-html=reports/coverage/
 
   test:modernize:
     desc: Dry-run Rector code modernization
     cmds:
-      - vendor/bin/rector process --config=tooling/rector.php --dry-run
+      - vendor/bin/rector process --config=tooling/config/rector.php --dry-run
 
   fix:modernize:
     desc: Run Rector code modernization (applies safe rules)
     cmds:
-      - vendor/bin/rector process --config=tooling/rector.php
+      - vendor/bin/rector process --config=tooling/config/rector.php
 
   test:phpstan:
     desc: Run PHPStan static analysis
     cmds:
-      - vendor/bin/phpstan analyse --configuration=tooling/phpstan.neon
+      - vendor/bin/phpstan analyse --configuration=tooling/config/phpstan.neon
 
   baseline:phpstan:
     desc: Generate PHPStan baseline for current violations
     cmds:
-      - vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline --configuration=tooling/phpstan.neon
+      - vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline --configuration=tooling/config/phpstan.neon
 
   test:lint:
     desc: Check code style with PHP CS Fixer
     cmds:
-      - php ./vendor/bin/php-cs-fixer check --diff --config=tooling/.php-cs-fixer.php
+      - php ./vendor/bin/php-cs-fixer check --diff --config=tooling/config/.php-cs-fixer.php
 
   fix:lint:
     desc: Auto-fix code style with PHP CS Fixer
     aliases: [lint]
     sources:
-      - 'core/src/**/*.php'
-      - 'cli/**/*.php'
+      - 'src/core/**/*.php'
+      - 'src/cli/**/*.php'
       - 'tests/**/*.php'
     cmds:
-      - php ./vendor/bin/php-cs-fixer fix --config=tooling/.php-cs-fixer.php
+      - php ./vendor/bin/php-cs-fixer fix --config=tooling/config/.php-cs-fixer.php
 
   test:security:
     desc: Check for security vulnerabilities in dependencies

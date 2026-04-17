@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Validates docs/config.schema.yaml is a valid JSON Schema and that
- * docs/config.example.yaml passes validation against it.
+ * Validates docs/spec/config.schema.yaml is a valid JSON Schema and that
+ * docs/spec/config.example.yaml passes validation against it.
  */
 
 import { readFileSync } from 'fs';
@@ -33,9 +33,9 @@ function loadYaml(relPath) {
 const ajv = new Ajv({ strict: true, allErrors: true });
 addFormats(ajv);
 
-console.log('\nValidating docs/config.schema.yaml\n');
+console.log('\nValidating docs/spec/config.schema.yaml\n');
 
-const schema = loadYaml('docs/config.schema.yaml');
+const schema = loadYaml('docs/spec/config.schema.yaml');
 
 let validate;
 try {
@@ -46,9 +46,9 @@ try {
     process.exit(1);
 }
 
-console.log('\nValidating docs/config.example.yaml against schema\n');
+console.log('\nValidating docs/spec/config.example.yaml against schema\n');
 
-const config = loadYaml('docs/config.example.yaml');
+const config = loadYaml('docs/spec/config.example.yaml');
 const valid = validate(config);
 
 if (valid) {

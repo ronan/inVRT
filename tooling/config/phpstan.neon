@@ -1,14 +1,14 @@
 includes:
     - phar://phpstan.phar/conf/bleedingEdge.neon
+    - phpstan-baseline.neon
 
 parameters:
     level: 5
     paths:
-        - ../core/src
-        - ../cli
+        - ../../src/core
+        - ../../src/cli
     excludePaths:
-        - ../src/*.sh
-        - ../src/*.js
+        - ../../src/js/*.js
 
     treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: false

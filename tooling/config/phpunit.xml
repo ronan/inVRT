@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         bootstrap="../vendor/autoload.php"
+         bootstrap="../../vendor/autoload.php"
          colors="true"
          failOnRisky="true"
-         failOnWarning="true">
+         failOnWarning="true"
+         cacheDirectory="../cache/">
     <testsuites>
         <testsuite name="Unit Tests">
             <directory suffix="Test.php">../tests/Unit</directory>
@@ -15,13 +16,13 @@
 
     <source>
         <include>
-            <directory suffix=".php">../core/src</directory>
-            <directory suffix=".php">../cli</directory>
+            <directory suffix=".php">../../src/core</directory>
+            <directory suffix=".php">../../src/cli</directory>
         </include>
         <exclude>
-            <directory>../vendor</directory>
-            <directory>../node_modules</directory>
-            <directory>../tests</directory>
+            <directory>../../vendor</directory>
+            <directory>../../node_modules</directory>
+            <directory>../../tests</directory>
         </exclude>
     </source>
 

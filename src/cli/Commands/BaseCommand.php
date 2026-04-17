@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 abstract class BaseCommand
 {
     /** Directory containing backstop.js / playwright-login.js. */
-    private const APP_DIR = __DIR__ . '/../../src';
+    private const APP_DIR = __DIR__ . '/../../js';
 
     /** When true, boot() attempts login before returning. */
     protected bool $requiresLogin = true;
