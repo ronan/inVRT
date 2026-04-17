@@ -2,6 +2,7 @@ const yaml = require('js-yaml');
 const fs = require('fs');
 const backstop = require('backstopjs');
 const path = require('path');
+const crypto = require('crypto');
 
 const { 
   INVRT_PROFILE, 
@@ -23,6 +24,20 @@ const op = process.argv[2] || 'test';
 const builtInScriptsDir = __dirname;
 const preferredScriptsDir = INVRT_SCRIPTS_DIR || builtInScriptsDir;
 const requiredHookScripts = ['playwright-onbefore.js', 'playwright-onready.js'];
+const MAX_SCENARIO_LABEL_PREFIX = 40;
+
+const normalizeLabelPart = (value) => value
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '');
+
+const buildScenarioLabel = (urlPath) => {
+  const normalized = normalizeLabelPart(urlPath) || 'root';
+  const prefix = normalized.slice(0, MAX_SCENARIO_LABEL_PREFIX);
+  const hash = crypto.createHash('sha1').update(urlPath).digest('hex').slice(0, 10);
+
+  return `${prefix}-${hash}`;
+};
 
 const hasRequiredHooks = (scriptsDir) => requiredHookScripts.every((script) => fs.existsSync(path.join(scriptsDir, script)));
 
@@ -73,20 +88,26 @@ const config = {
 }
 
 try {
-  fs
+  const maxPages = parseInt(INVRT_MAX_PAGES || '', 10);
+  const crawlEntries = fs
     .readFileSync(INVRT_CRAWL_FILE, 'utf-8')
-    .split(/\n/)
-    .slice(0, INVRT_MAX_PAGES)
-        .forEach((url) => {
-                config.scenarios.push(
-                  {
-                    "label":          url,
-                    "url":            `${INVRT_URL}${url}`,
-                    "cookiePath":     INVRT_COOKIES_FILE + '.json'
-                  }
-                );
-              });
-  // fs.writeFileSync(path.join(INVRT_CAPTURE_DIR, 'backstop-config.json'), JSON.stringify(config, null, 2));
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const scopedEntries = Number.isFinite(maxPages) && maxPages > 0
+    ? crawlEntries.slice(0, maxPages)
+    : crawlEntries;
+
+  scopedEntries.forEach((urlPath) => {
+    config.scenarios.push({
+      "label": buildScenarioLabel(urlPath),
+      "url": `${INVRT_URL}${urlPath}`,
+      "cookiePath": INVRT_COOKIES_FILE + '.json',
+      "invrtPath": urlPath
+    });
+  });
+  fs.writeFileSync(path.join(INVRT_CAPTURE_DIR, 'backstop-config.json'), JSON.stringify(config, null, 2));
 
   backstop(op, {config: config}).then(() => {
       console.log('Test complete');

@@ -72,6 +72,25 @@ class TestCommandTest extends WebCommandTestCase
         $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/test')));
     }
 
+    public function testTestHandlesVeryLongCrawledUrlPaths(): void
+    {
+        $this->setUpFixture(true);
+        $longQuery = str_repeat('a', 500);
+        $longSlug = str_repeat('segment', 45);
+
+        $this->fixture->writeCrawledUrlsFile('local', 'anonymous', [
+            '/about.html?long=' . $longQuery . '&slug=' . $longSlug,
+        ]);
+
+        $this->executeCommand('test', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
+        $this->assertCommandSuccess();
+
+        $testDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/desktop/bitmaps/test';
+        $this->assertDirectoryExists($testDir);
+        $pngs = $this->findPngs($testDir);
+        $this->assertGreaterThan(0, count($pngs));
+    }
+
     /** @return string[] */
     private function findPngs(string $dir): array
     {

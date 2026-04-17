@@ -45,7 +45,7 @@ const clickAndHoverHelper = async (page, scenario) => {
 
 module.exports = async (page, scenario, viewport, isReference, browserContext) => {
   const title = await page.title();
-  console.log('Page Ready > ' + title);
-  scenario.label = title;
+  scenario.pageTitle = title;
+  console.log('Page Ready > ' + title + ' [' + scenario.label + ']');
   await clickAndHoverHelper(page, scenario);
 };

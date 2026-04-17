@@ -15,7 +15,7 @@ For AI agents and human developers.
 
 - [x] INVRT_MAX_PAGES is not being applied during reference and test
 
-- [ ] Backstop fails when urls (and therefore file paths) are too long
+- [x] Backstop fails when urls (and therefore file paths) are too long
 
 ## Tech Debt
 
@@ -66,7 +66,7 @@ For AI agents and human developers.
     - Move the rest of the Console app into a directory called /cli and rewrite it to use the new core library.
     - Make sure all of the existing tests still pass.
 
-  - [ ] Move js source into `core/js` and refactor and hardcode the path in the php code. 
+- [ ] Move js source into `core/js` and refactor and hardcode the path in the php code. 
 
 ## Documentation
 
@@ -162,30 +162,17 @@ For AI agents and human developers.
 ### Advanced flow
 - [ ] Save reference output to 'INVRT_CAPTURE_DIR/reference_results.txt', save test results to 'INVRT_CAPTURE_DIR/test_results.txt'
     - [ ] Use the new files to determine which steps have run.
-- [#] Implement `invrt check` to load the homepage and retrieve the site title
 - [#] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
-  - [ ] Name the file 'plan.yml' and put it at the top of the .invrt directory
+  - [ ] Name the file 'plan.yaml' and put it at the top of the .invrt directory
   - [ ] Update the document when new paths are found when crawling with different profiles
-  - [ ] Turn 'plan.yml' into 'test.json' with backstop test config in it.
+  - [ ] Turn 'plan.yaml' into 'test.json' with backstop test config in it.
+- [#] Implement `invrt check` to load the homepage and retrieve the site title
 
-### Options and Configuration (`invrt contig`)
-
-- [ ] Load the config from `./.ddev/.invrt/config.yaml` as well as `./.invrt/config.yaml`
-
-- [ ] Retrieve a specific config key or multiple keys
-
-        invrt config --key=viewport_width --environment=dev --device=mobile
-        invrt config --key=title,url --environment=dev
-
-- [ ] update or add a key to config.yml
-
-        invrt config set --key=title --value="Hello, World"
-        invrt config set --key=profile.admin.name --value="Admin User"
-        invrt config set --key=title,settings.url --value="Hello, World",http://example.com
 
 ### User scripting
 
 - [ ] Optionally read the onload/onready playwright event script from `INVRT_SCRIPTS_DIR`
+- [ ] Allow specification of per-path scripts in plan.yaml
 - [ ] Allow the user to specify setup/teardown scripts per project
 
 ### Reporting
