@@ -9,12 +9,15 @@ For AI agents and human developers.
 
 Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DONE.md).
 
+## Bugs
+
+
 ## Tech Debt
 
 - [ ] reduce unnecessary code from php to make test run steps more self contained
 - [ ] move file generation to js/ts
 - [ ] Clean up config and get schema generation working again.
-  - [ ] Remove unnecessary file path config
+  - [.] Remove unnecessary file path config
   - [ ] Clean up the schema generator 
   - [ ] Teach the ai agents how to edit the schema instead of altering the generated code.
 - [ ] Clean up docs
@@ -55,6 +58,9 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - Crawl has run if a 'crawled_urls.txt' file exists
     - Reference has run if a 'reference_results.txt' file exists
     - Test has run if a 'test_results.txt' file exists
+- [ ] Generate backstop.json at the end of the crawl run
+  - Seperate out the config generation code from the test/reference running code
+  - Keep the processing in js for now.
 - [#] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
   - [ ] Name the file 'plan.yaml' and put it at the top of the .invrt directory
   - [ ] Update the document when new paths are found when crawling with different profiles

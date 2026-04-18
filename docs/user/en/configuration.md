@@ -19,7 +19,6 @@ settings:
   viewport_height: 768
   max_crawl_depth: 3
   max_pages: 100
-  max_concurrent_requests: 5
   login_url: user/login
   user_agent: InVRT/1.0
 
@@ -197,6 +196,5 @@ max_pages: 90
 | `max_crawl_depth`         | `$INVRT_MAX_CRAWL_DEPTH`         | `3`                             | settings | crawl                  | Recursion depth for wget crawl             |
 | `max_pages`               | `$INVRT_MAX_PAGES`               | `100`                           | settings | crawl                  | Maximum number of pages to crawl           |
 | `user_agent`              | `$INVRT_USER_AGENT`              | `InVRT/1.0`                     | settings | crawl, reference, test | HTTP User-Agent header sent by the crawler |
-| `max_concurrent_requests` | `$INVRT_MAX_CONCURRENT_REQUESTS` | `5`                             | settings | reference, test        | Number of parallel screenshot captures     |
 
 For usage see [InVRT Usage](./usage.md)

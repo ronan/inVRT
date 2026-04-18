@@ -94,9 +94,9 @@ class Runner
         $this->logger->info('✓ Initialized InVRT configuration file at ' . $configFile);
 
         $excludeUrls = "/user/logout\n/files\n/sites\n/core\n";
-        $excludePath = Path::join($directory, 'exclude_urls.txt');
+        $excludePath = Path::join($directory, 'exclude_paths.txt');
         if (file_put_contents($excludePath, $excludeUrls) === false) {
-            $this->logger->error('Failed to create exclude_urls.txt');
+            $this->logger->error('Failed to create exclude_paths.txt');
             return 1;
         }
 
@@ -189,7 +189,6 @@ class Runner
         $errno    = curl_errno($ch);
         $errMsg   = curl_error($ch);
         $info     = curl_getinfo($ch);
-        curl_close($ch);
 
         if ($errno !== 0 || $body === false) {
             $this->logger->error("Failed to connect to $url: $errMsg");
@@ -197,7 +196,7 @@ class Runner
         }
 
         $finalUrl      = (string) ($info['url']            ?? $url);
-        $redirectCount = (int)   ($info['redirect_count']  ?? 0);
+        $redirectCount = (int) ($info['redirect_count']  ?? 0);
 
         // Detect whether a permanent redirect was followed by re-requesting with no follow.
         $redirectedFrom = null;
@@ -581,7 +580,7 @@ class Runner
     {
         if (!file_exists($excludeFile)) {
             $defaults = '/user/*';
-            $this->logger->info("No exclude_urls.txt found at $excludeFile. Excluding defaults: $defaults");
+            $this->logger->info("No exclude_paths.txt found at $excludeFile. Excluding defaults: $defaults");
             return "--exclude-directories=$defaults";
         }
 
@@ -666,7 +665,6 @@ class Runner
         ]);
         curl_exec($ch);
         $code = (int) (curl_getinfo($ch, CURLINFO_HTTP_CODE) ?? 0);
-        curl_close($ch);
         return $code;
     }
 

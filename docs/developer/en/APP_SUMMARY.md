@@ -74,7 +74,6 @@ settings:
   viewport_height: 768
   max_crawl_depth: 3
   max_pages: 100
-  max_concurrent_requests: 5
   login_url: user/login
   user_agent: InVRT/1.0
 
@@ -86,7 +85,6 @@ environments:
 
 profiles:
   anonymous:
-    description: Anonymous visitor
   admin:
     username: admin
     password: secret
@@ -128,7 +126,6 @@ Default → settings → environments.<name> → profiles.<name> → devices.<na
 | `max_crawl_depth`         | `$INVRT_MAX_CRAWL_DEPTH`         | `3`          | crawl                  |
 | `max_pages`               | `$INVRT_MAX_PAGES`               | `100`        | crawl                  |
 | `user_agent`              | `$INVRT_USER_AGENT`              | `InVRT/1.0`  | crawl, reference, test |
-| `max_concurrent_requests` | `$INVRT_MAX_CONCURRENT_REQUESTS` | `5`          | reference, test        |
 | `directory`               | `$INVRT_DIRECTORY`               | `{CWD}/.invrt` | all                  |
 | `data_dir`                | `$INVRT_DATA_DIR`                | _(computed)_ | all                    |
 | `cookies_file`            | `$INVRT_COOKIES_FILE`            | _(computed)_ | all                    |

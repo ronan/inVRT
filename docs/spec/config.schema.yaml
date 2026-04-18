@@ -97,11 +97,6 @@ $defs:
         type: string
         description: HTTP User-Agent header sent by the crawler.
         default: InVRT/1.0
-      max_concurrent_requests:
-        type: integer
-        minimum: 1
-        description: Number of parallel screenshot captures.
-        default: 5
 
 
       viewport_width:

@@ -37,8 +37,8 @@ class InfoCommand extends BaseCommand
 
         $io->definitionList(
             ['Environments' => implode(', ', $data['environments']) ?: '(none)'],
-            ['Profiles'     => implode(', ', $data['profiles'])     ?: '(none)'],
-            ['Devices'      => implode(', ', $data['devices'])      ?: '(none)'],
+            ['Profiles'     => implode(', ', $data['profiles']) ?: '(none)'],
+            ['Devices'      => implode(', ', $data['devices']) ?: '(none)'],
         );
 
         $io->definitionList(

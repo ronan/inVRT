@@ -53,7 +53,7 @@ teardown() {
     [ -f "$TEST_DIR/.invrt/config.yaml" ]
     [ -d "$TEST_DIR/.invrt/data" ]
     [ -d "$TEST_DIR/.invrt/scripts" ]
-    [ -f "$TEST_DIR/.invrt/exclude_urls.txt" ]
+    [ -f "$TEST_DIR/.invrt/exclude_paths.txt" ]
 }
 
 @test "init: config.yaml contains the selected url and core sections" {
