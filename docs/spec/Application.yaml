@@ -1,4 +1,8 @@
-sections:
+Info:
+  version: 0.1.1
+  description: A zero-config CLI tool for Visual Regression Testing (VRT) of apps and websites as an authenticated or anonymous user.
+
+Sections:
   environment:
     default: local
     description: Selected key in environments.
@@ -48,7 +52,7 @@ settings:
     default: INVRT_CRAWL_DIR/exclude_paths.txt
     description: Path list used to exclude URL directories during crawl.
 
-commands:
+Commands:
   config:
     description: View the inVRT configuration.
     help: Displays the current inVRT project configuration.
