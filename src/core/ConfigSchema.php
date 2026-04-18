@@ -31,6 +31,7 @@ class ConfigSchema implements ConfigurationInterface
         'crawl_file' => 'INVRT_CRAWL_DIR/crawled_urls.txt',
         'exclude_file' => 'INVRT_CRAWL_DIR/exclude_paths.txt',
         'capture_dir' => 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE',
+        'check_file' => 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/check.yaml',
     ];
 
     public function getConfigTreeBuilder(): TreeBuilder
@@ -65,6 +66,7 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('crawl_file')->defaultValue('INVRT_CRAWL_DIR/crawled_urls.txt')->end()
                     ->scalarNode('exclude_file')->defaultValue('INVRT_CRAWL_DIR/exclude_paths.txt')->end()
                     ->scalarNode('capture_dir')->defaultValue('INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE')->end()
+                    ->scalarNode('check_file')->defaultValue('INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/check.yaml')->end()
                     ->end()
                 ->end()
                 ->arrayNode('environments')
@@ -92,6 +94,7 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('crawl_file')->end()
                     ->scalarNode('exclude_file')->end()
                     ->scalarNode('capture_dir')->end()
+                    ->scalarNode('check_file')->end()
                     ->end()
                 ->end()
             ->end()
@@ -121,6 +124,7 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('crawl_file')->end()
                     ->scalarNode('exclude_file')->end()
                     ->scalarNode('capture_dir')->end()
+                    ->scalarNode('check_file')->end()
                     ->end()
                 ->end()
             ->end()
@@ -150,6 +154,7 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('crawl_file')->end()
                     ->scalarNode('exclude_file')->end()
                     ->scalarNode('capture_dir')->end()
+                    ->scalarNode('check_file')->end()
                     ->end()
                 ->end()
             ->end()

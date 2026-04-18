@@ -4,6 +4,7 @@ namespace Tests\E2E;
 
 use App\Commands\ApproveCommand;
 use App\Commands\BaselineCommand;
+use App\Commands\CheckCommand;
 use App\Commands\ConfigCommand;
 use App\Commands\CrawlCommand;
 use App\Commands\InfoCommand;
@@ -46,6 +47,7 @@ abstract class CommandTestCase extends TestCase
         $this->app->addCommand(new InitCommand());
         $this->app->addCommand(new ApproveCommand());
         $this->app->addCommand(new BaselineCommand());
+        $this->app->addCommand(new CheckCommand());
         $this->app->addCommand(new CrawlCommand());
         $this->app->addCommand(new InfoCommand());
         $this->app->addCommand(new ReferenceCommand());

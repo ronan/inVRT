@@ -24,7 +24,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 ## Features
 
 ### Advanced flow
-- [ ] Implement `invrt check` to load the homepage and retrieve the site title
+- [.] Implement `invrt check` to load the homepage and retrieve the site title
     - Have the check function run automatically after init and before crawl if it hasn't been run yet.
     - Add cms_detector binary to dockerfile to check the cms version/platform.
     - Create a check.yml file with info from the check including:

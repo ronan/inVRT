@@ -11,6 +11,7 @@ inVRT is a CLI tool for running Visual Regression Testing (VRT) against CMS-driv
   - [Workflow Overview](#workflow-overview)
   - [Commands](#commands)
     - [`init`](#init)
+    - [`check`](#check)
     - [`approve`](#approve)
     - [`baseline`](#baseline)
     - [`crawl`](#crawl)
@@ -28,6 +29,7 @@ inVRT is a CLI tool for running Visual Regression Testing (VRT) against CMS-driv
 
 ``` 
 invrt init <url>  # One-time setup — creates .invrt/ and saves the site URL
+invrt check       # Verify site connectivity and collect metadata (auto-runs after init)
 invrt crawl       # Discover URLs by crawling the site
 invrt reference   # Capture baseline screenshots
 invrt test        # Compare current screenshots against the baseline
@@ -84,6 +86,51 @@ If you omit the URL argument in an interactive terminal, inVRT prompts for it.
 ```
 ⚠️  InVRT is already initialized for this project. Please remove the .invrt directory if you want to re-initialize.
 ```
+
+### `check`
+
+Verify that the configured site is reachable and collect metadata.
+
+```
+invrt check [--environment=<name>] [--profile=<name>] [--device=<name>]
+```
+
+Fetches the site homepage, extracts the page title, detects HTTPS, and records any permanent (301) redirects. Results are written to `.invrt/data/<environment>/check.yaml`.
+
+`check` runs automatically after `init` and before `crawl` when no check file exists yet.
+
+**Output:**
+
+```
+✓ Site check complete. Title: "My Site". HTTPS: yes. Written to .invrt/data/local/check.yaml
+```
+
+**check.yaml example:**
+
+```yaml
+url: 'https://example.com'
+title: 'My Site'
+https: true
+checked_at: '2026-04-17T23:38:44+00:00'
+```
+
+If the configured URL permanently redirects, `redirected_from` is included:
+
+```yaml
+url: 'https://example.com'
+title: 'My Site'
+https: true
+redirected_from: 'http://example.com'
+checked_at: '2026-04-17T23:38:44+00:00'
+```
+
+**Failure output (unreachable site):**
+
+```
+Failed to connect to https://example.com: Connection refused
+```
+
+---
 
 ### `approve`
 
@@ -406,6 +453,8 @@ inVRT stores all generated data under `.invrt/data/`, namespaced by profile and 
 ```
 .invrt/
 └── data/
+    ├── <environment>/
+    │   └── check.yaml                # Site metadata written by `check` command
     └── <profile>/
         └── <environment>/
             ├── crawled_urls.txt          # URL list produced by `crawl`

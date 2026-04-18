@@ -160,11 +160,14 @@ $defs:
         type: string
         description: File where inVRT stores paths to exclude from crawl.
         default: INVRT_CRAWL_DIR/exclude_paths.txt
-
       capture_dir:
         type: string
         description: Directory where inVRT stores captured screenshots for this device.
         default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE
+      check_file:
+        type: string
+        description: File where inVRT stores the list of checks for this device.
+        default: INVRT_CRAWL_DIR/check.yaml
 
   # ------------------------------------------------------------------
   # Section definitions — each extends configKeys with its own fields

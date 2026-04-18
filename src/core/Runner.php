@@ -101,6 +101,11 @@ class Runner
         }
 
         $this->logger->notice('✅ InVRT successfully initialized!');
+
+        if ($this->check() !== 0) {
+            $this->logger->warning('⚠️  Site check failed. Run `invrt check` manually once the site is reachable.');
+        }
+
         return 0;
     }
 
@@ -140,6 +145,92 @@ class Runner
         return $this->config->all();
     }
 
+    /**
+     * Fetch the site homepage and write a check.yaml with metadata.
+     *
+     * Follows redirects, detects HTTPS, extracts the page title, and records
+     * the resolved URL. Returns 0 on success, 1 on failure.
+     */
+    public function check(): int
+    {
+        $env       = $this->config->all();
+        $url       = $env['INVRT_URL']        ?? '';
+        $checkFile = $env['INVRT_CHECK_FILE'] ?? '';
+
+        if ($url === '') {
+            $this->logger->error('INVRT_URL must be set');
+            return 1;
+        }
+
+        if ($checkFile === '') {
+            $this->logger->error('INVRT_CHECK_FILE must be set');
+            return 1;
+        }
+
+        $this->logger->info("🔍 Checking site at $url");
+
+        $ch = curl_init();
+        if ($ch === false) {
+            $this->logger->error('curl_init() failed — curl extension may not be available');
+            return 1;
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_USERAGENT      => $env['INVRT_USER_AGENT'] ?? 'InVRT/1.0',
+        ]);
+
+        $body     = curl_exec($ch);
+        $errno    = curl_errno($ch);
+        $errMsg   = curl_error($ch);
+        $info     = curl_getinfo($ch);
+        curl_close($ch);
+
+        if ($errno !== 0 || $body === false) {
+            $this->logger->error("Failed to connect to $url: $errMsg");
+            return 1;
+        }
+
+        $finalUrl      = (string) ($info['url']            ?? $url);
+        $redirectCount = (int)   ($info['redirect_count']  ?? 0);
+
+        // Detect whether a permanent redirect was followed by re-requesting with no follow.
+        $redirectedFrom = null;
+        if ($redirectCount > 0) {
+            $firstCode = $this->getInitialHttpCode($url);
+            if ($firstCode === 301) {
+                $redirectedFrom = rtrim($url, '/');
+            }
+        }
+
+        $title   = $this->extractTitle((string) $body);
+        $isHttps = str_starts_with($finalUrl, 'https://');
+
+        $data = array_filter([
+            'url'             => rtrim($finalUrl, '/'),
+            'title'           => $title,
+            'https'           => $isHttps,
+            'redirected_from' => $redirectedFrom,
+            'checked_at'      => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
+        ], fn($v) => $v !== null);
+
+        $dir = dirname($checkFile);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        file_put_contents($checkFile, Yaml::dump($data, 2, 2));
+
+        $this->logger->notice("✓ Site check complete. Title: \"$title\". HTTPS: " . ($isHttps ? 'yes' : 'no') . ". Written to $checkFile");
+
+        return 0;
+    }
+
     /** Crawl the target URL and write unique paths to the crawl file. */
     public function crawl(): int
     {
@@ -165,6 +256,7 @@ class Runner
         $excludeFile = $env['INVRT_EXCLUDE_FILE']  ?? '';
         $profile     = $env['INVRT_PROFILE']       ?? '';
         $environment = $env['INVRT_ENVIRONMENT']   ?? '';
+        $checkFile   = $env['INVRT_CHECK_FILE']    ?? '';
 
         $filesystem = new Filesystem();
         $crawlLog  && $filesystem->dumpFile($crawlLog, '');
@@ -173,6 +265,11 @@ class Runner
         }
 
         $this->logger->info("🕸️ Crawling '$environment' environment ($url) with profile: '$profile' to depth: $maxDepth, max pages: $maxPages");
+
+        if ($checkFile !== '' && !file_exists($checkFile)) {
+            $this->logger->notice('🔍 No site check found — running check first.');
+            $this->check();
+        }
 
         foreach ([$cloneDir, dirname($crawlLog)] as $dir) {
             $this->prepareDirectory($dir);
@@ -540,5 +637,36 @@ class Runner
         }
 
         return array_values(array_slice($lines, -$lineCount));
+    }
+
+    /** Make a single non-following HEAD/GET request and return the HTTP status code. */
+    private function getInitialHttpCode(string $url): int
+    {
+        $ch = curl_init();
+        if ($ch === false) {
+            return 0;
+        }
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_NOBODY         => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ]);
+        curl_exec($ch);
+        $code = (int) (curl_getinfo($ch, CURLINFO_HTTP_CODE) ?? 0);
+        curl_close($ch);
+        return $code;
+    }
+
+    /** Extract the text content of the first <title> element in an HTML string. */
+    private function extractTitle(string $html): string
+    {
+        if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $m)) {
+            return trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        }
+        return '';
     }
 }

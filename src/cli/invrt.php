@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 use App\Commands\ApproveCommand;
 use App\Commands\BaselineCommand;
+use App\Commands\CheckCommand;
 use App\Commands\ConfigCommand;
 use App\Commands\CrawlCommand;
 use App\Commands\InfoCommand;
@@ -21,6 +22,7 @@ $container = new ContainerBuilder();
 
 $container->autowire(ApproveCommand::class)->setPublic(true);
 $container->autowire(BaselineCommand::class)->setPublic(true);
+$container->autowire(CheckCommand::class)->setPublic(true);
 $container->autowire(CrawlCommand::class)->setPublic(true);
 $container->autowire(ReferenceCommand::class)->setPublic(true);
 $container->autowire(TestCommand::class)->setPublic(true);
@@ -47,6 +49,7 @@ $app->addCommand($container->get(InfoCommand::class));
 $app->addCommand($container->get(InitCommand::class));
 $app->addCommand($container->get(ApproveCommand::class));
 $app->addCommand($container->get(BaselineCommand::class));
+$app->addCommand($container->get(CheckCommand::class));
 $app->addCommand($container->get(CrawlCommand::class));
 $app->addCommand($container->get(ReferenceCommand::class));
 $app->addCommand($container->get(TestCommand::class));
