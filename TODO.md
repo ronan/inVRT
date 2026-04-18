@@ -9,7 +9,22 @@ For AI agents and human developers.
 
 Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DONE.md).
 
+## Tech Debt
+
+- [ ] reduce unnecessary code from php to make test run steps more self contained
+- [ ] move file generation to js/ts
+- [ ] Clean up config and get schema generation working again.
+  - [ ] Remove unnecessary file path config
+  - [ ] Clean up the schema generator 
+  - [ ] Teach the ai agents how to edit the schema instead of altering the generated code.
+- [ ] Clean up docs
+  - Rebuild the app summary to ensure it is complete and correct.
+  - Regenerate simple human readable usage documentation.
+  - Create in-depth end user documentation for config
+
 ## Tests
+
+- [ ] Add all e2e tests to bats.
 
 ### CMS-Specific Testing
 
