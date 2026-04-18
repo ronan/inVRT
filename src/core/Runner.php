@@ -361,11 +361,10 @@ class Runner
         $profile     = $env['INVRT_PROFILE']     ?? '';
         $device      = $env['INVRT_DEVICE']      ?? '';
         $environment = $env['INVRT_ENVIRONMENT'] ?? '';
-        $captureDir  = $env['INVRT_CAPTURE_DIR'] ?? '';
 
         $this->logger->notice("🔬 Testing '$environment' environment ($url) with profile: '$profile' and device: '$device'");
 
-        if ($this->referencesAreMissing($captureDir)) {
+        if ($this->referencesAreMissing()) {
             $this->logger->notice('📸 No reference screenshots found — capturing references first.');
             // Reuse reference() so first-run prerequisites (crawl + URL validation) are enforced.
             if (($result = $this->reference()) !== 0) {
@@ -393,16 +392,14 @@ class Runner
     /** Create or refresh the approved visual baseline. */
     public function baseline(): int
     {
-        $captureDir = $this->config->get('INVRT_CAPTURE_DIR', '');
-
-        if ($this->referencesAreMissing($captureDir)) {
+        if ($this->referencesAreMissing()) {
             $this->logger->notice('📸 No reference screenshots found — capturing references first.');
             if (($result = $this->reference()) !== 0) {
                 return $result;
             }
         }
 
-        if ($this->testResultsAreMissing($captureDir)) {
+        if ($this->testResultsAreMissing()) {
             $this->logger->notice('🔬 No test screenshots found — running test first.');
             if (($result = $this->test()) !== 0) {
                 return $result;
@@ -479,16 +476,41 @@ class Runner
         $cmd    = 'node ' . escapeshellarg($script) . ' ' . $mode;
         $this->logger->debug('Running BackstopJS command: ' . $cmd);
 
+        $output  = '';
         $process = Process::fromShellCommandline($cmd, null, $env);
         $process->setTimeout(null);
-        $process->run(function (mixed $type, mixed $buffer): void {
+        $process->run(function (mixed $type, mixed $buffer) use (&$output): void {
             print($buffer);
+            $output .= $buffer;
         });
 
         $exitCode = $process->getExitCode() ?? 0;
         $this->logger->debug('BackstopJS exit code: ' . $exitCode);
 
+        $this->writeResultsFile($mode, $output);
+
         return $exitCode;
+    }
+
+    /** Write BackstopJS output to the appropriate results file for the given mode. */
+    private function writeResultsFile(string $mode, string $output): void
+    {
+        $file = match ($mode) {
+            'reference' => $this->config->get('INVRT_REFERENCE_RESULTS_FILE', ''),
+            'test'      => $this->config->get('INVRT_TEST_RESULTS_FILE', ''),
+            default     => '',
+        };
+
+        if ($file === '') {
+            return;
+        }
+
+        $dir = dirname($file);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        file_put_contents($file, $output);
     }
 
     /** Create dir if absent, or clear contents if present. */
@@ -525,29 +547,16 @@ class Runner
         return 0;
     }
 
-    private function referencesAreMissing(string $captureDir): bool
+    private function referencesAreMissing(): bool
     {
-        return $this->captureImagesAreMissing($captureDir . '/bitmaps/reference');
+        $file = $this->config->get('INVRT_REFERENCE_RESULTS_FILE', '');
+        return $file === '' || !file_exists($file);
     }
 
-    private function testResultsAreMissing(string $captureDir): bool
+    private function testResultsAreMissing(): bool
     {
-        return $this->captureImagesAreMissing($captureDir . '/bitmaps/test');
-    }
-
-    private function captureImagesAreMissing(string $dir): bool
-    {
-        if (!is_dir($dir)) {
-            return true;
-        }
-
-        foreach (new \FilesystemIterator($dir) as $entry) {
-            if ($entry->isFile() && strtolower($entry->getExtension()) === 'png') {
-                return false;
-            }
-        }
-
-        return true;
+        $file = $this->config->get('INVRT_TEST_RESULTS_FILE', '');
+        return $file === '' || !file_exists($file);
     }
 
     private function resolveCookieArg(array $env): string

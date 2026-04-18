@@ -24,7 +24,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 ## Features
 
 ### Advanced flow
-- [.] Implement `invrt check` to load the homepage and retrieve the site title
+- [x] Implement `invrt check` to load the homepage and retrieve the site title
     - Have the check function run automatically after init and before crawl if it hasn't been run yet.
     - Add cms_detector binary to dockerfile to check the cms version/platform.
     - Create a check.yml file with info from the check including:
@@ -34,8 +34,8 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
         - CMS/Platform (eg: drupal, backdrop, wordpress) via cms_detector
         - Last check date
         - Any other information that may be useful for crawling or capturing screenshots
-- [ ] Save reference output to 'INVRT_CAPTURE_DIR/reference_results.txt', save test results to 'INVRT_CAPTURE_DIR/test_results.txt'
-- [ ] Use generated config files to determine which steps have been run at least once
+- [x] Save reference output to 'INVRT_CAPTURE_DIR/reference_results.txt', save test results to 'INVRT_CAPTURE_DIR/test_results.txt'
+- [x] Use generated config files to determine which steps have been run at least once
     - Init has run if a 'check.yaml' file exists
     - Crawl has run if a 'crawled_urls.txt' file exists
     - Reference has run if a 'reference_results.txt' file exists

@@ -32,6 +32,8 @@ class ConfigSchema implements ConfigurationInterface
         'exclude_file' => 'INVRT_CRAWL_DIR/exclude_paths.txt',
         'capture_dir' => 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE',
         'check_file' => 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/check.yaml',
+        'reference_results_file' => 'INVRT_CAPTURE_DIR/reference_results.txt',
+        'test_results_file' => 'INVRT_CAPTURE_DIR/test_results.txt',
     ];
 
     public function getConfigTreeBuilder(): TreeBuilder
@@ -67,6 +69,8 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('exclude_file')->defaultValue('INVRT_CRAWL_DIR/exclude_paths.txt')->end()
                     ->scalarNode('capture_dir')->defaultValue('INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE')->end()
                     ->scalarNode('check_file')->defaultValue('INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/check.yaml')->end()
+                    ->scalarNode('reference_results_file')->defaultValue('INVRT_CAPTURE_DIR/reference_results.txt')->end()
+                    ->scalarNode('test_results_file')->defaultValue('INVRT_CAPTURE_DIR/test_results.txt')->end()
                     ->end()
                 ->end()
                 ->arrayNode('environments')
@@ -95,6 +99,8 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('exclude_file')->end()
                     ->scalarNode('capture_dir')->end()
                     ->scalarNode('check_file')->end()
+                    ->scalarNode('reference_results_file')->end()
+                    ->scalarNode('test_results_file')->end()
                     ->end()
                 ->end()
             ->end()
@@ -125,6 +131,8 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('exclude_file')->end()
                     ->scalarNode('capture_dir')->end()
                     ->scalarNode('check_file')->end()
+                    ->scalarNode('reference_results_file')->end()
+                    ->scalarNode('test_results_file')->end()
                     ->end()
                 ->end()
             ->end()
@@ -155,6 +163,8 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('exclude_file')->end()
                     ->scalarNode('capture_dir')->end()
                     ->scalarNode('check_file')->end()
+                    ->scalarNode('reference_results_file')->end()
+                    ->scalarNode('test_results_file')->end()
                     ->end()
                 ->end()
             ->end()

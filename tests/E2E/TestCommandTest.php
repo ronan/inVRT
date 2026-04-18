@@ -39,9 +39,15 @@ class TestCommandTest extends WebCommandTestCase
         $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/reference')));
         $this->assertGreaterThan(0, count($this->findPngs($dataDir . '/test')));
 
-        // Run visual regression test with verbose — identical site, so no regressions
-        $this->executeCommand('test');
+        // Results files written
+        $captureDir = $this->fixture->getInvrtDir() . '/data/local/anonymous/desktop';
+        $this->assertFileExists($captureDir . '/reference_results.txt');
+        $this->assertFileExists($captureDir . '/test_results.txt');
+
+        // Second test run: reference already ran (results file present) — should NOT re-trigger it
+        $this->executeCommand('test', [], ['verbosity' => OutputInterface::VERBOSITY_VERBOSE]);
         $this->assertCommandSuccess();
+        $this->assertOutputNotContains('No reference screenshots found');
 
         // Output status line
         $this->assertOutputContains('🔬 Testing');

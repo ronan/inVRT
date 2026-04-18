@@ -41,6 +41,10 @@ class ReferenceCommandTest extends WebCommandTestCase
         foreach ($pngs as $png) {
             $this->assertGreaterThan(0, filesize($png), "PNG $png should not be empty");
         }
+
+        // Results file written
+        $resultsFile = $this->fixture->getInvrtDir() . '/data/local/anonymous/desktop/reference_results.txt';
+        $this->assertFileExists($resultsFile);
     }
 
     public function testReferenceAutoTriggersCrawlWhenNoCrawlFileExists(): void

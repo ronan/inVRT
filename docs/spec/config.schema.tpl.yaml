@@ -165,7 +165,6 @@ $defs:
         description: Directory where inVRT stores captured screenshots for this device.
         default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE
 
-
   # ------------------------------------------------------------------
   # Section definitions — each extends configKeys with its own fields
   # ------------------------------------------------------------------

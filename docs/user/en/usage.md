@@ -460,13 +460,16 @@ inVRT stores all generated data under `.invrt/data/`, namespaced by profile and 
             ├── crawled_urls.txt          # URL list produced by `crawl`
             ├── cookies.json              # Playwright session cookies
             ├── cookies.txt               # Netscape-format cookies for wget
-            ├── bitmaps/
-            │   ├── reference/            # Baseline screenshots (`reference` command)
-            │   └── test/                 # Latest test screenshots (`test` command)
-            ├── reports/
-            │   └── index.html            # BackstopJS comparison report
             └── logs/
                 └── crawl.log             # wget crawl log
+            └── <device>/
+                ├── reference_results.txt     # Output from last `reference` run
+                ├── test_results.txt          # Output from last `test` run
+                ├── bitmaps/
+                │   ├── reference/            # Baseline screenshots (`reference` command)
+                │   └── test/                 # Latest test screenshots (`test` command)
+                └── reports/
+                    └── index.html            # BackstopJS comparison report
 ```
 
 Add `.invrt/data/` to `.gitignore` to keep generated artifacts out of version control.
