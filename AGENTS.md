@@ -160,30 +160,13 @@ Refer to [The configuration documentation](docs/user/en/configuration.md) for de
 
 **Unit tests** (`tests/Unit/`) test PHP services in isolation using PHPUnit mocking. No filesystem or subprocess access.
 
-**E2E tests** (`tests/e2e/`) extend `CommandTestCase`, which sets up a `TestProjectFixture` temp directory and a Symfony `Application` with all commands registered. `setUp()` calls `$this->fixture->setEnvironmentVariable()` to set `INVRT_DIRECTORY` — you do not need to set it manually.
+**CLI end-to-end tests** live in `tests/bats/` and run the real `bin/invrt` binary via Bats.
 
-`CommandTestCase` methods:
-- `executeCommand(string $name, array $input = [])` — run a command, returns `CommandTester`
-- `executeCommandWithOutputCapture(string $name, array $input = [])` — same, but also buffers subprocess (`passthru`) output into `$this->strayOutput`
-- `getOutput()` — Symfony console output from last command
-- `getExitCode()` — exit code from last command
-- `assertCommandSuccess()` — assert exit code 0
-- `assertCommandFailure(?int $code = null)` — assert non-zero (or specific) exit code
-- `assertOutputContains(string $expected)` / `assertOutputNotContains(string $notExpected)`
-- `assertConfigFileExists()` / `assertConfigFileNotExists()`
-- `assertConfigValue(string $dotKey, mixed $expected)` — dot-notation key into config array
-- `assertStrayOutputContains(string $expected)` / `assertStrayOutputNotContains(string $notExpected)`
-
-`TestProjectFixture` helpers:
-- `writeMinimalConfig()` — base project/settings only
-- `writeConfigWithProfiles()` — includes profiles block
-- `writeConfigWithEnvironments()` — includes environments block
-- `writeConfigWithDevices()` — includes devices block
-- `writeConfig(array $config)` — write arbitrary config
-- `writeCookiesFile(string $profile, string $env)` — write a cookies.json
-- `setEnvironmentVariable()` / `unsetEnvironmentVariable()` — set/clear `INVRT_DIRECTORY`
-
-When writing E2E tests, do not manually set `INVRT_DIRECTORY` or `INIT_CWD` — `CommandTestCase.setUp()` handles this via `$this->fixture->setEnvironmentVariable()`.
+- Use `tests/bats/test_helper.bash` for shared setup, command runners, YAML helpers, and webserver lifecycle helpers.
+- Each test cleans its own artifact directory at setup time and preserves outputs afterward for inspection.
+- Prefer `/scratch/tests/` for artifacts; the helper falls back to `scratch/tests/` when `/scratch/tests/` is unavailable on the host.
+- Workflow tests should use the real PHP built-in server against `tests/fixtures/website/`.
+- Interactive CLI flows should be exercised through a pseudo-TTY (`script`), not by mocking Symfony input classes.
 
 ### PHPStan
 Level 5, strict. A baseline file (`tooling/phpstan-baseline.neon`) tracks accepted violations. Run `task baseline:phpstan` after intentional type changes, not to hide new issues.

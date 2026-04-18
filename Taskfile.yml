@@ -113,17 +113,24 @@ tasks:
       - task publish:ddev-addon
 
   build:templates:
-    desc: Generate PHP files from Handlebars templates and the config schema
+    desc: Generate JavaScript files from Handlebars templates and the application specification
     sources:
       - 'tooling/templates/*'
-      - 'docs/spec/config.schema.yaml'
+      - 'docs/spec/Application.yaml'
     cmds:
-      - node tooling/scripts/build-config-definition.mjs
+      - node tooling/scripts/build-app.mjs
 
   test:bats:
     desc: Run BATS CLI tests
     cmds:
       - node_modules/.bin/bats tests/bats/
+
+  test:bats:docker:
+    desc: Run BATS CLI tests in the Docker test stage
+    cmds:
+      - mkdir -p {{.TASKFILE_DIR}}/scratch/tests
+      - docker build --target test -t invrt:test .
+      - docker run --rm -v {{.TASKFILE_DIR}}/scratch/tests:/scratch/tests invrt:test
 
   test:php:
     desc: Run all tests with PHPUnit
@@ -145,16 +152,6 @@ tasks:
       - 'src/cli/**/*.php'
       - 'tests/**/*.php'
     
-  test:php:e2e:
-    desc: Run integration tests with PHPUnit
-    dir: /tmp
-    cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/config/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/e2e {{.CLI_ARGS}}
-    sources:
-      - 'src/core/**/*.php'
-      - 'src/cli/**/*.php'
-      - 'tests/**/*.php'
-
   test:coverage:
     desc: Run tests with code coverage report
     cmds:

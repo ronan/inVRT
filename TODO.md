@@ -27,8 +27,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Tests
 
-- [ ] Add all e2e tests to bats.
-
 ### CMS-Specific Testing
 
   - [#] Set up ddev to run during tests
@@ -87,4 +85,3 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 - [ ] Rewrite the crawler
     - Make exclude_paths work and provide defaults for drupal/backdrop
     - add a max_width to go with max_depth
-

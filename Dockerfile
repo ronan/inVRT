@@ -1,13 +1,18 @@
 # Composer install
-FROM composer:latest AS composer
+FROM composer:latest AS composer-prod
 WORKDIR /app
 COPY composer.json composer.lock /app/
 RUN composer install --no-dev --prefer-dist --optimize-autoloader
 
+FROM composer:latest AS composer-dev
+WORKDIR /app
+COPY composer.json composer.lock /app/
+RUN composer install --prefer-dist --optimize-autoloader
+
 # FROM debian:bookworm AS build
 
-# Final runtime image
-FROM mcr.microsoft.com/playwright:v1.58.2-noble
+# Shared base image
+FROM mcr.microsoft.com/playwright:v1.58.2-noble AS base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -22,10 +27,19 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --from=composer /app /app
 WORKDIR /app
 COPY . /app
+
+FROM base AS test
+COPY --from=composer-dev /app/vendor /app/vendor
+RUN npm install --loglevel error
+RUN mkdir -p /scratch/tests
+ENV INVRT_TEST_ROOT=/scratch/tests
+ENTRYPOINT ["node_modules/.bin/bats", "tests/bats"]
+
+FROM base AS runtime
+COPY --from=composer-prod /app/vendor /app/vendor
 RUN npm install --loglevel error --omit=dev
-    
+
 WORKDIR /dir
 ENTRYPOINT [ "/app/bin/invrt" ]

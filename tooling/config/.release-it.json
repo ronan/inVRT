@@ -29,10 +29,6 @@
           "type": "text/php"
         },
         {
-          "file": "tests/e2e/CommandTestCase.php",
-          "type": "text/php"
-        },
-        {
           "file": "README.md",
           "type": "text/markdown"
         }

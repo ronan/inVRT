@@ -86,6 +86,8 @@ Completed tasks moved from TODO.md.
 
 ## Tests
 
+- [x] Add all e2e tests to bats.
+
 - [x] **E2E: ReferenceCommandTest**
 
 - [x] **E2E: TestCommandTest**
