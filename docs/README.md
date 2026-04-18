@@ -27,3 +27,4 @@ docs/
 
 - [Config Schema](spec/config.schema.yaml)
 - [Config Example](spec/config.example.yaml)
+- [Command Scaffold Spec](planning/spec/Commands.yaml)

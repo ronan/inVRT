@@ -1,0 +1,167 @@
+sections:
+  environment:
+    default: local
+    description: Selected key in environments.
+  profile:
+    default: anonymous
+    description: Selected key in profiles.
+  device:
+    default: desktop
+    description: Selected key in devices.
+
+settings:
+  url:
+    default: ""
+    description: Base site URL used by check, crawl, and login flows.
+  login_url:
+    default: ""
+    description: Explicit login URL. When blank, login defaults to <url>/user/login.
+  username:
+    default: ""
+    description: Username used for Playwright login.
+  password:
+    default: ""
+    description: Password used for Playwright login.
+  cookie:
+    default: ""
+    description: Raw Cookie header value used during crawl when set.
+  max_crawl_depth:
+    default: 3
+    description: Maximum wget recursion depth.
+  max_pages:
+    default: 100
+    description: Intended crawl page cap for crawl workflows.
+  user_agent:
+    default: InVRT/1.0
+    description: User agent used for HTTP requests such as check.
+  viewport_width:
+    default: 1024
+    description: Browser viewport width for screenshot capture.
+  viewport_height:
+    default: 768
+    description: Browser viewport height for screenshot capture.
+
+  cookies_file:
+    default: INVRT_CRAWL_DIR/cookies
+    description: Base path for generated cookie files. Login writes .json and .txt variants.
+  exclude_file:
+    default: INVRT_CRAWL_DIR/exclude_paths.txt
+    description: Path list used to exclude URL directories during crawl.
+
+commands:
+  config:
+    description: View the inVRT configuration.
+    help: Displays the current inVRT project configuration.
+
+  help:
+    description: Display help information for inVRT commands.
+    help: Shows detailed help information for all available inVRT commands.
+
+  info:
+    description: Show project status summary.
+    help: Displays the project name, configured environments/profiles/devices, and current crawl/screenshot counts.
+
+  init:
+    description: Initialize a new inVRT project in the current directory.
+    help: Initializes a new inVRT project, saving the provided URL into a fresh config file.
+    success: InVRT successfully initialized!
+    triggers: [ approve ]
+    output_file: INVRT_DIRECTORY/config.yaml
+    output_fields: [ url ]
+    directories:
+      directory:
+        default: INVRT_CWD/.invrt
+        description: Root inVRT project directory.
+      scripts_dir:
+        default: INVRT_DIRECTORY/scripts
+        description: Directory for optional user-defined scripts.
+      data_dir:
+        default: INVRT_DIRECTORY/data
+        description: Directory for data artifacts.
+    creates:
+      - .invrt/scripts/
+    arguments:
+      url:
+        required: true
+        description: Website URL to save in the new config file.
+
+  check:
+    description: Check site connectivity and collect metadata.
+    help: Fetches the site homepage, extracts the page title, detects HTTPS, and records any permanent redirects. Results are written to .invrt/data/check.yaml.
+    success: InVRT successfully checked the site!
+    requires: [ init ]
+    output_file: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/check.yaml
+    output_fields:
+      - url
+      - title
+      - https
+      - redirected_from
+      - checked_at
+
+  crawl:
+    description: Crawl the website and generate screenshots.
+    help: Crawls the configured website and generates screenshots for the specified profile, device, and environment.
+    success: InVRT successfully crawled the site!
+    login: true
+    requires: [ check ]
+    triggers: [ config-backstop ]
+    directories: 
+      crawl_dir:
+        default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE
+        description: Directory holding crawl artifacts for the selected environment and profile.
+      clone_dir:
+        default: INVRT_CRAWL_DIR/clone
+        description: Temporary wget mirror output directory.
+    log: INVRT_CRAWL_DIR/crawl.log
+    output_file: INVRT_CRAWL_DIR/crawled_urls.txt
+    output_fields:
+      - url
+      - title
+      - https
+      - redirected_from
+      - checked_at
+
+  backstop-config:
+    description: Configure BackstopJS for visual regression testing.
+    help: Generates or updates the BackstopJS configuration for the specified profile, device, and environment.
+    success: InVRT successfully configured BackstopJS!
+    requires: [ crawl ]
+    internal: true
+    output_file: INVRT_CRAWL_DIR/backstop_config.json
+
+  reference:
+    description: Create reference screenshots for comparison.
+    help: Creates reference screenshots for the specified profile, device, and environment to use as baseline for comparison.
+    login: true
+    requires: [ backstop-config ]
+    output_file: INVRT_CAPTURE_DIR/reference_results.txt
+    directories:
+      capture_dir:
+        default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE
+        description: Root directory for BackstopJS capture and report artifacts.
+    writes:
+      - INVRT_CAPTURE_DIR/bitmaps/reference
+      - INVRT_CAPTURE_DIR/reports/html
+      - INVRT_CAPTURE_DIR/reports/json
+
+  test:
+    description: Run visual regression tests.
+    help: Runs visual regression tests comparing current screenshots against reference screenshots.
+    login: true
+    requires: [ reference ]
+    output_file: INVRT_CAPTURE_DIR/test_results.txt
+    writes:
+      - INVRT_CAPTURE_DIR/bitmaps/test
+      - INVRT_TEST_RESULTS_FILE
+
+  approve:
+    description: Approve the latest visual test results.
+    help: Runs BackstopJS approve for the current profile, device, and environment.
+    success: Approved baseline images via BackstopJS
+    requires: [ test ]
+
+  baseline:
+    description: Create or refresh the approved visual baseline.
+    help: Ensures reference and test artifacts exist, then approves the latest visual results.
+    success: Site has been baselined successfully.
+    requires: [ test ]
