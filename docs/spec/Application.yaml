@@ -17,6 +17,9 @@ Settings:
   url:
     default: ""
     description: Base site URL used by check, crawl, and login flows.
+  id:
+    default: ""
+    description: Identifier used for the inVRT project
   login_url:
     default: ""
     description: Explicit login URL. When blank, login defaults to <url>/user/login.

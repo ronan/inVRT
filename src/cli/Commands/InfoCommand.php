@@ -30,6 +30,7 @@ class InfoCommand extends BaseCommand
         $io->newLine();
 
         $io->definitionList(
+            ['Project ID'  => $data['id'] ?: '(not set)'],
             ['Environment' => $data['environment']],
             ['Profile'     => $data['profile']],
             ['Device'      => $data['device']],

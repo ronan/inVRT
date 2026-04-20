@@ -35,6 +35,8 @@ Initializes a new inVRT project in the current working directory. Creates:
 
 It writes a minimal config with the currently selected environment/profile/device keys and stores the provided URL at `environments.<selected-environment>.url`. If no URL argument is provided and stdin is interactive, it prompts for one. It fails if `.invrt/` already exists. After initialization it runs `check`, warning if the site is not reachable yet.
 
+During init, inVRT also generates a stable project identifier and stores it at `settings.id`. The ID is derived from the URL hostname plus a random seed so projects with the same URL still get distinct report IDs.
+
 ### `check`
 
 Fetches the configured site URL, follows redirects, extracts the page title, detects whether the resolved URL uses HTTPS, and records any permanent redirect source. Writes the result to `INVRT_CHECK_FILE`, which defaults to `.invrt/data/<environment>/check.yaml`.
@@ -105,6 +107,7 @@ Refreshes the approved baseline. It runs:
 Displays a status summary for the selected environment/profile/device:
 
 - project name
+- project ID (`settings.id` / `INVRT_ID`)
 - config file path
 - selected environment/profile/device
 - configured environment/profile/device keys
@@ -213,6 +216,7 @@ These keys are accepted in `settings`, `environments.*`, `profiles.*`, and `devi
 | YAML key | Resolved env var | Default |
 |---|---|---|
 | `url` | `INVRT_URL` | `""` |
+| `id` | `INVRT_ID` | `""` |
 | `login_url` | `INVRT_LOGIN_URL` | `""` |
 | `username` | `INVRT_USERNAME` | `""` |
 | `password` | `INVRT_PASSWORD` | `""` |

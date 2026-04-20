@@ -14,6 +14,7 @@ const {
   INVRT_COOKIES_FILE,
   INVRT_MAX_PAGES,
   INVRT_BACKSTOP_CONFIG_FILE,
+  INVRT_ID,
 } = process.env;
 
 const builtInScriptsDir = __dirname;
@@ -41,6 +42,7 @@ const engineScriptsDir = hasRequiredHooks(preferredScriptsDir) ? preferredScript
 const outputFile = INVRT_BACKSTOP_CONFIG_FILE || path.join(INVRT_CAPTURE_DIR, 'backstop-config.json');
 
 const config = {
+  ...(INVRT_ID ? { id: INVRT_ID } : {}),
   "dynamicTestId": 'latest',
   "viewports": [
     {

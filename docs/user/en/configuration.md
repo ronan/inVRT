@@ -14,6 +14,7 @@ Configuration for a given project is stored in a yaml file the INVRT_DIRECTORY:
 name: My inVRT Project
 
 settings:
+  id: xkqjmxvte
   project_type: drupal11
   viewport_width: 1024
   viewport_height: 768
@@ -188,6 +189,7 @@ max_pages: 90
 | `cookies_file`            | `$INVRT_COOKIES_FILE`            | _(varies)_                      | -        | all                    | `.invrt/data/<profile>/<env>/cookies`      |
 | `scripts_dir`             | `$INVRT_SCRIPTS_DIR`             | _(varies)_                      | -        | all                    | Path to the user scripts                   |
 | `url`                     | `$INVRT_URL`                     | _(empty)_                       | settings | crawl, reference, test | Base URL to crawl and test                 |
+| `id`                      | `$INVRT_ID`                      | _(empty)_                       | settings | reference, test        | Stable project identifier used in reports  |
 | `login_url`               | `$INVRT_LOGIN_URL`               | _(empty)_                       | settings | crawl, reference, test | Login page URL                             |
 | `username`                | `$INVRT_USERNAME`                | _(empty)_                       | settings | crawl, reference, test | Login username                             |
 | `password`                | `$INVRT_PASSWORD`                | _(empty)_                       | settings | crawl, reference, test | Login password                             |

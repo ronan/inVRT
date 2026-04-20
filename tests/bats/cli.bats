@@ -42,10 +42,15 @@ teardown() {
   assert_dir_exists "$TEST_DIR/.invrt"
   assert_dir_exists "$TEST_DIR/.invrt/data"
   assert_dir_exists "$TEST_DIR/.invrt/scripts"
-  assert_file_exists "$TEST_DIR/.invrt/exclude_paths.txt"
+  assert_file_exists "$TEST_DIR/.invrt/data/stage/editor/exclude_paths.txt"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "environments.stage.url" "https://example.test"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "profiles.editor" "[]"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "devices.tablet" "[]"
+
+  local project_id
+  project_id="$(yaml_get "$TEST_DIR/.invrt/config.yaml" "settings.id")"
+  [[ -n "$project_id" ]]
+  [[ "$project_id" =~ ^[a-z]+$ ]]
 }
 
 @test "init: prompts for url in a tty when the argument is missing" {
@@ -117,7 +122,8 @@ devices:
   mobile:
     viewport_width: 375
     viewport_height: 667
-settings: {}
+settings:
+  id: sampleprojectid
 EOF
   printf "/\n/about\n/contact\n" > "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt"
 
@@ -125,6 +131,8 @@ EOF
 
   [ "$status" -eq 0 ]
   assert_output_contains "My Test Project"
+  assert_output_contains "Project ID"
+  assert_output_contains "sampleprojectid"
   assert_output_contains "local"
   assert_output_contains "staging"
   assert_output_contains "anonymous"

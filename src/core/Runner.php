@@ -42,9 +42,9 @@ class Runner
             return 1;
         }
 
-        $url = trim((string) $url);
+        $url = $this::normalizeURL((string) $url);
         if ($url === '') {
-            $this->logger->error('A URL is required to initialize inVRT.');
+            $this->logger->error('A valid URL is required to initialize inVRT.');
             return 1;
         }
 
@@ -72,9 +72,13 @@ class Runner
         }
         $this->logger->info('✓ Created data directories for generated data, and user scripts.');
 
+        $projectId = self::generateProjectId($url);
+
         $configContent = Yaml::dump([
             'name' => basename($cwd) ?: 'My InVRT Project',
-            'settings' => [],
+            'settings' => [
+                'id' => $projectId,
+            ],
             'environments' => [
                 $environment => [
                     'url' => $url,
@@ -98,13 +102,22 @@ class Runner
 /logout
 /user/logout
 /files
-/downloads
+/download
+/assets
+/images
 EOF;
+        if (!empty($excludeFile)) {
+            $excludeDir = dirname($excludeFile);
+            if (!is_dir($excludeDir)) {
+                mkdir($excludeDir, 0755, true);
+            }
+        }
+
         if (
-            !empty($excludeFile) && 
-            !file_exists($excludeFile) &&
-            file_put_contents($excludeFile, $excludeUrls) === false
-          ) {
+            !empty($excludeFile)
+            && !file_exists($excludeFile)
+            && file_put_contents($excludeFile, $excludeUrls) === false
+        ) {
             $this->logger->error('Failed to create exclude_paths.txt');
             return 1;
         }
@@ -134,6 +147,7 @@ EOF;
 
         return [
             'name'         => $this->config->getSection('name') ?? '',
+            'id'           => $env['INVRT_ID'] ?? '',
             'config_file'  => $env['INVRT_CONFIG_FILE'] ?? '',
             'environment'  => $env['INVRT_ENVIRONMENT'] ?? '',
             'profile'      => $env['INVRT_PROFILE']     ?? '',
@@ -478,6 +492,53 @@ EOF;
 
         return $paths;
     }
+
+    /** Generate a stable, short project identifier from project URL + random seed. */
+    public static function generateProjectId(string $url): string
+    {
+        return self::encodeId($url, random_int(0, 0xFFFF));
+    }
+
+    /** Generate a stable, short identifier from a string and optional seed/salt. */
+    private static function encodeId(string $value, int $seed = 0): string
+    {
+        $hash = (int) hexdec(hash('crc32b', $value));
+        $alphabet = 'swxdyktzhgjfblrpmcqvn';
+        $number = (($hash & 0xFFFFFFFF) << 16) | ($seed & 0xFFFF);
+        $base = strlen($alphabet);
+
+        if ($number === 0) {
+            return $alphabet[0];
+        }
+
+        $encoded = '';
+        while ($number > 0) {
+            $index = $number % $base;
+            $encoded = $alphabet[$index] . $encoded;
+            $number = intdiv($number, $base);
+        }
+
+        return $encoded;
+    }
+
+    /** Normalize a URL by ensuring it has a scheme, host, and properly formatted components. */
+    public function normalizeURL(string $url): string
+    {
+        $parts = parse_url($url);
+        if ($parts === false) {
+            return '';
+        }
+
+        $scheme = isset($parts['scheme']) ? strtolower($parts['scheme']) : 'http';
+        $host   = isset($parts['host']) ? strtolower($parts['host']) : '';
+        $port   = isset($parts['port']) ? ':' . $parts['port'] : '';
+        $path   = $parts['path'] ?? '';
+        $query  = isset($parts['query']) ? '?' . $parts['query'] : '';
+        $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
+
+        return $scheme . '://' . $host . $port . $path . $query . $fragment;
+    }
+
 
     // -------------------------------------------------------------------------
     // Private helpers

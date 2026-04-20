@@ -22,6 +22,10 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
   - [x] Clean up the schema generator 
   - [x] Teach the ai agents how to edit the schema instead of altering the generated code.
 
+- [ ] Remove the `settings` section and replace it with `project`
+  - This more accurately reflects the fact that these are the base defaults for the given project.
+  - Move `name` into project.
+
 ## Tests
 
 ### CMS-Specific Testing
@@ -76,13 +80,14 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Reporting
 
-- [ ] Improve the source files used for reporting
+  - [x] Add a project id to distinguish final reports.
+    - [x] The project id should be saved to the config.yml file as 'id' in settings
+    - [x] It should be based on the url and a unique seed
   - [ ] Improve page ids
-    - [ ] Short and human readable
-    - [ ] Stable across crawl runs
-    - [ ] Low chance of collisions up to 100,000 pages.
-  - [ ] Add a project id to distinguish final reports.
-    - [ ] 1 project_id == 1 report
+    - [ ] use node-shorthash (https://github.com/bibig/node-shorthash) to generate an id from the path.
+      - [ ] Short and human readable
+      - [ ] Stable across crawl runs
+      - [ ] Low chance of collisions up to 100,000 pages.
 
 - [ ] Create a 1 page html report for all existing test results
 - [ ] Create an "Interactive" report
