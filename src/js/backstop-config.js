@@ -20,30 +20,41 @@ const {
 const builtInScriptsDir = __dirname;
 const preferredScriptsDir = INVRT_SCRIPTS_DIR || builtInScriptsDir;
 const requiredHookScripts = ['playwright-onbefore.js', 'playwright-onready.js'];
-const MAX_SCENARIO_LABEL_PREFIX = 40;
 
-const normalizeLabelPart = (value) => value
-  .toLowerCase()
-  .replace(/[^a-z0-9]+/g, '-')
-  .replace(/^-+|-+$/g, '');
+const ENCODE_ALPHABET = 'swxdyktzhgjfblrpmcqvn';
 
-const buildScenarioLabel = (urlPath) => {
-  const normalized = normalizeLabelPart(urlPath) || 'root';
-  const prefix = normalized.slice(0, MAX_SCENARIO_LABEL_PREFIX);
-  const hash = crypto.createHash('sha1').update(urlPath).digest('hex').slice(0, 10);
+/** Stable short ID from value + seed, mirroring Runner::encodeId in PHP. */
+const encodeId = (value, seed = 0) => {
+  const hashHex = crypto.createHash('sha1').update(value).digest('hex').slice(0, 8);
+  const hash = parseInt(hashHex, 16) >>> 0;
+  let number = (BigInt(hash) << 16n) | BigInt(seed & 0xFFFF);
+  const base = BigInt(ENCODE_ALPHABET.length);
 
-  return `${prefix}-${hash}`;
+  if (number === 0n) return ENCODE_ALPHABET[0];
+
+  let encoded = '';
+  while (number > 0n) {
+    encoded = ENCODE_ALPHABET[Number(number % base)] + encoded;
+    number = number / base;
+  }
+  return encoded;
 };
+
+// Derive a 16-bit project seed from INVRT_ID so page IDs are scoped per project.
+const projectSeed = INVRT_ID
+  ? parseInt(crypto.createHash('sha1').update(INVRT_ID).digest('hex').slice(0, 4), 16) & 0xFFFF
+  : 0;
 
 const hasRequiredHooks = (scriptsDir) => requiredHookScripts.every((script) => fs.existsSync(path.join(scriptsDir, script)));
 
 const engineScriptsDir = hasRequiredHooks(preferredScriptsDir) ? preferredScriptsDir : builtInScriptsDir;
 
-const outputFile = INVRT_BACKSTOP_CONFIG_FILE || path.join(INVRT_CAPTURE_DIR, 'backstop-config.json');
+const outputFile = INVRT_BACKSTOP_CONFIG_FILE || path.join(INVRT_CAPTURE_DIR, 'backstop.json');
 
 const config = {
   ...(INVRT_ID ? { id: INVRT_ID } : {}),
   "dynamicTestId": 'latest',
+  "fileNameTemplate": '{scenarioLabel}',
   "viewports": [
     {
       "label": INVRT_DEVICE,
@@ -93,7 +104,7 @@ try {
 
   scopedEntries.forEach((urlPath) => {
     config.scenarios.push({
-      "label": buildScenarioLabel(urlPath),
+      "label": encodeId(urlPath, projectSeed),
       "url": `${INVRT_URL}${urlPath}`,
       "cookiePath": INVRT_COOKIES_FILE + '.json',
       "invrtPath": urlPath

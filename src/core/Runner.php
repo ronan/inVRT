@@ -500,7 +500,7 @@ EOF;
     }
 
     /** Generate a stable, short identifier from a string and optional seed/salt. */
-    private static function encodeId(string $value, int $seed = 0): string
+    public static function encodeId(string $value, int $seed = 0): string
     {
         $hash = (int) hexdec(hash('crc32b', $value));
         $alphabet = 'swxdyktzhgjfblrpmcqvn';

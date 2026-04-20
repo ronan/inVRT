@@ -2,6 +2,13 @@
 
 Completed tasks moved from TODO.md.
 
+## Reporting
+
+- [x] Improve page ids
+    - [x] Use the existing `Runner::encodeId` function in `src/core/Runner.php`
+    - [x] Use a 4 byte number derived from the project_id as a seed.
+    - [x] Add the page id to the page's scenario in backstop.js as the 'label'
+
 ## Bugs
 
 - [x] The path of playwright-onbefore.js and playwright-onload.js are incorrect

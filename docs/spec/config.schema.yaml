@@ -162,7 +162,7 @@ $defs:
       backstop_config_file:
         type: string
         description: Path to the generated BackstopJS configuration file.
-        default: INVRT_CAPTURE_DIR/backstop-config.json
+        default: INVRT_CAPTURE_DIR/backstop.json
       check_file:
         type: string
         description: File where inVRT stores the list of checks for this device.

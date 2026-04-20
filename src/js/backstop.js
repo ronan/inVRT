@@ -15,7 +15,7 @@ const {
 } = process.env;
 
 const op = process.argv[2] || 'test';
-const configFile = INVRT_BACKSTOP_CONFIG_FILE || path.join(INVRT_CAPTURE_DIR, 'backstop-config.json');
+const configFile = INVRT_BACKSTOP_CONFIG_FILE || path.join(INVRT_CAPTURE_DIR, 'backstop.json');
 
 console.log(`🎯 Running '${op}'. profile: ${INVRT_PROFILE}, environment: ${INVRT_ENVIRONMENT} device: ${INVRT_DEVICE} (${INVRT_VIEWPORT_WIDTH}x${INVRT_VIEWPORT_HEIGHT})`);
 console.log(`📂 Capture directory: ${INVRT_CAPTURE_DIR}`);

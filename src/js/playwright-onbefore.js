@@ -9,13 +9,12 @@ const loadCookies = async (browserContext, scenario) => {
     cookies = JSON.parse(fs.readFileSync(cookiePath));
     console.log(`🍪 Loaded ${cookies.length} cookies from ${cookiePath}`);
   }
-  
 
   // Add cookies to browser
   browserContext.addCookies(cookies);
 };
 
 module.exports = async (page, scenario, viewport, isReference, browserContext) => {
-  console.log('Running onBefore script with scenario:', scenario.label);
+  console.log(`📸 Capturing page: ${scenario.label}: ${scenario.url}`);
   await loadCookies(browserContext, scenario);
 };

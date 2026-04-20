@@ -59,6 +59,20 @@ teardown() {
   assert_output_contains "Generated backstop config"
 }
 
+@test "crawl: scenario labels in backstop config are short lowercase ids" {
+  start_fixture_server
+  seed_basic_config "$SERVER_URL"
+
+  run_invrt crawl
+
+  [ "$status" -eq 0 ]
+  local config_file="$TEST_DIR/.invrt/data/local/anonymous/desktop/backstop.json"
+  assert_file_exists "$config_file"
+  # All scenario labels should be lowercase letters only (encodeId output).
+  run bash -c "jq -r '.scenarios[].label' '$config_file' | grep -qvE '^[a-z]+$'"
+  [ "$status" -ne 0 ]
+}
+
 @test "crawl: auto initializes from an interactive prompt when config is missing" {
   start_fixture_server
 

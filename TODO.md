@@ -25,6 +25,19 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 - [ ] Remove the `settings` section and replace it with `project`
   - This more accurately reflects the fact that these are the base defaults for the given project.
   - Move `name` into project.
+- [ ] Move more business logic into javascript
+  - Create helpers to allow JS to log responses using levels similar to PSR-3
+  - Use pino in js to write log output
+  - Allow the runner to read the responses along with their level and call the appropriate PSR-3 log function on $logger 
+    - pino: trace, debug, info, warn, error, and fatal
+    - psr3: Debug, Info, Notice, Warning, Error, Critical, Alert, and Emergency
+      - trace = Debug
+      - fatal - Emergency
+  - Make the runner slimmer by offloading more work to js/ts scripts run with node
+    - Init:
+      - Generate the project id in JS with the same algorithm as the pageid generation
+    
+
 
 ## Tests
 
@@ -86,6 +99,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
   - [ ] Improve page ids
     - [ ] Use the existing `Runner::encodeId` function in `src/core/Runner.php`
     - [ ] Use a 4 byte number derived from the project_id as a seed.
+    - [ ] Add the page id to the page's scenario in backstop.js as the 'label'
 
 - [ ] Create a 1 page html report for all existing test results
 - [ ] Create an "Interactive" report
