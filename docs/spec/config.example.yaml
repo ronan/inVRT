@@ -1,6 +1,5 @@
-name: My inVRT Project
-
-settings:
+project:
+  name: My inVRT Project
   id: xkqjmxvte
   viewport_width: 1920
   viewport_height: 1080

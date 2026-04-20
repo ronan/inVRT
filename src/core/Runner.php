@@ -75,9 +75,9 @@ class Runner
         $projectId = self::generateProjectId($url);
 
         $configContent = Yaml::dump([
-            'name' => basename($cwd) ?: 'My InVRT Project',
-            'settings' => [
-                'id' => $projectId,
+            'project' => [
+                'name' => basename($cwd) ?: 'My InVRT Project',
+                'id'   => $projectId,
             ],
             'environments' => [
                 $environment => [
@@ -146,7 +146,7 @@ EOF;
         }
 
         return [
-            'name'         => $this->config->getSection('name') ?? '',
+            'name'         => ($this->config->getSection('project')['name'] ?? '') ?: '',
             'id'           => $env['INVRT_ID'] ?? '',
             'config_file'  => $env['INVRT_CONFIG_FILE'] ?? '',
             'environment'  => $env['INVRT_ENVIRONMENT'] ?? '',

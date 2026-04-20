@@ -1,6 +1,5 @@
-name: Example Project
-
-settings:
+project:
+  name: Example Project
   url: https://example.com
   max_crawl_depth: 5
   max_pages: 200

@@ -22,21 +22,18 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
   - [x] Clean up the schema generator 
   - [x] Teach the ai agents how to edit the schema instead of altering the generated code.
 
-- [ ] Remove the `settings` section and replace it with `project`
-  - This more accurately reflects the fact that these are the base defaults for the given project.
-  - Move `name` into project.
-- [ ] Move more business logic into javascript
-  - Create helpers to allow JS to log responses using levels similar to PSR-3
-  - Use pino in js to write log output
-  - Allow the runner to read the responses along with their level and call the appropriate PSR-3 log function on $logger 
+- [ ] Standardize output from js/node
+  - Use pino to write output from node
+    - https://getpino.io
+  - Allow the runner to read the responses along with their level and call the appropriate PSR-3 log function on $logger to send output to the user or to a text log depending on verbosity.
     - pino: trace, debug, info, warn, error, and fatal
     - psr3: Debug, Info, Notice, Warning, Error, Critical, Alert, and Emergency
       - trace = Debug
       - fatal - Emergency
+
+- [ ] Move more logic to js/ts/node
   - Make the runner slimmer by offloading more work to js/ts scripts run with node
-    - Init:
-      - Generate the project id in JS with the same algorithm as the pageid generation
-    
+  - Use the standardized pino log output to send responses to the console.
 
 
 ## Tests
@@ -70,10 +67,11 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - Crawl has run if a 'crawled_urls.txt' file exists
     - Reference has run if a 'reference_results.txt' file exists
     - Test has run if a 'test_results.txt' file exists
-- [#] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
-  - [ ] Name the file 'plan.yaml' and put it at the top of the .invrt directory
-  - [ ] Update the document when new paths are found when crawling with different profiles
-  - [ ] Turn 'plan.yaml' into 'test.json' with backstop test config in it.
+- [ ] Improve `approve` to make the last run capture the new baseline
+  - If no tests have been run, run `crawl`, `reference` then `test` and then approve the capture
+  - [ ] Implement `baseline` as a synonym of `approve`
+    - This does the same thing as `approve` but is assumed to be run from a newly created projects.
+
 
 ### Move to Playwright
 - [ ] Generate a playwrite test script instead of backstop.js
@@ -89,17 +87,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - [ ] " per device
     - [ ] " per environment
 
-
-
 ### Reporting
-
-  - [x] Add a project id to distinguish final reports.
-    - [x] The project id should be saved to the config.yml file as 'id' in settings
-    - [x] It should be based on the url and a unique seed
-  - [ ] Improve page ids
-    - [ ] Use the existing `Runner::encodeId` function in `src/core/Runner.php`
-    - [ ] Use a 4 byte number derived from the project_id as a seed.
-    - [ ] Add the page id to the page's scenario in backstop.js as the 'label'
 
 - [ ] Create a 1 page html report for all existing test results
 - [ ] Create an "Interactive" report
@@ -114,6 +102,12 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 - [ ] Rewrite the crawler
     - Make exclude_paths work and provide defaults for drupal/backdrop
     - add a max_width to go with max_depth
+  - [ ] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
+    - [ ] Name the file 'plan.yaml' and put it at the top of the .invrt directory
+    - [ ] Update the document when new paths are found when crawling with different profiles
+    - [ ] Turn 'plan.yaml' into 'backstop.json' with backstop test config in it.
+
+
 
 ## Documentation
  - [ ] Clean up docs

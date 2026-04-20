@@ -11,9 +11,8 @@ Configuration for a given project is stored in a yaml file the INVRT_DIRECTORY:
 ```yaml
 # .invrt/config.yaml
 
-name: My inVRT Project
-
-settings:
+project:
+  name: My inVRT Project
   id: xkqjmxvte
   project_type: drupal11
   viewport_width: 1024
@@ -63,12 +62,12 @@ The config file contains the following named sections:
 
 | Name        | Yaml Section   | Option                | Default   | Represents                                        |
 | ----------- | -------------- | --------------------- | --------- | ------------------------------------------------- |
-| Settings    | `settings`     | _n/a_                 | _n/a_     | Base values for the project                       |
+| Project     | `project`      | _n/a_                 | _n/a_     | Base values for the project                       |
 | Environment | `environments` | `--environment={key}` | local     | Installations (local, stage, live) of the project |
 | Profile     | `profiles`     | `--profile={key}`     | anonymous | User personas to test with                        |
 | Device      | `devices`      | `--device={key}`      | desktop   | Screen sizes to capture                           |
 
-Values in the 'settings' section will be overriden by values in the Environment, Profile and Device specified by the command options when the tool is run.
+Values in the 'project' section will be overriden by values in the Environment, Profile and Device specified by the command options when the tool is run.
 
 
 ### Environments

@@ -48,7 +48,7 @@ teardown() {
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "devices.tablet" "[]"
 
   local project_id
-  project_id="$(yaml_get "$TEST_DIR/.invrt/config.yaml" "settings.id")"
+  project_id="$(yaml_get "$TEST_DIR/.invrt/config.yaml" "project.id")"
   [[ -n "$project_id" ]]
   [[ "$project_id" =~ ^[a-z]+$ ]]
 }
@@ -106,7 +106,9 @@ teardown() {
 @test "info: shows project summary and crawled page count" {
   mkdir -p "$TEST_DIR/.invrt/data/local/anonymous"
   cat > "$TEST_DIR/.invrt/config.yaml" <<'EOF'
-name: My Test Project
+project:
+  name: My Test Project
+  id: sampleprojectid
 environments:
   local:
     url: https://local.example.com
@@ -122,8 +124,6 @@ devices:
   mobile:
     viewport_width: 375
     viewport_height: 667
-settings:
-  id: sampleprojectid
 EOF
   printf "/\n/about\n/contact\n" > "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt"
 

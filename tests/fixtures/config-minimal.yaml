@@ -1,4 +1,4 @@
-settings:
+project:
   url: https://example.com
   max_crawl_depth: 2
   max_pages: 100

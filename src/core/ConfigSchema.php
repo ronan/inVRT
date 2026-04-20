@@ -1,12 +1,11 @@
 <?php
-
 /**
  * Auto generated. Do not edit.
- *
- * See
+ * 
+ * See 
  *  - @tooling/templates/ConfigSchema.tpl.php
  *  - @docs/spec/Application.yaml
- * and run
+ * and run 
  *  `task build:templates`
  * to regenerate.
  */
@@ -56,10 +55,10 @@ class ConfigSchema implements ConfigurationInterface
 
         $root
             ->children()
-                ->scalarNode('name')->defaultNull()->end()
-                ->arrayNode('settings')
+                ->arrayNode('project')
                 ->addDefaultsIfNotSet()
                 ->children()
+                    ->scalarNode('name')->defaultNull()->end()
                     ->scalarNode('url')->defaultValue('')->end()
                     ->scalarNode('id')->defaultValue('')->end()
                     ->scalarNode('login_url')->defaultValue('')->end()

@@ -8,7 +8,7 @@ use Symfony\Component\Yaml\Yaml;
  * Resolves, holds, and persists inVRT configuration.
  *
  * Accepts a config filepath and an env-var override array. Merges defaults,
- * the YAML file's settings/environments/profiles/devices sections, and the
+ * the YAML file's project/environments/profiles/devices sections, and the
  * env overrides into a flat INVRT_* array with all placeholder tokens resolved.
  */
 class Configuration
@@ -82,7 +82,7 @@ class Configuration
 
     /**
      * Persists any set() changes back to the YAML config file.
-     * Updates the settings section with the changed keys.
+     * Updates the project section with the changed keys.
      */
     public function write(): void
     {
@@ -91,7 +91,7 @@ class Configuration
         foreach ($this->changes as $invrtKey => $value) {
             $yamlKey = strtolower(str_replace('INVRT_', '', $invrtKey));
             if (array_key_exists($yamlKey, ConfigSchema::DEFAULTS)) {
-                $data['settings'][$yamlKey] = $value;
+                $data['project'][$yamlKey] = $value;
             }
         }
 
@@ -113,12 +113,14 @@ class Configuration
 
         $base = $this->buildDefaults($profile, $environment, $device);
 
-        $settings    = $this->asEnv($this->parsed['settings']    ?? []);
+        $project     = $this->parsed['project'] ?? [];
+        unset($project['name']);
+        $settings    = $this->asEnv($project);
         $envSection  = $this->asEnv($this->parsed['environments'][$environment] ?? []);
         $profSection = $this->asEnv($this->parsed['profiles'][$profile]         ?? []);
         $devSection  = $this->asEnv($this->parsed['devices'][$device]           ?? []);
 
-        // Merge: env overrides win, then device, profile, environment, settings, defaults
+        // Merge: env overrides win, then device, profile, environment, project, defaults
         $combined = $this->env
                   + $devSection
                   + $profSection

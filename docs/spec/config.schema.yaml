@@ -9,15 +9,15 @@ type: object
 
 properties:
 
-  name:
-    type: string
-    description: Display name for this inVRT project.
-    examples:
-      - My inVRT Project
-  
-  settings:
-    description: Base-layer defaults. Values here are overridden by environments, profiles, and devices.
+  project:
+    description: Base-layer defaults for this project. Values here are overridden by environments, profiles, and devices.
     type: object
+    properties:
+      name:
+        type: string
+        description: Display name for this inVRT project.
+        examples:
+          - My inVRT Project
     allOf:
       - $ref: "#/$defs/configKeys"
 

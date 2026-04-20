@@ -4,6 +4,10 @@ Completed tasks moved from TODO.md.
 
 ## Reporting
 
+  - [x] Add a project id to distinguish final reports.
+    - [x] The project id should be saved to the config.yml file as 'id' in settings
+    - [x] It should be based on the url and a unique seed
+
 - [x] Improve page ids
     - [x] Use the existing `Runner::encodeId` function in `src/core/Runner.php`
     - [x] Use a 4 byte number derived from the project_id as a seed.
@@ -20,6 +24,10 @@ Completed tasks moved from TODO.md.
 - [x] Backstop fails when urls (and therefore file paths) are too long
 
 ## Tech Debt
+
+- [x] Remove the `settings` section and replace it with `project`
+  - This more accurately reflects the fact that these are the base defaults for the given project.
+  - Move `name` into project.
 
 - [x] Update AGENTS.md new command guidance for Symfony 8 command patterns
 
