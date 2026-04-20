@@ -14,12 +14,12 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Tech Debt
 
-- [ ] reduce unnecessary code from php to make test run steps more self contained
-- [ ] move file generation to js/ts
-- [ ] Clean up config and get schema generation working again.
-  - [.] Remove unnecessary file path config
-  - [ ] Clean up the schema generator 
-  - [ ] Teach the ai agents how to edit the schema instead of altering the generated code.
+- [x] reduce unnecessary code from php to make test run steps more self contained
+- [x] move file generation to js/ts
+- [x] Clean up config and get schema generation working again.
+  - [ ] Remove unnecessary file path config
+  - [x] Clean up the schema generator 
+  - [x] Teach the ai agents how to edit the schema instead of altering the generated code.
 - [ ] Clean up docs
   - Rebuild the app summary to ensure it is complete and correct.
   - Regenerate simple human readable usage documentation.

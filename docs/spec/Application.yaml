@@ -13,7 +13,7 @@ Sections:
     default: desktop
     description: Selected key in devices.
 
-settings:
+Settings:
   url:
     default: ""
     description: Base site URL used by check, crawl, and login flows.
@@ -31,8 +31,10 @@ settings:
     description: Raw Cookie header value used during crawl when set.
   max_crawl_depth:
     default: 3
+    type: int
     description: Maximum wget recursion depth.
   max_pages:
+    type: int
     default: 100
     description: Intended crawl page cap for crawl workflows.
   user_agent:
@@ -40,17 +42,26 @@ settings:
     description: User agent used for HTTP requests such as check.
   viewport_width:
     default: 1024
+    type: int
     description: Browser viewport width for screenshot capture.
   viewport_height:
     default: 768
+    type: int
     description: Browser viewport height for screenshot capture.
-
   cookies_file:
     default: INVRT_CRAWL_DIR/cookies
     description: Base path for generated cookie files. Login writes .json and .txt variants.
   exclude_file:
     default: INVRT_CRAWL_DIR/exclude_paths.txt
     description: Path list used to exclude URL directories during crawl.
+  config_file:
+    default: INVRT_DIRECTORY/config.yaml
+    description: Path to the main inVRT configuration file.
+  crawl_log:
+    default: INVRT_CRAWL_DIR/logs/crawl.log
+    description: Log file capturing the output of the crawl process.
+
+
 
 Commands:
   config:

@@ -32,7 +32,8 @@ else
     git tag -a "$TAG" -m "Release ${TAG}"
 fi
 
+echo "Pushing changes and tag ${TAG} to remote repository"
 git push origin main
 git push origin "$TAG"
 cd ../..
-rm -rf scratch/ddev-invrt
+# rm -rf scratch/ddev-invrt

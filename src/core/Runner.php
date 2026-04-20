@@ -271,6 +271,7 @@ class Runner
         }
 
         foreach ([$cloneDir, dirname($crawlLog)] as $dir) {
+            $this->logger->info("Preparing directory: $dir");
             $this->prepareDirectory($dir);
         }
 
@@ -495,8 +496,8 @@ class Runner
     private function writeResultsFile(string $mode, string $output): void
     {
         $file = match ($mode) {
-            'reference' => $this->config->get('INVRT_REFERENCE_RESULTS_FILE', ''),
-            'test'      => $this->config->get('INVRT_TEST_RESULTS_FILE', ''),
+            'reference' => $this->config->get('INVRT_REFERENCE_FILE', ''),
+            'test'      => $this->config->get('INVRT_TEST_FILE', ''),
             default     => '',
         };
 
@@ -548,13 +549,13 @@ class Runner
 
     private function referencesAreMissing(): bool
     {
-        $file = $this->config->get('INVRT_REFERENCE_RESULTS_FILE', '');
+        $file = $this->config->get('INVRT_REFERENCE_FILE', '');
         return $file === '' || !file_exists($file);
     }
 
     private function testResultsAreMissing(): bool
     {
-        $file = $this->config->get('INVRT_TEST_RESULTS_FILE', '');
+        $file = $this->config->get('INVRT_TEST_FILE', '');
         return $file === '' || !file_exists($file);
     }
 
