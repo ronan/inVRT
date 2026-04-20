@@ -57,6 +57,7 @@ Crawls `INVRT_URL` with `wget`, scoped to the current environment/profile. It:
 - writes wget stderr output to `INVRT_CRAWL_LOG`
 - parses discovered paths from the crawl log
 - writes sorted unique paths to `INVRT_CRAWL_FILE`
+- generates BackstopJS config to `INVRT_BACKSTOP_CONFIG_FILE` after a successful crawl
 - optionally authenticates first when the selected profile has credentials
 
 Crawling uses:
@@ -231,6 +232,7 @@ These keys are accepted in `settings`, `environments.*`, `profiles.*`, and `devi
 | `crawl_file` | `INVRT_CRAWL_FILE` | `INVRT_CRAWL_DIR/crawled_urls.txt` |
 | `exclude_file` | `INVRT_EXCLUDE_FILE` | `INVRT_CRAWL_DIR/exclude_paths.txt` |
 | `capture_dir` | `INVRT_CAPTURE_DIR` | `INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE` |
+| `backstop_config_file` | `INVRT_BACKSTOP_CONFIG_FILE` | `INVRT_CAPTURE_DIR/backstop-config.json` |
 | `check_file` | `INVRT_CHECK_FILE` | `INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/check.yaml` |
 | `reference_results_file` | `INVRT_REFERENCE_RESULTS_FILE` | `INVRT_CAPTURE_DIR/reference_results.txt` |
 | `test_results_file` | `INVRT_TEST_RESULTS_FILE` | `INVRT_CAPTURE_DIR/test_results.txt` |
@@ -265,13 +267,23 @@ For crawling, `INVRT_COOKIE` takes precedence over the cookie jar and is sent as
 
 ## Screenshot Engine
 
-`src/js/backstop.js` builds a BackstopJS config from the resolved `INVRT_*` environment:
+Config generation and BackstopJS execution are separated into two scripts:
+
+### Config generation (`src/js/backstop-config.js`)
+
+`src/js/backstop-config.js` builds a BackstopJS config from the resolved `INVRT_*` environment and writes it to `INVRT_BACKSTOP_CONFIG_FILE`:
 
 - viewport comes from `INVRT_VIEWPORT_WIDTH` and `INVRT_VIEWPORT_HEIGHT`
 - scenarios come from the newline-delimited paths in `INVRT_CRAWL_FILE`
 - each scenario URL is `INVRT_URL + <path>`
 - scenario labels are normalized from the path and suffixed with a SHA-1 hash for stability
 - only the first `INVRT_MAX_PAGES` crawl entries are used
+
+Config generation runs automatically at the end of a successful `crawl`. If the config file is missing when `reference` or `test` starts, it is regenerated before BackstopJS runs.
+
+### BackstopJS runner (`src/js/backstop.js`)
+
+`src/js/backstop.js` loads the pre-generated config from `INVRT_BACKSTOP_CONFIG_FILE` and runs the requested BackstopJS operation (reference, test, or approve).
 
 Hook scripts are resolved from `INVRT_SCRIPTS_DIR` when both of these files exist there:
 

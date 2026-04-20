@@ -1,12 +1,11 @@
 <?php
-
 /**
  * Auto generated. Do not edit.
- *
- * See
+ * 
+ * See 
  *  - @tooling/templates/ConfigSchema.tpl.php
  *  - @docs/spec/Application.yaml
- * and run
+ * and run 
  *  `task build:templates`
  * to regenerate.
  */
@@ -74,7 +73,7 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('data_dir')->defaultValue('INVRT_DIRECTORY/data')->end()
                     ->scalarNode('crawl_dir')->defaultValue('INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE')->end()
                     ->scalarNode('clone_dir')->defaultValue('INVRT_CRAWL_DIR/clone')->end()
-                    ->scalarNode('backstop_config_file')->defaultValue('INVRT_CRAWL_DIR/backstop_config.json')->end()
+                    ->scalarNode('backstop_config_file')->defaultValue('INVRT_CAPTURE_DIR/backstop.json')->end()
                     ->scalarNode('capture_dir')->defaultValue('INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE')->end()
                     ->end()
                 ->end()

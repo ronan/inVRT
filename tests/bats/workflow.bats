@@ -55,6 +55,8 @@ teardown() {
   assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/services.html"
   assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/contact.html"
   assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/blog.html"
+  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/backstop-config.json"
+  assert_output_contains "Generated backstop config"
 }
 
 @test "crawl: auto initializes from an interactive prompt when config is missing" {

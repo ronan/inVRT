@@ -68,6 +68,10 @@ Completed tasks moved from TODO.md.
 
 ## Features
 
+- [x] Generate backstop.json at the end of the crawl run
+  - [x] Separate out the config generation code from the test/reference running code
+  - [x] Keep the processing in js
+
 - [x] Add an `invrt info` command that returns nicely formatted info about the current project
 
         The output should include: current config, environments, devices, profiles, number of crawled pages, number of captured screenshots and the last few lines of the crawl.log

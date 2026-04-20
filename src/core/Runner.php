@@ -321,6 +321,9 @@ class Runner
         }
 
         $this->logger->notice("Crawling completed. Found $count unique paths. Results saved to $crawlFile");
+
+        $this->generateBackstopConfig();
+
         return 0;
     }
 
@@ -349,6 +352,7 @@ class Runner
         }
 
         $this->prepareDirectory($captureDir);
+        $this->ensureBackstopConfig();
 
         return $this->runBackstop('reference', $env);
     }
@@ -469,6 +473,39 @@ class Runner
     // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
+
+    /** Generate the BackstopJS config file from crawled URLs. */
+    public function generateBackstopConfig(): int
+    {
+        $env = $this->config->all();
+        $script = rtrim($this->appDir, '/') . '/backstop-config.js';
+        $cmd = 'node ' . escapeshellarg($script);
+        $this->logger->debug('Generating backstop config: ' . $cmd);
+
+        $process = Process::fromShellCommandline($cmd, null, $env);
+        $process->setTimeout(null);
+        $process->run(function (mixed $type, mixed $buffer): void {
+            print($buffer);
+        });
+
+        $exitCode = $process->getExitCode() ?? 0;
+        if ($exitCode !== 0) {
+            $this->logger->warning('Failed to generate backstop config');
+        }
+
+        return $exitCode;
+    }
+
+    /** Generate backstop config if it doesn't exist yet. */
+    private function ensureBackstopConfig(): void
+    {
+        $configFile = $this->config->get('INVRT_BACKSTOP_CONFIG_FILE', '');
+        if ($configFile !== '' && file_exists($configFile)) {
+            return;
+        }
+
+        $this->generateBackstopConfig();
+    }
 
     private function runBackstop(string $mode, array $env): int
     {

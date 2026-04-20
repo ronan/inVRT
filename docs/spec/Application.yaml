@@ -150,7 +150,7 @@ Commands:
     success: InVRT successfully configured BackstopJS!
     requires: [ crawl ]
     internal: true
-    output_file: INVRT_CRAWL_DIR/backstop_config.json
+    output_file: INVRT_CAPTURE_DIR/backstop.json
 
   reference:
     description: Create reference screenshots for comparison.
