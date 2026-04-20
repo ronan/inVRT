@@ -48,19 +48,35 @@ Settings:
     default: 768
     type: int
     description: Browser viewport height for screenshot capture.
+
+Files:
+  config_file:
+    default: INVRT_DIRECTORY/config.yaml
+    description: Path to the main inVRT configuration file.
+  crawl_file:
+    default: INVRT_CRAWL_DIR/crawled_urls.txt
+    description: Path to the file storing the list of crawled URLs.
+  crawl_log:
+    default: INVRT_CRAWL_DIR/logs/crawl.log
+    description: Log file capturing the output of the crawl process.
+  output_file:
+    default: INVRT_DIRECTORY/config.yaml
+    description: Path to the output file for storing the URL.
+  check_file:
+    default: INVRT_DATA_DIR/INVRT_ENVIRONMENT/check.yaml
+    description: Path to the file storing the results of the site check.
+  reference_file:
+    default: INVRT_CAPTURE_DIR/reference_results.txt
+    description: Path to the file storing the reference output for visual regression testing.
+  test_file:
+    default: INVRT_CAPTURE_DIR/test_results.txt
+    description: Path to the file storing the test output for visual regression testing.
   cookies_file:
     default: INVRT_CRAWL_DIR/cookies
     description: Base path for generated cookie files. Login writes .json and .txt variants.
   exclude_file:
     default: INVRT_CRAWL_DIR/exclude_paths.txt
     description: Path list used to exclude URL directories during crawl.
-  config_file:
-    default: INVRT_DIRECTORY/config.yaml
-    description: Path to the main inVRT configuration file.
-  crawl_log:
-    default: INVRT_CRAWL_DIR/logs/crawl.log
-    description: Log file capturing the output of the crawl process.
-
 
 
 Commands:
@@ -81,7 +97,6 @@ Commands:
     help: Initializes a new inVRT project, saving the provided URL into a fresh config file.
     success: InVRT successfully initialized!
     triggers: [ approve ]
-    output_file: INVRT_DIRECTORY/config.yaml
     output_fields: [ url ]
     directories:
       directory:
@@ -105,7 +120,6 @@ Commands:
     help: Fetches the site homepage, extracts the page title, detects HTTPS, and records any permanent redirects. Results are written to .invrt/data/check.yaml.
     success: InVRT successfully checked the site!
     requires: [ init ]
-    output_file: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/check.yaml
     output_fields:
       - url
       - title
@@ -128,13 +142,7 @@ Commands:
         default: INVRT_CRAWL_DIR/clone
         description: Temporary wget mirror output directory.
     log: INVRT_CRAWL_DIR/crawl.log
-    output_file: INVRT_CRAWL_DIR/crawled_urls.txt
-    output_fields:
-      - url
-      - title
-      - https
-      - redirected_from
-      - checked_at
+
 
   backstop-config:
     description: Configure BackstopJS for visual regression testing.
@@ -149,7 +157,6 @@ Commands:
     help: Creates reference screenshots for the specified profile, device, and environment to use as baseline for comparison.
     login: true
     requires: [ backstop-config ]
-    output_file: INVRT_CAPTURE_DIR/reference_results.txt
     directories:
       capture_dir:
         default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE
@@ -164,7 +171,6 @@ Commands:
     help: Runs visual regression tests comparing current screenshots against reference screenshots.
     login: true
     requires: [ reference ]
-    output_file: INVRT_CAPTURE_DIR/test_results.txt
     writes:
       - INVRT_CAPTURE_DIR/bitmaps/test
       - INVRT_TEST_RESULTS_FILE

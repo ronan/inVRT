@@ -26,15 +26,15 @@ class ConfigSchema implements ConfigurationInterface
       #{{else}}
         '{{@key}}'                => '{{this.default}}',
       #{{/if}}
-
+      
       #{{/each}}
       #{{#each app.Commands}}
       #{{#each this.directories}}
         '{{@key}}'                => '{{this.default}}',
       #{{/each}}
-      #{{#if this.output_file }}
-        '{{snake_case @key}}_file'           => '{{this.output_file}}',
-      #{{/if}}
+      #{{/each}}
+      #{{#each app.Files}}
+        '{{@key}}'                => '{{this.default}}',
       #{{/each}}
     ];
 
