@@ -11,6 +11,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Bugs
 
+- [x] Exclud path file is not being read.
 
 ## Tech Debt
 
@@ -20,10 +21,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
   - [x] Remove unnecessary file path config
   - [x] Clean up the schema generator 
   - [x] Teach the ai agents how to edit the schema instead of altering the generated code.
-- [ ] Clean up docs
-  - Rebuild the app summary to ensure it is complete and correct.
-  - Regenerate simple human readable usage documentation.
-  - Create in-depth end user documentation for config
 
 ## Tests
 
@@ -61,13 +58,31 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
   - [ ] Update the document when new paths are found when crawling with different profiles
   - [ ] Turn 'plan.yaml' into 'test.json' with backstop test config in it.
 
-### User scripting
+### Move to Playwright
+- [ ] Generate a playwrite test script instead of backstop.js
+- [ ] Run references and test capture by running the test script
+- [ ] Allow the user to insert custom behavior into the playwright tests
+  - [ ] Optionally read the onload/onready playwright event script from `INVRT_SCRIPTS_DIR`
+  - [ ] Allow specification of per-path scripts in plan.yaml
+  - [ ] Scripts can be paths to a script in `INVRT_SCRIPTS_DIR`
+  - [ ] Scripts can be a code block on the yaml in typescript or javascript.
+  - [ ] Allow the user to specify setup/teardown scripts per project
+    - [ ] Allow setup/teardown per site section
+    - [ ] " per profile
+    - [ ] " per device
+    - [ ] " per environment
 
-- [ ] Optionally read the onload/onready playwright event script from `INVRT_SCRIPTS_DIR`
-- [ ] Allow specification of per-path scripts in plan.yaml
-- [ ] Allow the user to specify setup/teardown scripts per project
+
 
 ### Reporting
+
+- [ ] Improve the source files used for reporting
+  - [ ] Improve page ids
+    - [ ] Short and human readable
+    - [ ] Stable across crawl runs
+    - [ ] Low chance of collisions up to 100,000 pages.
+  - [ ] Add a project id to distinguish final reports.
+    - [ ] 1 project_id == 1 report
 
 - [ ] Create a 1 page html report for all existing test results
 - [ ] Create an "Interactive" report
@@ -82,3 +97,11 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 - [ ] Rewrite the crawler
     - Make exclude_paths work and provide defaults for drupal/backdrop
     - add a max_width to go with max_depth
+
+## Documentation
+ - [ ] Clean up docs
+  - Rebuild the app summary to ensure it is complete and correct.
+  - Regenerate simple human readable usage documentation.
+  - Create in-depth end user documentation for config
+
+

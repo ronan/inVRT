@@ -35,6 +35,7 @@ class Runner
         $environment = $this->config->get('INVRT_ENVIRONMENT', 'local');
         $profile     = $this->config->get('INVRT_PROFILE', 'anonymous');
         $device      = $this->config->get('INVRT_DEVICE', 'desktop');
+        $excludeFile = $this->config->get('INVRT_EXCLUDE_FILE');
 
         if (empty($cwd)) {
             $this->logger->error("⚠️  I can't make a directory here because I don't know where I am.");
@@ -93,9 +94,17 @@ class Runner
         }
         $this->logger->info('✓ Initialized InVRT configuration file at ' . $configFile);
 
-        $excludeUrls = "/user/logout\n/files\n/sites\n/core\n";
-        $excludePath = Path::join($directory, 'exclude_paths.txt');
-        if (file_put_contents($excludePath, $excludeUrls) === false) {
+        $excludeUrls = <<<'EOF'
+/logout
+/user/logout
+/files
+/downloads
+EOF;
+        if (
+            !empty($excludeFile) && 
+            !file_exists($excludeFile) &&
+            file_put_contents($excludeFile, $excludeUrls) === false
+          ) {
             $this->logger->error('Failed to create exclude_paths.txt');
             return 1;
         }
@@ -618,7 +627,7 @@ class Runner
     {
         if (!file_exists($excludeFile)) {
             $defaults = '/user/*';
-            $this->logger->info("No exclude_paths.txt found at $excludeFile. Excluding defaults: $defaults");
+            $this->logger->info("No exclude file found at $excludeFile. Excluding defaults: $defaults");
             return "--exclude-directories=$defaults";
         }
 
