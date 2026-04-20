@@ -84,10 +84,8 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - [x] The project id should be saved to the config.yml file as 'id' in settings
     - [x] It should be based on the url and a unique seed
   - [ ] Improve page ids
-    - [ ] use node-shorthash (https://github.com/bibig/node-shorthash) to generate an id from the path.
-      - [ ] Short and human readable
-      - [ ] Stable across crawl runs
-      - [ ] Low chance of collisions up to 100,000 pages.
+    - [ ] Use the existing `Runner::encodeId` function in `src/core/Runner.php`
+    - [ ] Use a 4 byte number derived from the project_id as a seed.
 
 - [ ] Create a 1 page html report for all existing test results
 - [ ] Create an "Interactive" report
