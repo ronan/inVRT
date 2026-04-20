@@ -53,7 +53,7 @@ settings:
 environments:
   local:
     name: DDEV Local
-    url: http://$DDEV_HOSTNAME"
+    url: $DDEV_PRIMARY_URL"
 
     if [ -n "${DDEV_PANTHEON_SITE+set}" ]; then
         pantheon_site=$(ddev exec echo \$DDEV_PANTHEON_SITE)
