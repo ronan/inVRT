@@ -15,8 +15,11 @@ Sections:
 
 Settings:
   url:
-    default: ""
     description: Base site URL used by check, crawl, and login flows.
+  name:
+    description: Human readable label used for reporting.
+  description:
+    description: Human readable description used for reporting.
   id:
     default: ""
     description: Identifier used for the inVRT project

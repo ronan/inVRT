@@ -258,7 +258,8 @@ seed_basic_config() {
   mkdir -p "$TEST_DIR/.invrt"
 
   cat > "$TEST_DIR/.invrt/config.yaml" <<EOF
-name: Test Project
+project:
+  name: Test Project
 environments:
   $environment:
     url: $url
@@ -266,7 +267,6 @@ profiles:
   $profile: {}
 devices:
   $device: {}
-settings: {}
 EOF
 }
 

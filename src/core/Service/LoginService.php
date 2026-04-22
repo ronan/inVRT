@@ -60,9 +60,11 @@ class LoginService
 
             $process = Process::fromShellCommandline($cmd, null, $env);
             $process->setTimeout(null);
-            $process->run(function (mixed $type, mixed $buffer): void {
-                print($buffer);
+            $parser = new NodeOutputParser($logger);
+            $process->run(function (mixed $type, mixed $buffer) use ($parser): void {
+                $parser->write($buffer);
             });
+            $parser->flush();
             $exitCode = $process->getExitCode() ?? 0;
             $logger->debug("Login command exit code: $exitCode");
 

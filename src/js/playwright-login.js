@@ -2,6 +2,7 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 const { match } = require('assert');
+const log = require('./logger');
 
 /**
  * Logs into a web application and saves cookies to a JSON file
@@ -35,7 +36,7 @@ async function loginAndSaveCookies(
   let browser;
   try {
     // Launch browser
-    console.log('Launching browser...');
+    log.debug('Launching browser...');
     browser = await chromium.launch({ headless: true });
     chromium.ignoreHTTPSErrors = true;
 
@@ -45,7 +46,7 @@ async function loginAndSaveCookies(
 
     const match = loginUrl.match(/\/\/(.+\.pantheonsite\.io)/);
     if (match) {
-      console.log('Adding deterrence bypass cookie to skip environment warning...');
+      log.debug('Adding deterrence bypass cookie to skip environment warning...');
       await context.addCookies([{
         "name": "Deterrence-Bypass",
         "value": "1",
@@ -58,26 +59,26 @@ async function loginAndSaveCookies(
     }
 
     // Navigate to login page
-    console.log(`Navigating to ${loginUrl}...`);
+    log.debug(`Navigating to ${loginUrl}...`);
     await page.goto(loginUrl, { waitUntil: 'networkidle', timeout });
     // TODO: Save the screenshot to the data direecory
     // await page.screenshot({ path: 'login-before.png' });
 
     // Fill in username
-    console.log('Entering username...');
+    log.debug('Entering username...');
     await page.fill(usernameSelector, username, { timeout });
 
     // Fill in password
-    console.log('Entering password...');
+    log.debug('Entering password...');
     await page.fill(passwordSelector, password, { timeout });
 
     // Submit form
-    console.log('Submitting login form...');
+    log.debug('Submitting login form...');
     await page.locator(passwordSelector).press('Enter');
 
     // Wait for navigation or specific element
     if (waitForSelector) {
-      console.log(`Waiting for selector: ${waitForSelector}...`);
+      log.debug(`Waiting for selector: ${waitForSelector}...`);
       await page.waitForSelector(waitForSelector, { timeout });
     } else {
       // Wait for network to be idle after login
@@ -86,7 +87,7 @@ async function loginAndSaveCookies(
     // TODO: Save the screenshot to the data direecory
     // await page.screenshot({ path: 'login-after.png' });
 
-    console.log('Login successful!');
+    log.info('Login successful!');
 
     // Get all cookies
     const cookies = await context.cookies();
@@ -104,15 +105,15 @@ async function loginAndSaveCookies(
 
     // Save cookies to JSON file
     fs.writeFileSync(jsonFile, JSON.stringify(cookies, null, 2));
-    console.log(`Cookies saved to ${jsonFile}`);
-    console.log(`Total cookies: ${cookies.length}`);
+    log.info(`Cookies saved to ${jsonFile}`);
+    log.debug(`Total cookies: ${cookies.length}`);
 
     // Close browser
     await browser.close();
 
     return cookies;
   } catch (error) {
-    console.error('Error during login:', error.message);
+    log.error({ err: error }, error.message || String(error));
     if (browser) {
       await browser.close();
     }
@@ -137,8 +138,7 @@ async function main() {
       }
     );
 
-    console.log('\nCookies:');
-    console.log(JSON.stringify(cookies, null, 2));
+    log.debug({ count: cookies.length }, 'Cookies retrieved');
   } catch (error) {
     process.exit(1);
   }

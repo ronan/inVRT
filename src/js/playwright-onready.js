@@ -1,3 +1,4 @@
+const log = require('./logger');
 
 const clickAndHoverHelper = async (page, scenario) => {
   const hoverSelector = scenario.hoverSelectors || scenario.hoverSelector;
@@ -46,6 +47,6 @@ const clickAndHoverHelper = async (page, scenario) => {
 module.exports = async (page, scenario, viewport, isReference, browserContext) => {
   const title = await page.title();
   scenario.pageTitle = title;
-  console.log('Page Ready > ' + title + ' [' + scenario.label + ']');
+  log.debug(`Page ready: ${title} [${scenario.label}]`);
   await clickAndHoverHelper(page, scenario);
 };

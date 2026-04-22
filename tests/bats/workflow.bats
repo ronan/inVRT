@@ -45,7 +45,7 @@ teardown() {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
 
-  run_invrt crawl
+  run_invrt crawl -vvv
 
   [ "$status" -eq 0 ]
   assert_output_contains "Crawling completed"

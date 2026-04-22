@@ -22,14 +22,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
   - [x] Clean up the schema generator 
   - [x] Teach the ai agents how to edit the schema instead of altering the generated code.
 
-- [ ] Standardize output from js/node
-  - Use pino to write output from node
-    - https://getpino.io
-  - Allow the runner to read the responses along with their level and call the appropriate PSR-3 log function on $logger to send output to the user or to a text log depending on verbosity.
-    - pino: trace, debug, info, warn, error, and fatal
-    - psr3: Debug, Info, Notice, Warning, Error, Critical, Alert, and Emergency
-      - trace = Debug
-      - fatal - Emergency
+- [x] Standardize output from js/node
 
 - [ ] Move more logic to js/ts/node
   - Make the runner slimmer by offloading more work to js/ts scripts run with node
@@ -106,7 +99,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - [ ] Name the file 'plan.yaml' and put it at the top of the .invrt directory
     - [ ] Update the document when new paths are found when crawling with different profiles
     - [ ] Turn 'plan.yaml' into 'backstop.json' with backstop test config in it.
-
 
 
 ## Documentation

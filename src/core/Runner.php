@@ -3,6 +3,7 @@
 namespace InVRT\Core;
 
 use InVRT\Core\Service\LoginService;
+use InVRT\Core\Service\NodeOutputParser;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
@@ -554,9 +555,11 @@ EOF;
 
         $process = Process::fromShellCommandline($cmd, null, $env);
         $process->setTimeout(null);
-        $process->run(function (mixed $type, mixed $buffer): void {
-            print($buffer);
+        $parser = new NodeOutputParser($this->logger);
+        $process->run(function (mixed $type, mixed $buffer) use ($parser): void {
+            $parser->write($buffer);
         });
+        $parser->flush();
 
         $exitCode = $process->getExitCode() ?? 0;
         if ($exitCode !== 0) {
@@ -583,18 +586,18 @@ EOF;
         $cmd    = 'node ' . escapeshellarg($script) . ' ' . $mode;
         $this->logger->debug('Running BackstopJS command: ' . $cmd);
 
-        $output  = '';
         $process = Process::fromShellCommandline($cmd, null, $env);
         $process->setTimeout(null);
-        $process->run(function (mixed $type, mixed $buffer) use (&$output): void {
-            print($buffer);
-            $output .= $buffer;
+        $parser = new NodeOutputParser($this->logger);
+        $process->run(function (mixed $type, mixed $buffer) use ($parser): void {
+            $parser->write($buffer);
         });
+        $parser->flush();
 
         $exitCode = $process->getExitCode() ?? 0;
         $this->logger->debug('BackstopJS exit code: ' . $exitCode);
 
-        $this->writeResultsFile($mode, $output);
+        $this->writeResultsFile($mode, $parser->getMessages());
 
         return $exitCode;
     }

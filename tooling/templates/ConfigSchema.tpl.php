@@ -45,10 +45,13 @@ class ConfigSchema implements ConfigurationInterface
 
         $root
             ->children()
+                ->scalarNode('name')->defaultNull()->end()
+                ->scalarNode('id')->defaultNull()->end()
+                ->scalarNode('url')->defaultNull()->end()
+                ->scalarNode('description')->defaultNull()->end()
                 ->arrayNode('project')
                 ->addDefaultsIfNotSet()
                 ->children()
-                    ->scalarNode('name')->defaultNull()->end()
                   #{{#each app.Settings}}
                   #{{#if (matches this.type "int") }}
                     ->integerNode('{{@key}}')->defaultValue({{this.default}})->end()

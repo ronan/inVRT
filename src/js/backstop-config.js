@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const log = require('./logger');
 
 const {
   INVRT_PROFILE,
@@ -117,9 +118,9 @@ try {
   }
 
   fs.writeFileSync(outputFile, JSON.stringify(config, null, 2));
-  console.log(`✅ Generated backstop config with ${config.scenarios.length} scenarios at ${outputFile}`);
+  log.info(`Generated backstop config with ${config.scenarios.length} scenarios at ${outputFile}`);
   process.exit(0);
 } catch (err) {
-  console.error(err);
+  log.error({ err }, err.message || String(err));
   process.exit(1);
 }

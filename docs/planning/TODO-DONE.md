@@ -2,6 +2,17 @@
 
 Completed tasks moved from TODO.md.
 
+## Tech Debt
+
+- [x] Standardize output from js/node
+  - Use pino to write output from node
+    - https://getpino.io
+  - Allow the runner to read the responses along with their level and call the appropriate PSR-3 log function on $logger to send output to the user or to a text log depending on verbosity.
+    - pino: trace, debug, info, warn, error, and fatal
+    - psr3: Debug, Info, Notice, Warning, Error, Critical, Alert, and Emergency
+      - trace = Debug
+      - fatal = Emergency
+
 ## Reporting
 
   - [x] Add a project id to distinguish final reports.

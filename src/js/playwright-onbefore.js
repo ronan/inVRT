@@ -1,4 +1,5 @@
 const fs = require('fs');
+const log = require('./logger');
 
 const loadCookies = async (browserContext, scenario) => {
   let cookies = [];
@@ -7,7 +8,7 @@ const loadCookies = async (browserContext, scenario) => {
   // Read Cookies from File, if exists
   if (fs.existsSync(cookiePath)) {
     cookies = JSON.parse(fs.readFileSync(cookiePath));
-    console.log(`🍪 Loaded ${cookies.length} cookies from ${cookiePath}`);
+    log.debug(`Loaded ${cookies.length} cookies from ${cookiePath}`);
   }
 
   // Add cookies to browser
@@ -15,6 +16,6 @@ const loadCookies = async (browserContext, scenario) => {
 };
 
 module.exports = async (page, scenario, viewport, isReference, browserContext) => {
-  console.log(`📸 Capturing page: ${scenario.label}: ${scenario.url}`);
+  log.debug(`Capturing page: ${scenario.label}: ${scenario.url}`);
   await loadCookies(browserContext, scenario);
 };

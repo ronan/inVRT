@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Auto generated. Do not edit.
- * 
- * See 
+ *
+ * See
  *  - @tooling/templates/ConfigSchema.tpl.php
  *  - @docs/spec/Application.yaml
- * and run 
+ * and run
  *  `task build:templates`
  * to regenerate.
  */
@@ -21,6 +22,8 @@ class ConfigSchema implements ConfigurationInterface
     /** Hard-coded defaults — applied when a key is absent from all config sections. */
     public const DEFAULTS = [
         'url'                => '',
+        'name'                => '',
+        'description'                => '',
         'id'                => '',
         'login_url'                => '',
         'username'                => '',
@@ -55,11 +58,16 @@ class ConfigSchema implements ConfigurationInterface
 
         $root
             ->children()
+                ->scalarNode('name')->defaultNull()->end()
+                ->scalarNode('id')->defaultNull()->end()
+                ->scalarNode('url')->defaultNull()->end()
+                ->scalarNode('description')->defaultNull()->end()
                 ->arrayNode('project')
                 ->addDefaultsIfNotSet()
                 ->children()
-                    ->scalarNode('name')->defaultNull()->end()
                     ->scalarNode('url')->defaultValue('')->end()
+                    ->scalarNode('name')->defaultValue('')->end()
+                    ->scalarNode('description')->defaultValue('')->end()
                     ->scalarNode('id')->defaultValue('')->end()
                     ->scalarNode('login_url')->defaultValue('')->end()
                     ->scalarNode('username')->defaultValue('')->end()
@@ -83,6 +91,8 @@ class ConfigSchema implements ConfigurationInterface
                 ->arrayPrototype()
                 ->children()
                     ->scalarNode('url')->end()
+                    ->scalarNode('name')->end()
+                    ->scalarNode('description')->end()
                     ->scalarNode('id')->end()
                     ->scalarNode('login_url')->end()
                     ->scalarNode('username')->end()
@@ -108,6 +118,8 @@ class ConfigSchema implements ConfigurationInterface
                 ->children()
                     ->scalarNode('name')->end()
                     ->scalarNode('url')->end()
+                    ->scalarNode('name')->end()
+                    ->scalarNode('description')->end()
                     ->scalarNode('id')->end()
                     ->scalarNode('login_url')->end()
                     ->scalarNode('username')->end()
@@ -133,6 +145,8 @@ class ConfigSchema implements ConfigurationInterface
                 ->children()
                     ->scalarNode('name')->end()
                     ->scalarNode('url')->end()
+                    ->scalarNode('name')->end()
+                    ->scalarNode('description')->end()
                     ->scalarNode('id')->end()
                     ->scalarNode('login_url')->end()
                     ->scalarNode('username')->end()
