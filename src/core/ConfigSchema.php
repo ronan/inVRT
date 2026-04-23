@@ -37,19 +37,18 @@ class ConfigSchema implements ConfigurationInterface
         'directory'                => 'INVRT_CWD/.invrt',
         'scripts_dir'                => 'INVRT_DIRECTORY/scripts',
         'data_dir'                => 'INVRT_DIRECTORY/data',
-        'crawl_dir'                => 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE',
+        'crawl_dir'                => 'INVRT_DIRECTORY/data/INVRT_PROFILE',
         'clone_dir'                => 'INVRT_CRAWL_DIR/clone',
-        'capture_dir'                => 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE',
-        'backstop_config_file'       => 'INVRT_CAPTURE_DIR/backstop.json',
+        'capture_dir'                => 'INVRT_CRAWL_DIR/bitmaps',
         'config_file'                => 'INVRT_DIRECTORY/config.yaml',
-        'crawl_file'                => 'INVRT_CRAWL_DIR/crawled_urls.txt',
+        'crawl_file'                => 'INVRT_CRAWL_DIR/crawled-paths.text',
         'crawl_log'                => 'INVRT_CRAWL_DIR/logs/crawl.log',
-        'output_file'                => 'INVRT_DIRECTORY/config.yaml',
-        'check_file'                => 'INVRT_DATA_DIR/INVRT_ENVIRONMENT/check.yaml',
-        'reference_file'                => 'INVRT_CAPTURE_DIR/reference_results.txt',
-        'test_file'                => 'INVRT_CAPTURE_DIR/test_results.txt',
+        'check_file'                => 'INVRT_DIRECTORY/check.yaml',
+        'reference_file'                => 'INVRT_CRAWL_DIR/logs/reference.log',
+        'test_file'                => 'INVRT_CRAWL_DIR/logs/test.log',
+        'backstop_config_file'                => 'INVRT_SCRIPTS_DIR/backstop.json',
         'cookies_file'                => 'INVRT_CRAWL_DIR/cookies',
-        'exclude_file'                => 'INVRT_CRAWL_DIR/exclude_paths.txt',
+        'exclude_file'                => 'INVRT_DIRECTORY/exclude-paths.txt',
     ];
 
     public function getConfigTreeBuilder(): TreeBuilder
@@ -82,10 +81,10 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('directory')->defaultValue('INVRT_CWD/.invrt')->end()
                     ->scalarNode('scripts_dir')->defaultValue('INVRT_DIRECTORY/scripts')->end()
                     ->scalarNode('data_dir')->defaultValue('INVRT_DIRECTORY/data')->end()
-                    ->scalarNode('crawl_dir')->defaultValue('INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE')->end()
+                    ->scalarNode('crawl_dir')->defaultValue('INVRT_DIRECTORY/data/INVRT_PROFILE')->end()
                     ->scalarNode('clone_dir')->defaultValue('INVRT_CRAWL_DIR/clone')->end()
-                    ->scalarNode('backstop_config_file')->defaultValue('INVRT_CAPTURE_DIR/backstop.json')->end()
-                    ->scalarNode('capture_dir')->defaultValue('INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE')->end()
+                    ->scalarNode('configure_backstop_file')->defaultValue('INVRT_CAPTURE_DIR/backstop.json')->end()
+                    ->scalarNode('capture_dir')->defaultValue('INVRT_CRAWL_DIR/bitmaps')->end()
                     ->end()
                 ->end()
                 ->arrayNode('environments')
@@ -109,7 +108,7 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('data_dir')->end()
                     ->scalarNode('crawl_dir')->end()
                     ->scalarNode('clone_dir')->end()
-                    ->scalarNode('backstop_config_file')->end()
+                    ->scalarNode('configure_backstop_file')->end()
                     ->scalarNode('capture_dir')->end()
                     ->end()
                 ->end()
@@ -136,7 +135,7 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('data_dir')->end()
                     ->scalarNode('crawl_dir')->end()
                     ->scalarNode('clone_dir')->end()
-                    ->scalarNode('backstop_config_file')->end()
+                    ->scalarNode('configure_backstop_file')->end()
                     ->scalarNode('capture_dir')->end()
                     ->end()
                 ->end()
@@ -163,7 +162,7 @@ class ConfigSchema implements ConfigurationInterface
                     ->scalarNode('data_dir')->end()
                     ->scalarNode('crawl_dir')->end()
                     ->scalarNode('clone_dir')->end()
-                    ->scalarNode('backstop_config_file')->end()
+                    ->scalarNode('configure_backstop_file')->end()
                     ->scalarNode('capture_dir')->end()
                     ->end()
                 ->end()

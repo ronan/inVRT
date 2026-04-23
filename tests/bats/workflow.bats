@@ -19,10 +19,10 @@ teardown() {
   [ "$status" -eq 0 ]
   assert_output_contains "Site check complete"
   assert_output_contains "Home"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/check.yaml"
-  assert_yaml_equals "$TEST_DIR/.invrt/data/local/check.yaml" "title" "Home"
-  assert_yaml_equals "$TEST_DIR/.invrt/data/local/check.yaml" "https" "false"
-  assert_file_not_contains "$TEST_DIR/.invrt/data/local/check.yaml" "redirected_from:"
+  assert_file_exists "$TEST_DIR/.invrt/check.yaml"
+  assert_yaml_equals "$TEST_DIR/.invrt/check.yaml" "title" "Home"
+  assert_yaml_equals "$TEST_DIR/.invrt/check.yaml" "https" "false"
+  assert_file_not_contains "$TEST_DIR/.invrt/check.yaml" "redirected_from:"
 }
 
 @test "check: fails when the site is unreachable" {
@@ -49,12 +49,12 @@ teardown() {
 
   [ "$status" -eq 0 ]
   assert_output_contains "Crawling completed"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/logs/crawl.log"
-  assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/about.html"
-  assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/services.html"
-  assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/contact.html"
-  assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/blog.html"
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/crawl.log"
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" "/about.html"
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" "/services.html"
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" "/contact.html"
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" "/blog.html"
 }
 
 @test "crawl: scenario labels in backstop config are short lowercase ids" {
@@ -67,7 +67,7 @@ teardown() {
   run_invrt configure-backstop
   [ "$status" -eq 0 ]
 
-  local config_file="$TEST_DIR/.invrt/data/local/anonymous/desktop/backstop.json"
+  local config_file="$TEST_DIR/.invrt/scripts/backstop.json"
   assert_file_exists "$config_file"
   assert_output_contains "Generated backstop config"
   # All scenario labels should be lowercase letters only (encodeId output).
@@ -83,7 +83,7 @@ teardown() {
   [ "$status" -eq 0 ]
   assert_output_contains "No configuration file found. Initializing inVRT first."
   assert_output_contains "What URL should inVRT use?"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt"
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "environments.local.url" "$SERVER_URL"
 }
 
@@ -95,8 +95,8 @@ teardown() {
   [ "$status" -ne 0 ]
   assert_output_contains "No usable URLs were found during crawl."
   assert_output_contains "Last 5 lines of crawl log:"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt"
-  [ ! -s "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" ]
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
+  [ ! -s "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" ]
 }
 
 @test "reference: fails without config when no url is available" {
@@ -109,14 +109,14 @@ teardown() {
 @test "reference: captures screenshots from the crawled urls file" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
-  seed_crawled_urls local anonymous / /about.html
+  seed_crawled_urls anonymous / /about.html
 
   run_invrt reference
 
   [ "$status" -eq 0 ]
-  assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference"
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference" 2
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/reference_results.txt"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
+  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop" 2
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/reference.log"
 }
 
 @test "reference: auto triggers crawl when crawled urls are missing" {
@@ -127,14 +127,14 @@ teardown() {
 
   [ "$status" -eq 0 ]
   assert_output_contains "No crawled URLs found"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt"
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference" 1
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
+  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop" 1
 }
 
 @test "reference: shows debug output at vvv" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
-  seed_crawled_urls local anonymous /
+  seed_crawled_urls anonymous /
 
   run_invrt -vvv reference
 
@@ -147,7 +147,7 @@ teardown() {
 @test "reference: fails when the crawl file is empty" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
-  seed_crawled_urls local anonymous
+  seed_crawled_urls anonymous
 
   run_invrt reference
 
@@ -165,16 +165,16 @@ teardown() {
 @test "test: captures references on first run and skips that step on the second run" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
-  seed_crawled_urls local anonymous / /about.html
+  seed_crawled_urls anonymous / /about.html
 
   run_invrt test
 
   [ "$status" -eq 0 ]
   assert_output_contains "No reference screenshots found"
-  assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference"
-  assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/test"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/reference_results.txt"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/test_results.txt"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop"
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/reference.log"
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/test.log"
 
   run_invrt test
 
@@ -192,8 +192,8 @@ teardown() {
   [ "$status" -eq 0 ]
   assert_output_contains "No reference screenshots found"
   assert_output_contains "No crawled URLs found"
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference" 1
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/test" 1
+  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop" 1
+  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop" 1
 }
 
 @test "test: handles very long crawled url paths" {
@@ -203,12 +203,12 @@ teardown() {
   local long_query long_slug
   long_query="$(printf 'a%.0s' $(seq 1 500))"
   long_slug="$(printf 'segment%.0s' $(seq 1 45))"
-  seed_crawled_urls local anonymous "/about.html?long=$long_query&slug=$long_slug"
+  seed_crawled_urls anonymous "/about.html?long=$long_query&slug=$long_slug"
 
   run_invrt test
 
   [ "$status" -eq 0 ]
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/test" 1
+  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop" 1
 }
 
 @test "approve: succeeds after a test run" {
@@ -235,10 +235,10 @@ teardown() {
   assert_output_contains "Crawling completed"
   assert_output_contains "Generated backstop config"
   assert_output_contains "Approving latest results"
-  assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference"
-  assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/test"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/reference_results.txt"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/test_results.txt"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop"
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/reference.log"
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/test.log"
 }
 
 @test "init: automatically runs baseline after init" {
@@ -249,8 +249,8 @@ teardown() {
   [ "$status" -eq 0 ]
   assert_output_contains "InVRT successfully initialized!"
   assert_output_contains "Running baseline"
-  assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference"
-  assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/test"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop"
 }
 
 @test "init: skips baseline with --skip-baseline" {
@@ -260,5 +260,5 @@ teardown() {
 
   [ "$status" -eq 0 ]
   assert_output_contains "InVRT successfully initialized!"
-  assert_dir_not_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference"
+  assert_dir_not_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
 }

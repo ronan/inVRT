@@ -23,26 +23,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
   - [x] Teach the ai agents how to edit the schema instead of altering the generated code.
 
 - [x] Standardize output from js/node
-- [ ] Clean up file structure
-    - Standardize the naming of files
-    - Create the following folder structure
-      - .invrt/
-        - config.yaml
-        - data/
-          - bitmaps/
-            - mobile/
-            - desktop/
-              - local/
-              - reference/
-          - logs/
-            - crawl-anonymous.txt
-            - test-anonymous-local-mobile.txt
-        
-        - plan.yaml
-        - scripts/
-          - onready.js
-        - report/
-          - index.html
 
 ## Tests
 
@@ -83,10 +63,12 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Move to Playwright
 
-- [ ] Create a command to generate a playwright test script at INVRT_CRAWL_DIR/playwright.spec.ts which:
-    - Visits each page in the crawl list
-    - Waits for the content to load and settle
-    - Take a screenshot and save it as data/bitmaps/{environment}/`{pageID}_{profile}_{device}`
+- [ ] Create a command to generate a playwright test script
+    - save to INVRT_CRAWL_DIR/playwright.spec.ts
+    - test steps
+      - Visits each page in the crawl list
+      - Waits for the content to load and settle
+      - Take a screenshot and save it as data/bitmaps/{environment}/`{pageID}_{profile}_{device}`
 
 - [ ] Run references and test capture by running the playwright test script
 
@@ -133,6 +115,13 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Future Features
 
+- [ ] New flags
+  - [ ] --skip-<step>
+  - [ ] init --redo (or init --force)
+  - [ ] init --unhide 
+    - Make the invrt directory visible (`invrt` not `.invrt`)
+  - [ ] --[config-option] override any config option at runtime
+    - [ ] eg: invrt test --viewport-width=1600
 - [ ] Advanced playwright integration
 - [ ] Better debug output during crawl
 - [ ] Rewrite the crawler

@@ -33,8 +33,10 @@ const run = async () => {
   const {
     INVRT_PROFILE,
     INVRT_DEVICE,
+    INVRT_ENVIRONMENT,
     INVRT_SCRIPTS_DIR,
     INVRT_CAPTURE_DIR,
+    INVRT_CRAWL_DIR,
     INVRT_URL,
     INVRT_VIEWPORT_WIDTH,
     INVRT_VIEWPORT_HEIGHT,
@@ -68,11 +70,11 @@ const run = async () => {
     "scenarios": [],
     "paths": {
       "engine_scripts":     engineScriptsDir,
-      "html_report":        INVRT_CAPTURE_DIR + "/reports/html",
-      "ci_report":          INVRT_CAPTURE_DIR + "/reports/ci",
-      "json_report":        INVRT_CAPTURE_DIR + "/reports/json",
-      "bitmaps_reference":  INVRT_CAPTURE_DIR + "/bitmaps/reference",
-      "bitmaps_test":       INVRT_CAPTURE_DIR + "/bitmaps/test"
+      "html_report":        INVRT_CRAWL_DIR + "/reports/html",
+      "ci_report":          INVRT_CRAWL_DIR + "/reports/ci",
+      "json_report":        INVRT_CRAWL_DIR + "/reports/json",
+      "bitmaps_reference":  INVRT_CAPTURE_DIR + "/reference/" + INVRT_DEVICE,
+      "bitmaps_test":       INVRT_CAPTURE_DIR + "/" + INVRT_ENVIRONMENT + "/" + INVRT_DEVICE
     },
     "report": ["html","json"],
     "engine": "playwright",

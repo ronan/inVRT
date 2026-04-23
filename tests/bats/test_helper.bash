@@ -275,17 +275,16 @@ EOF
 }
 
 seed_crawled_urls() {
-  local environment="${1:-local}"
-  local profile="${2:-anonymous}"
-  shift 2
+  local profile="${1:-anonymous}"
+  shift
 
-  local crawl_dir="$TEST_DIR/.invrt/data/$environment/$profile"
+  local crawl_dir="$TEST_DIR/.invrt/data/$profile"
   mkdir -p "$crawl_dir"
 
   if [ "$#" -eq 0 ]; then
-    : > "$crawl_dir/crawled_urls.txt"
+    : > "$crawl_dir/crawled-paths.text"
     return
   fi
 
-  printf '%s\n' "$@" > "$crawl_dir/crawled_urls.txt"
+  printf '%s\n' "$@" > "$crawl_dir/crawled-paths.text"
 }

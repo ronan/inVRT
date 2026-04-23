@@ -49,6 +49,15 @@ Completed tasks moved from TODO.md.
 
 - [x] Remove the `settings` section and replace it with `project`
 
+- [x] Clean up file structure
+    - `check.yaml` and `exclude-paths.txt` moved to `.invrt/` root
+    - Crawl artifacts at `data/PROFILE/` (environment removed from path)
+    - `crawled_urls.txt` renamed to `crawled-paths.text`
+    - Bitmaps reorganized: `data/PROFILE/bitmaps/reference/DEVICE` (approved baseline) and `data/PROFILE/bitmaps/ENV/DEVICE` (test runs)
+    - `backstop.json` moved to `scripts/backstop.json`
+    - `init` creates empty `scripts/onready.js` placeholder
+    - Logs at `data/PROFILE/logs/` with simple names (`crawl.log`, `reference.log`, `test.log`)
+
 ## Features
 
 - [x] Implement `baseline`

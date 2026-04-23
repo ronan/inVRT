@@ -70,6 +70,7 @@ class Runner
             $this->logger->error('Failed to create scripts directory');
             return 1;
         }
+        file_put_contents(Path::join($directory, 'scripts', 'onready.js'), '');
         $this->logger->info('✓ Created data directories for generated data, and user scripts.');
 
         $projectId = self::generateProjectId($url);
@@ -134,10 +135,12 @@ EOF;
     /** Returns a project status summary. */
     public function info(): array
     {
-        $env        = $this->config->all();
-        $crawlFile  = $env['INVRT_CRAWL_FILE']  ?? '';
-        $crawlLog   = $env['INVRT_CRAWL_LOG']   ?? '';
-        $captureDir = $env['INVRT_CAPTURE_DIR'] ?? '';
+        $env         = $this->config->all();
+        $crawlFile   = $env['INVRT_CRAWL_FILE']  ?? '';
+        $crawlLog    = $env['INVRT_CRAWL_LOG']   ?? '';
+        $captureDir  = $env['INVRT_CAPTURE_DIR'] ?? '';
+        $device      = $env['INVRT_DEVICE']      ?? 'desktop';
+        $environment = $env['INVRT_ENVIRONMENT'] ?? 'local';
 
         $crawledPages = 0;
         if ($crawlFile !== '' && is_readable($crawlFile)) {
@@ -156,8 +159,8 @@ EOF;
             'profiles'     => array_keys((array) ($this->config->getSection('profiles')     ?? [])),
             'devices'      => array_keys((array) ($this->config->getSection('devices')      ?? [])),
             'crawled_pages'         => $crawledPages,
-            'reference_screenshots' => $this->countScreenshots($captureDir . '/bitmaps/reference'),
-            'test_screenshots'      => $this->countScreenshots($captureDir . '/bitmaps/test'),
+            'reference_screenshots' => $this->countScreenshots($captureDir . '/reference/' . $device),
+            'test_screenshots'      => $this->countScreenshots($captureDir . '/' . $environment . '/' . $device),
             'crawl_log_tail'        => $this->readLogTail($crawlLog),
         ];
     }
@@ -211,7 +214,7 @@ EOF;
             return $result;
         }
 
-        $this->prepareDirectory($captureDir);
+        $this->prepareDirectory($captureDir . '/reference/' . $device);
         $this->ensureBackstopConfig();
 
         return $this->runBackstop('reference', $env);
@@ -268,9 +271,12 @@ EOF;
             return $result;
         }
 
-        $env        = $this->config->all();
-        $captureDir = $env['INVRT_CAPTURE_DIR'] ?? '';
-        $this->prepareDirectory($captureDir);
+        $env         = $this->config->all();
+        $captureDir  = $env['INVRT_CAPTURE_DIR'] ?? '';
+        $device      = $env['INVRT_DEVICE']      ?? 'desktop';
+        $environment = $env['INVRT_ENVIRONMENT'] ?? 'local';
+        $this->prepareDirectory($captureDir . '/reference/' . $device);
+        $this->prepareDirectory($captureDir . '/' . $environment . '/' . $device);
 
         if (($result = $this->configureBackstop()) !== 0) {
             return $result;

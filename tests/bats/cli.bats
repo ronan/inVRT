@@ -42,7 +42,7 @@ teardown() {
   assert_dir_exists "$TEST_DIR/.invrt"
   assert_dir_exists "$TEST_DIR/.invrt/data"
   assert_dir_exists "$TEST_DIR/.invrt/scripts"
-  assert_file_exists "$TEST_DIR/.invrt/data/stage/editor/exclude_paths.txt"
+  assert_file_exists "$TEST_DIR/.invrt/exclude-paths.txt"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "environments.stage.url" "https://example.test"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "profiles.editor" "[]"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "devices.tablet" "[]"
@@ -123,7 +123,7 @@ EOF
 }
 
 @test "info: shows project summary and crawled page count" {
-  mkdir -p "$TEST_DIR/.invrt/data/local/anonymous"
+  mkdir -p "$TEST_DIR/.invrt/data/anonymous"
   cat > "$TEST_DIR/.invrt/config.yaml" <<'EOF'
 project:
   name: My Test Project
@@ -144,7 +144,7 @@ devices:
     viewport_width: 375
     viewport_height: 667
 EOF
-  printf "/\n/about\n/contact\n" > "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt"
+  printf "/\n/about\n/contact\n" > "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
 
   run_invrt info
 

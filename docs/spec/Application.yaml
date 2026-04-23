@@ -55,25 +55,28 @@ Files:
     default: INVRT_DIRECTORY/config.yaml
     description: Path to the main inVRT configuration file.
   crawl_file:
-    default: INVRT_CRAWL_DIR/crawled_urls.txt
+    default: INVRT_CRAWL_DIR/crawled-paths.text
     description: Path to the file storing the list of crawled URLs.
   crawl_log:
     default: INVRT_CRAWL_DIR/logs/crawl.log
     description: Log file capturing the output of the crawl process.
   check_file:
-    default: INVRT_DATA_DIR/INVRT_ENVIRONMENT/check.yaml
+    default: INVRT_DIRECTORY/check.yaml
     description: Path to the file storing the results of the site check.
   reference_file:
-    default: INVRT_CAPTURE_DIR/reference_results.txt
+    default: INVRT_CRAWL_DIR/logs/reference.log
     description: Path to the file storing the reference output for visual regression testing.
   test_file:
-    default: INVRT_CAPTURE_DIR/test_results.txt
+    default: INVRT_CRAWL_DIR/logs/test.log
     description: Path to the file storing the test output for visual regression testing.
+  backstop_config_file:
+    default: INVRT_SCRIPTS_DIR/backstop.json
+    description: Path to the generated BackstopJS configuration file.
   cookies_file:
     default: INVRT_CRAWL_DIR/cookies
     description: Base path for generated cookie files. Login writes .json and .txt variants.
   exclude_file:
-    default: INVRT_CRAWL_DIR/exclude_paths.txt
+    default: INVRT_DIRECTORY/exclude-paths.txt
     description: Path list used to exclude URL directories during crawl.
 
 Commands:
@@ -134,8 +137,8 @@ Commands:
     triggers: [ configure-backstop ]
     directories: 
       crawl_dir:
-        default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE
-        description: Directory holding crawl artifacts for the selected environment and profile.
+        default: INVRT_DIRECTORY/data/INVRT_PROFILE
+        description: Directory holding crawl artifacts for the selected profile.
       clone_dir:
         default: INVRT_CRAWL_DIR/clone
         description: Temporary wget mirror output directory.
@@ -156,10 +159,10 @@ Commands:
     requires: [ backstop-config ]
     directories:
       capture_dir:
-        default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE
+        default: INVRT_CRAWL_DIR/bitmaps
         description: Root directory for BackstopJS capture and report artifacts.
     writes:
-      - INVRT_CAPTURE_DIR/bitmaps/reference
+      - INVRT_CAPTURE_DIR/reference/INVRT_DEVICE
       - INVRT_CAPTURE_DIR/reports/html
       - INVRT_CAPTURE_DIR/reports/json
 
