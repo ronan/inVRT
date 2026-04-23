@@ -28,6 +28,15 @@ Completed tasks moved from TODO.md.
 
   - [x] Add a project id to distinguish final reports.
     - [x] The project id should be saved to the config.yml file as 'id' in settings
+
+## Move to Playwright
+
+- [x] Create a command to generate a playwright test script
+    - save to INVRT_DIRECTORY/scripts/playwright.spec.ts
+    - test steps
+      - Visits each page in the crawl list
+      - Waits for the content to load and settle
+      - Take a screenshot and save it as data/bitmaps/{environment}/`{pageID}_{profile}_{device}`
     - [x] It should be based on the url and a unique seed
 
 - [x] Improve page ids

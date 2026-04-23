@@ -49,6 +49,7 @@ class ConfigSchema implements ConfigurationInterface
         'backstop_config_file'                => 'INVRT_SCRIPTS_DIR/backstop.json',
         'cookies_file'                => 'INVRT_CRAWL_DIR/cookies',
         'exclude_file'                => 'INVRT_DIRECTORY/exclude-paths.txt',
+        'playwright_spec_file'                => 'INVRT_SCRIPTS_DIR/INVRT_PROFILE.spec.ts',
     ];
 
     public function getConfigTreeBuilder(): TreeBuilder

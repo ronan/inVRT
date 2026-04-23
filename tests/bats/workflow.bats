@@ -224,6 +224,20 @@ teardown() {
   assert_output_contains "Approving latest results"
 }
 
+@test "generate-playwright: generates spec from crawled urls" {
+  start_fixture_server
+  seed_basic_config "$SERVER_URL"
+  seed_crawled_urls anonymous / /about.html
+
+  run_invrt generate-playwright
+
+  [ "$status" -eq 0 ]
+  assert_output_contains "Generated playwright spec"
+  assert_file_exists "$TEST_DIR/.invrt/scripts/anonymous.spec.ts"
+  assert_file_contains "$TEST_DIR/.invrt/scripts/anonymous.spec.ts" "import { test"
+  assert_file_contains "$TEST_DIR/.invrt/scripts/anonymous.spec.ts" "networkidle"
+}
+
 @test "baseline: runs full pipeline and produces approved screenshots" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"

@@ -301,6 +301,14 @@ EOF;
         return $this->runNode('backstop-config.js', $inputFile, $outputFile);
     }
 
+    /** Generate a Playwright TypeScript spec from the crawled URL list. */
+    public function generatePlaywright(): int
+    {
+        $inputFile  = $this->config->get('INVRT_CRAWL_FILE', '') ?: null;
+        $outputFile = $this->config->get('INVRT_PLAYWRIGHT_SPEC_FILE', '') ?: null;
+        return $this->runNode('generate-playwright.js', $inputFile, $outputFile);
+    }
+
     /** Attempt login using credentials from the resolved config. */
     public function login(): int
     {
