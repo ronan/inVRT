@@ -130,7 +130,7 @@ class Configuration
         $device      = $this->env['INVRT_DEVICE']      ?? 'desktop';
 
         $base = $this->buildDefaults($profile, $environment, $device);
-        
+
         $project     = $this->parsed['project'] ?? [];
         unset($project['name']);
         $settings    = $this->asEnv($project);

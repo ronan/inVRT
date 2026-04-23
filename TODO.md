@@ -57,9 +57,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - Reference has run if a 'reference_results.txt' file exists
     - Test has run if a 'test_results.txt' file exists
 
-- [ ] Move 'configure-backstop' into a new command.
-  - [ ] Make reference auto-trigger this step when needed.
-
 - [ ] Create a stdin/stdout bese based pipeline
 
     The check, crawl, backstop-config, reference and test commands should take a single file as input and produce a single file as output. If any commands currently write more than one file, it should be broken into two steps.

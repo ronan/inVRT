@@ -271,6 +271,12 @@ EOF;
         return $this->approve();
     }
 
+    /** Generate or regenerate the BackstopJS configuration from the crawled URL list. */
+    public function configureBackstop(): int
+    {
+        return $this->runNode('backstop-config.js');
+    }
+
     /** Attempt login using credentials from the resolved config. */
     public function login(): int
     {
@@ -376,7 +382,7 @@ EOF;
             return;
         }
 
-        $this->runNode('backstop-config.js');
+        $this->configureBackstop();
     }
 
     private function runBackstop(string $mode, array $env): int

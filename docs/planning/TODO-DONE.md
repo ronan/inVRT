@@ -48,6 +48,11 @@ Completed tasks moved from TODO.md.
 ## Tech Debt
 
 - [x] Remove the `settings` section and replace it with `project`
+
+## Features
+
+- [x] Move 'configure-backstop' into a new command.
+  - [x] Make reference auto-trigger this step when needed.
   - This more accurately reflects the fact that these are the base defaults for the given project.
   - Move `name` into project.
 
