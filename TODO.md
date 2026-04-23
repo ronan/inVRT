@@ -67,7 +67,8 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Create plan.yaml
 
-- [ ] The crawl command should create a structured yaml file in the format specified in [Site Tree Spec](docs/planning/proposals/SITE_TREE_FILE_SPEC.md)
+- [ ] The crawl command should create a structured yaml file in the format specified in [Plan Yaml Spec](docs/planning/proposals/Plan.yaml.specification.md)
+  - [ ] The generate backstop/playwright commands should read paths from the Plan rather than `crawled-paths.txt`
 
 ## User Scripting (requires Move to Playwright and Create plan.yaml)
 
@@ -81,12 +82,12 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
   - [ ] " per environment
 - [ ] Scripts can be paths to a script in `INVRT_SCRIPTS_DIR`
 - [ ] Scripts can be literal codeblock in plan.yaml in javascript or typescript
+- [ ] Allow some 'pages' to be functional tests which are not necessarily a URL
 - [ ] Future feature: Create a yaml shorthand for often used steps
 
     ```yaml
-    search_popover:
-        <url: /about.html
-        <steps:
+    /about.html:
+        steps:
             # Automatically run: snap onready
             - click .search-trigger
             - snap 'search popup'
