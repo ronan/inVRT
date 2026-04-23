@@ -12,7 +12,7 @@ RUN composer install --prefer-dist --optimize-autoloader
 # FROM debian:bookworm AS build
 
 # Shared base image
-FROM mcr.microsoft.com/playwright:v1.58.2-noble AS base
+FROM mcr.microsoft.com/playwright:v1.59.1-noble AS base
 
 ARG DEBIAN_FRONTEND=noninteractive
 

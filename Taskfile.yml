@@ -37,12 +37,12 @@ tasks:
   start:playwright:
     desc: Start Playwright test runner
     cmds:
-      - docker run -p 3000:3000 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.58.2-noble /bin/sh -c "npx -y playwright@1.58.2 run-server --port 3000 --host 0.0.0.0"
+      - docker run -p 3000:3000 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.59.1-noble /bin/sh -c "npx -y playwright@1.59.1 run-server --port 3000 --host 0.0.0.0"
 
   stop:playwright:
     desc: Stop Playwright test runner
     cmds:
-      - docker ps -q --filter "ancestor=mcr.microsoft.com/playwright:v1.58.2-noble" | xargs -r docker stop
+      - docker ps -q --filter "ancestor=mcr.microsoft.com/playwright:v1.59.1-noble" | xargs -r docker stop
 
   test:
     desc: Run all tests and quality checks

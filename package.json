@@ -28,7 +28,7 @@
     "backstopjs": "^6.3.25",
     "js-yaml": "^4.1.1",
     "pino": "^10.3.1",
-    "playwright": "^1.58.2"
+    "playwright": "^1.59.1"
   },
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^15.3.4",
