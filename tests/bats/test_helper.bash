@@ -144,6 +144,10 @@ assert_dir_exists() {
   [ -d "$1" ]
 }
 
+assert_dir_not_exists() {
+  [ ! -d "$1" ]
+}
+
 assert_file_contains() {
   grep -Fq "$2" "$1"
 }

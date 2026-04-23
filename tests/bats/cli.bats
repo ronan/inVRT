@@ -36,7 +36,7 @@ teardown() {
 }
 
 @test "init: writes selected url environment profile and device" {
-  run_invrt init https://example.test --environment=stage --profile=editor --device=tablet
+  run_invrt init https://example.test --environment=stage --profile=editor --device=tablet --skip-baseline
 
   [ "$status" -eq 0 ]
   assert_dir_exists "$TEST_DIR/.invrt"
@@ -54,7 +54,7 @@ teardown() {
 }
 
 @test "init: prompts for url in a tty when the argument is missing" {
-  run_invrt_in_tty_with_stdin $'https://prompted.example\n' init --environment=review --profile=editor --device=tablet
+  run_invrt_in_tty_with_stdin $'https://prompted.example\n' init --environment=review --profile=editor --device=tablet --skip-baseline
 
   [ "$status" -eq 0 ]
   assert_output_contains "What URL should inVRT use?"
@@ -64,10 +64,10 @@ teardown() {
 }
 
 @test "init: fails when already initialized" {
-  run_invrt init https://example.test
+  run_invrt init https://example.test --skip-baseline
   [ "$status" -eq 0 ]
 
-  run_invrt init https://example.test
+  run_invrt init https://example.test --skip-baseline
 
   [ "$status" -ne 0 ]
   assert_output_contains "already initialized"
@@ -82,7 +82,7 @@ teardown() {
 }
 
 @test "config: shows resolved configuration after init" {
-  run_invrt init https://example.test
+  run_invrt init https://example.test --skip-baseline
   [ "$status" -eq 0 ]
 
   run_invrt config

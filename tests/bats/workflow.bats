@@ -224,16 +224,41 @@ teardown() {
   assert_output_contains "Approving latest results"
 }
 
-@test "baseline: builds missing artifacts and approves them" {
+@test "baseline: runs full pipeline and produces approved screenshots" {
   start_fixture_server
+  seed_basic_config "$SERVER_URL"
 
-  run_invrt_in_tty_with_stdin "$SERVER_URL"$'\n' baseline
+  run_invrt baseline
 
   [ "$status" -eq 0 ]
-  assert_output_contains "No configuration file found. Initializing inVRT first."
-  assert_output_contains "No reference screenshots found"
-  assert_output_contains "No test screenshots found"
+  assert_output_contains "Site check complete"
+  assert_output_contains "Crawling completed"
+  assert_output_contains "Generated backstop config"
   assert_output_contains "Approving latest results"
   assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference"
   assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/test"
+  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/reference_results.txt"
+  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/test_results.txt"
+}
+
+@test "init: automatically runs baseline after init" {
+  start_fixture_server
+
+  run_invrt_in_tty_with_stdin "$SERVER_URL"$'\n' init
+
+  [ "$status" -eq 0 ]
+  assert_output_contains "InVRT successfully initialized!"
+  assert_output_contains "Running baseline"
+  assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/test"
+}
+
+@test "init: skips baseline with --skip-baseline" {
+  start_fixture_server
+
+  run_invrt_in_tty_with_stdin "$SERVER_URL"$'\n' init --skip-baseline
+
+  [ "$status" -eq 0 ]
+  assert_output_contains "InVRT successfully initialized!"
+  assert_dir_not_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/bitmaps/reference"
 }

@@ -51,6 +51,10 @@ Completed tasks moved from TODO.md.
 
 ## Features
 
+- [x] Implement `baseline`
+    - Runs full pipeline: check → crawl → configure-backstop → reference → test → approve
+    - `baseline` runs automatically after `init` unless `--skip-baseline` is set.
+
 - [x] Move 'configure-backstop' into a new command.
   - [x] Make reference auto-trigger this step when needed.
 

@@ -23,6 +23,26 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
   - [x] Teach the ai agents how to edit the schema instead of altering the generated code.
 
 - [x] Standardize output from js/node
+- [ ] Clean up file structure
+    - Standardize the naming of files
+    - Create the following folder structure
+      - .invrt/
+        - config.yaml
+        - data/
+          - bitmaps/
+            - mobile/
+            - desktop/
+              - local/
+              - reference/
+          - logs/
+            - crawl-anonymous.txt
+            - test-anonymous-local-mobile.txt
+        
+        - plan.yaml
+        - scripts/
+          - onready.js
+        - report/
+          - index.html
 
 ## Tests
 
@@ -57,26 +77,50 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - Reference has run if a 'reference_results.txt' file exists
     - Test has run if a 'test_results.txt' file exists
 
-- [ ] Improve `approve` to make the last run capture the new baseline
+- [x] Improve `approve` to make the last results of the last test the new baseline
   - If no tests have been run, run `crawl`, `reference` then `test` and then approve the capture
-  - [ ] Implement `baseline` as a synonym of `approve`
-    - This does the same thing as `approve` but is assumed to be run from a newly created projects.
 
 
 ### Move to Playwright
 
-- [ ] Generate a playwrite test script instead of backstop.js
-- [ ] Run references and test capture by running the test script
-- [ ] Allow the user to insert custom behavior into the playwright tests
-  - [ ] Optionally read the onload/onready playwright event script from `INVRT_SCRIPTS_DIR`
-  - [ ] Allow specification of per-path scripts in plan.yaml
-  - [ ] Scripts can be paths to a script in `INVRT_SCRIPTS_DIR`
-  - [ ] Scripts can be a code block on the yaml in typescript or javascript.
-  - [ ] Allow the user to specify setup/teardown scripts per project
-    - [ ] Allow setup/teardown per site section
-    - [ ] " per profile
-    - [ ] " per device
-    - [ ] " per environment
+- [ ] Create a command to generate a playwright test script at INVRT_CRAWL_DIR/playwright.spec.ts which:
+    - Visits each page in the crawl list
+    - Waits for the content to load and settle
+    - Take a screenshot and save it as data/bitmaps/{environment}/`{pageID}_{profile}_{device}`
+
+- [ ] Run references and test capture by running the playwright test script
+
+## Create plan.yaml
+
+- [ ] The crawl command should create a structured yaml file in the format specified in [Site Tree Spec](docs/planning/proposals/SITE_TREE_FILE_SPEC.md)
+
+## User Scripting (requires Move to Playwright and Create plan.yaml)
+
+- [ ] Optionally read the onload/onready playwright event script from `INVRT_SCRIPTS_DIR`
+- [ ] Allow specification of per-path scripts in plan.yaml
+- [ ] Scripts can be a code block on the yaml in typescript or javascript.
+- [ ] Allow the user to specify setup/teardown scripts per project
+  - [ ] Allow setup/teardown per site section (configured in config.yaml)
+  - [ ] " per profile
+  - [ ] " per device
+  - [ ] " per environment
+- [ ] Scripts can be paths to a script in `INVRT_SCRIPTS_DIR`
+- [ ] Scripts can be literal codeblock in plan.yaml in javascript or typescript
+- [ ] Future feature: Create a yaml shorthand for often used steps
+
+    ```yaml
+    search_popover:
+        <url: /about.html
+        <steps:
+            # Automatically run: snap onready
+            - click .search-trigger
+            - snap 'search popup'
+            - type 'Test' in .search
+            - click 'Search'
+            - snap 'search results'
+            - click .search-close
+            # Automatically run snap done
+    ,,,
 
 ### Reporting
 
@@ -88,6 +132,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - [ ] Allow comparison of different profiles
 
 ### Future Features
+
 - [ ] Advanced playwright integration
 - [ ] Better debug output during crawl
 - [ ] Rewrite the crawler
@@ -97,7 +142,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - [ ] Name the file 'plan.yaml' and put it at the top of the .invrt directory
     - [ ] Update the document when new paths are found when crawling with different profiles
     - [ ] Turn 'plan.yaml' into 'backstop.json' with backstop test config in it.
-
 
 ## Documentation
  - [ ] Clean up docs

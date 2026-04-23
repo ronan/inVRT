@@ -253,21 +253,35 @@ EOF;
         return $this->runBackstop('approve', $env);
     }
 
-    /** Create or refresh the approved visual baseline. */
+    /**
+     * Run the full baseline workflow from scratch: check → crawl → configure-backstop → reference → test → approve.
+     *
+     * Always re-runs every step regardless of prior artifacts.
+     */
     public function baseline(): int
     {
-        if ($this->referencesAreMissing()) {
-            $this->logger->notice('📸 No reference screenshots found — capturing references first.');
-            if (($result = $this->reference()) !== 0) {
-                return $result;
-            }
+        if (($result = $this->check()) !== 0) {
+            return $result;
         }
 
-        if ($this->testResultsAreMissing()) {
-            $this->logger->notice('🔬 No test screenshots found — running test first.');
-            if (($result = $this->test()) !== 0) {
-                return $result;
-            }
+        if (($result = $this->crawl()) !== 0) {
+            return $result;
+        }
+
+        $env        = $this->config->all();
+        $captureDir = $env['INVRT_CAPTURE_DIR'] ?? '';
+        $this->prepareDirectory($captureDir);
+
+        if (($result = $this->configureBackstop()) !== 0) {
+            return $result;
+        }
+
+        if (($result = $this->runBackstop('reference', $env)) !== 0) {
+            return $result;
+        }
+
+        if (($result = $this->runBackstop('test', $env)) !== 0) {
+            return $result;
         }
 
         return $this->approve();
@@ -500,12 +514,6 @@ EOF;
     private function referencesAreMissing(): bool
     {
         $file = $this->config->get('INVRT_REFERENCE_FILE', '');
-        return $file === '' || !file_exists($file);
-    }
-
-    private function testResultsAreMissing(): bool
-    {
-        $file = $this->config->get('INVRT_TEST_FILE', '');
         return $file === '' || !file_exists($file);
     }
 

@@ -32,9 +32,23 @@ class InitCommand extends BaseCommand
 
         $exitCode = $this->runner->init($url);
 
-        if ($exitCode === 0) {
-            $io->success('InVRT successfully initialized!');
+        if ($exitCode !== 0) {
+            return Command::FAILURE;
         }
+
+        $io->success('InVRT successfully initialized!');
+
+        if ($opts->skipBaseline) {
+            return Command::SUCCESS;
+        }
+
+        // Re-boot now that config.yaml has been written so the runner has INVRT_URL.
+        if (($result = $this->boot($opts, $io)) !== Command::SUCCESS) {
+            return $result;
+        }
+
+        $io->writeln('🏁 Running baseline to capture initial screenshots...');
+        $exitCode = $this->runner->baseline();
 
         return $exitCode === 0 ? Command::SUCCESS : Command::FAILURE;
     }

@@ -40,6 +40,7 @@ class ConfigSchema implements ConfigurationInterface
         'crawl_dir'                => 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE',
         'clone_dir'                => 'INVRT_CRAWL_DIR/clone',
         'capture_dir'                => 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE',
+        'backstop_config_file'       => 'INVRT_CAPTURE_DIR/backstop.json',
         'config_file'                => 'INVRT_DIRECTORY/config.yaml',
         'crawl_file'                => 'INVRT_CRAWL_DIR/crawled_urls.txt',
         'crawl_log'                => 'INVRT_CRAWL_DIR/logs/crawl.log',

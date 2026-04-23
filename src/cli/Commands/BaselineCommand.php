@@ -11,8 +11,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'baseline',
-    description: 'Create or refresh the approved visual baseline',
-    help: 'Ensures reference and test artifacts exist, then approves the latest visual results.',
+    description: 'Capture a fresh baseline from check through approve',
+    help: 'Runs the full pipeline — check, crawl, configure-backstop, reference, test, approve — to establish a new approved baseline.',
 )]
 class BaselineCommand extends BaseCommand
 {
