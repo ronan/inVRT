@@ -64,7 +64,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 ### Move to Playwright
 
 - [ ] Create a command to generate a playwright test script
-    - save to INVRT_CRAWL_DIR/playwright.spec.ts
+    - save to INVRT_DIRECTORY/scripts/playwright.spec.ts
     - test steps
       - Visits each page in the crawl list
       - Waits for the content to load and settle
