@@ -21,19 +21,14 @@ Settings:
   description:
     description: Human readable description used for reporting.
   id:
-    default: ""
     description: Identifier used for the inVRT project
   login_url:
-    default: ""
     description: Explicit login URL. When blank, login defaults to <url>/user/login.
   username:
-    default: ""
     description: Username used for Playwright login.
   password:
-    default: ""
     description: Password used for Playwright login.
   cookie:
-    default: ""
     description: Raw Cookie header value used during crawl when set.
   max_crawl_depth:
     default: 3
@@ -65,9 +60,6 @@ Files:
   crawl_log:
     default: INVRT_CRAWL_DIR/logs/crawl.log
     description: Log file capturing the output of the crawl process.
-  output_file:
-    default: INVRT_DIRECTORY/config.yaml
-    description: Path to the output file for storing the URL.
   check_file:
     default: INVRT_DATA_DIR/INVRT_ENVIRONMENT/check.yaml
     description: Path to the file storing the results of the site check.
@@ -83,7 +75,6 @@ Files:
   exclude_file:
     default: INVRT_CRAWL_DIR/exclude_paths.txt
     description: Path list used to exclude URL directories during crawl.
-
 
 Commands:
   config:
@@ -103,6 +94,7 @@ Commands:
     help: Initializes a new inVRT project, saving the provided URL into a fresh config file.
     success: InVRT successfully initialized!
     triggers: [ approve ]
+    output: config_file
     output_fields: [ url ]
     directories:
       directory:
@@ -139,7 +131,7 @@ Commands:
     success: InVRT successfully crawled the site!
     login: true
     requires: [ check ]
-    triggers: [ config-backstop ]
+    triggers: [ configure-backstop ]
     directories: 
       crawl_dir:
         default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE
@@ -149,8 +141,7 @@ Commands:
         description: Temporary wget mirror output directory.
     log: INVRT_CRAWL_DIR/crawl.log
 
-
-  backstop-config:
+  configure-backstop:
     description: Configure BackstopJS for visual regression testing.
     help: Generates or updates the BackstopJS configuration for the specified profile, device, and environment.
     success: InVRT successfully configured BackstopJS!

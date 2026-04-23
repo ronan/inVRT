@@ -56,6 +56,24 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - Crawl has run if a 'crawled_urls.txt' file exists
     - Reference has run if a 'reference_results.txt' file exists
     - Test has run if a 'test_results.txt' file exists
+
+- [ ] Move 'configure-backstop' into a new command.
+  - [ ] Make reference auto-trigger this step when needed.
+
+- [ ] Create a stdin/stdout bese based pipeline
+
+    The check, crawl, backstop-config, reference and test commands should take a single file as input and produce a single file as output. If any commands currently write more than one file, it should be broken into two steps.
+
+    The output of each command should be saved to the file specified in the INVRT_{command}_FILE configuration
+
+    The input is assumed to be the output of the command's previous step.
+
+    Move the file reading and writing out of javascript and have the values read from stdin and written to stdout. Logging should be done via stderr.
+    
+    File creation, reading and writing should be handled by the runner code. The runner should stream the command's input file to the node script using stdin. The resulting output file should be written to stdout. Logging should be done via stderr.
+
+
+
 - [ ] Improve `approve` to make the last run capture the new baseline
   - If no tests have been run, run `crawl`, `reference` then `test` and then approve the capture
   - [ ] Implement `baseline` as a synonym of `approve`

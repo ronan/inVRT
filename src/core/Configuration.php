@@ -146,7 +146,7 @@ class Configuration
                   + $settings
                   + $base;
 
-                  // Keep only INVRT_* keys, then resolve placeholders
+        // Keep only INVRT_* keys, then resolve placeholders
         $cleaned = array_filter($combined, fn($k) => str_starts_with($k, 'INVRT_'), ARRAY_FILTER_USE_KEY);
 
         $result = $this->interpolate($cleaned);
