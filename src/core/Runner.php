@@ -176,13 +176,15 @@ EOF;
      */
     public function check(): int
     {
-        return $this->runNode('check.js');
+        $outputFile = $this->config->get('INVRT_CHECK_FILE', '') ?: null;
+        return $this->runNode('check.js', null, $outputFile);
     }
 
     /** Crawl the target URL and write unique paths to the crawl file. */
     public function crawl(): int
     {
-        return $this->runNode('crawl.js');
+        $outputFile = $this->config->get('INVRT_CRAWL_FILE', '') ?: null;
+        return $this->runNode('crawl.js', null, $outputFile);
     }
 
     /** Capture reference screenshots, running a crawl first if needed. */
@@ -274,7 +276,9 @@ EOF;
     /** Generate or regenerate the BackstopJS configuration from the crawled URL list. */
     public function configureBackstop(): int
     {
-        return $this->runNode('backstop-config.js');
+        $inputFile  = $this->config->get('INVRT_CRAWL_FILE', '') ?: null;
+        $outputFile = $this->config->get('INVRT_BACKSTOP_CONFIG_FILE', '') ?: null;
+        return $this->runNode('backstop-config.js', $inputFile, $outputFile);
     }
 
     /** Attempt login using credentials from the resolved config. */
@@ -354,22 +358,45 @@ EOF;
     // Private helpers
     // -------------------------------------------------------------------------
 
-    /** Run a Node.js script from the app's JS directory, streaming output through NodeOutputParser. */
-    private function runNode(string $script, string ...$args): int
+    /**
+     * Run a Node.js script from the app's JS directory.
+     *
+     * Streams $inputFile content to the process stdin if provided. Captures
+     * stdout and writes it to $outputFile if provided. Log messages arrive on
+     * stderr as pino NDJSON and are routed to the PSR-3 logger.
+     */
+    private function runNode(string $script, ?string $inputFile = null, ?string $outputFile = null): int
     {
         $env  = $this->config->all();
         $file = rtrim($this->appDir, '/') . '/' . $script;
-        $cmd  = 'node ' . escapeshellarg($file)
-            . ($args ? ' ' . implode(' ', array_map('escapeshellarg', $args)) : '');
+        $cmd  = 'node ' . escapeshellarg($file);
         $this->logger->debug("Running Node script: $cmd");
 
         $process = Process::fromShellCommandline($cmd, null, $env);
         $process->setTimeout(null);
+
+        if ($inputFile !== null && is_readable($inputFile)) {
+            $process->setInput(file_get_contents($inputFile));
+        }
+
         $parser = new NodeOutputParser($this->logger);
-        $process->run(function (mixed $type, mixed $buffer) use ($parser): void {
-            $parser->write($buffer);
+        $stdout = '';
+        $process->run(function (mixed $type, mixed $buffer) use ($parser, &$stdout): void {
+            if ($type === Process::ERR) {
+                $parser->write($buffer);
+            } else {
+                $stdout .= $buffer;
+            }
         });
         $parser->flush();
+
+        if ($outputFile !== null) {
+            $dir = dirname($outputFile);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            file_put_contents($outputFile, $stdout);
+        }
 
         return $process->getExitCode() ?? 0;
     }
@@ -387,15 +414,23 @@ EOF;
 
     private function runBackstop(string $mode, array $env): int
     {
-        $file   = rtrim($this->appDir, '/') . '/backstop.js';
-        $cmd    = 'node ' . escapeshellarg($file) . ' ' . $mode;
+        $configFile = $this->config->get('INVRT_BACKSTOP_CONFIG_FILE', '');
+        $file       = rtrim($this->appDir, '/') . '/backstop.js';
+        $cmd        = 'node ' . escapeshellarg($file) . ' ' . $mode;
         $this->logger->debug('Running BackstopJS command: ' . $cmd);
 
         $process = Process::fromShellCommandline($cmd, null, $env);
         $process->setTimeout(null);
+
+        if ($configFile !== '' && is_readable($configFile)) {
+            $process->setInput(file_get_contents($configFile));
+        }
+
         $parser = new NodeOutputParser($this->logger);
         $process->run(function (mixed $type, mixed $buffer) use ($parser): void {
-            $parser->write($buffer);
+            if ($type === Process::ERR) {
+                $parser->write($buffer);
+            }
         });
         $parser->flush();
 

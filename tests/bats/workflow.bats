@@ -55,8 +55,6 @@ teardown() {
   assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/services.html"
   assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/contact.html"
   assert_file_contains "$TEST_DIR/.invrt/data/local/anonymous/crawled_urls.txt" "/blog.html"
-  assert_file_exists "$TEST_DIR/.invrt/data/local/anonymous/desktop/backstop.json"
-  assert_output_contains "Generated backstop config"
 }
 
 @test "crawl: scenario labels in backstop config are short lowercase ids" {
@@ -64,10 +62,14 @@ teardown() {
   seed_basic_config "$SERVER_URL"
 
   run_invrt crawl
-
   [ "$status" -eq 0 ]
+
+  run_invrt configure-backstop
+  [ "$status" -eq 0 ]
+
   local config_file="$TEST_DIR/.invrt/data/local/anonymous/desktop/backstop.json"
   assert_file_exists "$config_file"
+  assert_output_contains "Generated backstop config"
   # All scenario labels should be lowercase letters only (encodeId output).
   run bash -c "jq -r '.scenarios[].label' '$config_file' | grep -qvE '^[a-z]+$'"
   [ "$status" -ne 0 ]

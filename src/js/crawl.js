@@ -1,12 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
-const { generateBackstopConfig } = require('./backstop-config');
 const log = require('./logger');
 
 const {
   INVRT_URL,
-  INVRT_CRAWL_FILE,
   INVRT_CRAWL_LOG,
   INVRT_CRAWL_DIR,
   INVRT_CLONE_DIR,
@@ -17,7 +15,6 @@ const {
   INVRT_COOKIES_FILE,
   INVRT_PROFILE,
   INVRT_ENVIRONMENT,
-  INVRT_CHECK_FILE,
 } = process.env;
 
 /** Build wget --exclude-directories arg from exclude file or defaults. */
@@ -93,21 +90,8 @@ const run = () => {
   [INVRT_CRAWL_DIR, INVRT_CLONE_DIR, INVRT_CRAWL_LOG ? path.dirname(INVRT_CRAWL_LOG) : null]
     .forEach(prepareDir);
 
-  // Clear previous results
+  // Clear previous crawl log
   if (INVRT_CRAWL_LOG) fs.writeFileSync(INVRT_CRAWL_LOG, '');
-  if (INVRT_CRAWL_FILE && fs.existsSync(INVRT_CRAWL_FILE)) fs.unlinkSync(INVRT_CRAWL_FILE);
-
-  // Run check if not yet done
-  if (INVRT_CHECK_FILE && !fs.existsSync(INVRT_CHECK_FILE)) {
-    log.info('🔍 No site check found — running check first.');
-    const checkResult = spawnSync(process.execPath, [path.join(__dirname, 'check.js')], {
-      env: process.env,
-      stdio: 'inherit',
-    });
-    if (checkResult.status !== 0) {
-      log.warn('Site check failed. Continuing with crawl.');
-    }
-  }
 
   const host = new URL(INVRT_URL).hostname;
   const excludeArg = resolveExcludeArg();
@@ -148,8 +132,6 @@ const run = () => {
   const paths = parseUrlsFromLog(INVRT_CRAWL_LOG, INVRT_URL);
   const count = paths.length;
 
-  fs.writeFileSync(INVRT_CRAWL_FILE, paths.join('\n'));
-
   if (count === 0) {
     log.info('No usable URLs were found during crawl. See crawl log details below:');
     if (INVRT_CRAWL_LOG && fs.existsSync(INVRT_CRAWL_LOG)) {
@@ -159,9 +141,9 @@ const run = () => {
     process.exit(1);
   }
 
-  log.info(`Crawling completed. Found ${count} unique paths. Results saved to ${INVRT_CRAWL_FILE}`);
+  process.stdout.write(paths.join('\n'));
 
-  generateBackstopConfig();
+  log.info(`Crawling completed. Found ${count} unique paths.`);
 
   process.exit(0);
 };

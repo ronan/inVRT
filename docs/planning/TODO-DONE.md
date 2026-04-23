@@ -53,6 +53,11 @@ Completed tasks moved from TODO.md.
 
 - [x] Move 'configure-backstop' into a new command.
   - [x] Make reference auto-trigger this step when needed.
+
+- [x] Create a stdin/stdout based pipeline.
+  - Node scripts (check, crawl, backstop-config, backstop) write output to stdout; log to stderr.
+  - PHP Runner owns all file reading (stdin) and writing (stdout capture → output file).
+  - `runNode()` accepts optional `$inputFile`/`$outputFile` params.
   - This more accurately reflects the fact that these are the base defaults for the given project.
   - Move `name` into project.
 

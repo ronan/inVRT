@@ -22,19 +22,24 @@ const encodeId = (value, seed = 0) => {
   return encoded;
 };
 
-const generateBackstopConfig = () => {
+/** Read all of stdin and return as a string. */
+const readStdin = () => new Promise((resolve) => {
+  const chunks = [];
+  process.stdin.on('data', (chunk) => chunks.push(chunk));
+  process.stdin.on('end', () => resolve(Buffer.concat(chunks).toString()));
+});
+
+const run = async () => {
   const {
     INVRT_PROFILE,
     INVRT_DEVICE,
     INVRT_SCRIPTS_DIR,
     INVRT_CAPTURE_DIR,
     INVRT_URL,
-    INVRT_CRAWL_FILE,
     INVRT_VIEWPORT_WIDTH,
     INVRT_VIEWPORT_HEIGHT,
     INVRT_COOKIES_FILE,
     INVRT_MAX_PAGES,
-    INVRT_BACKSTOP_CONFIG_FILE,
     INVRT_ID,
   } = process.env;
 
@@ -48,8 +53,6 @@ const generateBackstopConfig = () => {
   const projectSeed = INVRT_ID
     ? parseInt(crypto.createHash('sha1').update(INVRT_ID).digest('hex').slice(0, 4), 16) & 0xFFFF
     : 0;
-
-  const outputFile = INVRT_BACKSTOP_CONFIG_FILE || path.join(INVRT_CAPTURE_DIR, 'backstop.json');
 
   const config = {
     ...(INVRT_ID ? { id: INVRT_ID } : {}),
@@ -91,9 +94,9 @@ const generateBackstopConfig = () => {
   };
 
   try {
+    const input = await readStdin();
     const maxPages = parseInt(INVRT_MAX_PAGES || '', 10);
-    const crawlEntries = fs
-      .readFileSync(INVRT_CRAWL_FILE, 'utf-8')
+    const crawlEntries = input
       .split(/\r?\n/)
       .map((line) => line.trim())
       .filter(Boolean);
@@ -111,26 +114,12 @@ const generateBackstopConfig = () => {
       });
     });
 
-    const outputDir = path.dirname(outputFile);
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-
-    fs.writeFileSync(outputFile, JSON.stringify(config, null, 2));
-    log.info(`Generated backstop config with ${config.scenarios.length} scenarios at ${outputFile}`);
+    process.stdout.write(JSON.stringify(config, null, 2));
+    log.info(`Generated backstop config with ${config.scenarios.length} scenarios.`);
   } catch (err) {
     log.error({ err }, err.message || String(err));
-    throw err;
+    process.exit(1);
   }
 };
 
-module.exports = { generateBackstopConfig };
-
-if (require.main === module) {
-  try {
-    generateBackstopConfig();
-    process.exit(0);
-  } catch {
-    process.exit(1);
-  }
-}
+run();

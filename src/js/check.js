@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const http = require('http');
 const https = require('https');
 const yaml = require('js-yaml');
@@ -7,7 +5,6 @@ const log = require('./logger');
 
 const {
   INVRT_URL,
-  INVRT_CHECK_FILE,
   INVRT_USER_AGENT,
 } = process.env;
 
@@ -60,10 +57,6 @@ const run = async () => {
     log.error('INVRT_URL must be set');
     process.exit(1);
   }
-  if (!INVRT_CHECK_FILE) {
-    log.error('INVRT_CHECK_FILE must be set');
-    process.exit(1);
-  }
 
   log.info(`🔍 Checking site at ${INVRT_URL}`);
 
@@ -104,12 +97,9 @@ const run = async () => {
     checked_at: new Date().toISOString(),
   };
 
-  const dir = path.dirname(INVRT_CHECK_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  process.stdout.write(yaml.dump(data, { lineWidth: -1 }));
 
-  fs.writeFileSync(INVRT_CHECK_FILE, yaml.dump(data, { lineWidth: -1 }));
-
-  log.info(`✓ Site check complete. Title: "${title}". HTTPS: ${isHttps ? 'yes' : 'no'}. Written to ${INVRT_CHECK_FILE}`);
+  log.info(`✓ Site check complete. Title: "${title}". HTTPS: ${isHttps ? 'yes' : 'no'}.`);
 };
 
 run();
