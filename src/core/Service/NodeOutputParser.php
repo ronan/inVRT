@@ -68,7 +68,7 @@ class NodeOutputParser
             $level >= 60 => $this->logger->emergency($msg),
             $level >= 50 => $this->logger->error($msg),
             $level >= 40 => $this->logger->warning($msg),
-            $level >= 30 => $this->logger->info($msg),
+            $level >= 30 => $this->logger->notice($msg),
             default      => $this->logger->debug($msg),
         };
 

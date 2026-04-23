@@ -18,10 +18,10 @@ class NodeOutputParserTest extends TestCase
         $this->parser = new NodeOutputParser($this->logger);
     }
 
-    public function testInfoLineRoutedToInfoLogger(): void
+    public function testInfoLineRoutedToNoticeLogger(): void
     {
         $this->logger->expects($this->once())
-            ->method('info')
+            ->method('notice')
             ->with('hello world');
 
         $this->parser->write('{"level":30,"msg":"hello world"}' . "\n");
@@ -91,7 +91,7 @@ class NodeOutputParserTest extends TestCase
     public function testPartialLineBufferedAcrossWrites(): void
     {
         $this->logger->expects($this->once())
-            ->method('info')
+            ->method('notice')
             ->with('split message');
 
         $this->parser->write('{"level":30,"msg":');
@@ -102,17 +102,17 @@ class NodeOutputParserTest extends TestCase
     public function testFlushProcessesRemainingPartialLine(): void
     {
         $this->logger->expects($this->once())
-            ->method('info')
+            ->method('notice')
             ->with('no newline');
 
         $this->parser->write('{"level":30,"msg":"no newline"}');
         $this->parser->flush();
     }
 
-    public function testGetMessagesContainsInfoAndAbove(): void
+    public function testGetMessagesContainsNoticeAndAbove(): void
     {
         $this->logger->method('debug');
-        $this->logger->method('info');
+        $this->logger->method('notice');
         $this->logger->method('warning');
 
         $this->parser->write('{"level":20,"msg":"debug msg"}' . "\n");

@@ -5,7 +5,6 @@ namespace InVRT\Core;
 use InVRT\Core\Service\LoginService;
 use InVRT\Core\Service\NodeOutputParser;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
@@ -177,178 +176,13 @@ EOF;
      */
     public function check(): int
     {
-        $env       = $this->config->all();
-        $url       = $env['INVRT_URL']        ?? '';
-        $checkFile = $env['INVRT_CHECK_FILE'] ?? '';
-
-        if ($url === '') {
-            $this->logger->error('INVRT_URL must be set');
-            return 1;
-        }
-
-        if ($checkFile === '') {
-            $this->logger->error('INVRT_CHECK_FILE must be set');
-            return 1;
-        }
-
-        $this->logger->info("🔍 Checking site at $url");
-
-        $ch = curl_init();
-        if ($ch === false) {
-            $this->logger->error('curl_init() failed — curl extension may not be available');
-            return 1;
-        }
-
-        curl_setopt_array($ch, [
-            CURLOPT_URL            => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS      => 10,
-            CURLOPT_TIMEOUT        => 15,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_USERAGENT      => $env['INVRT_USER_AGENT'] ?? 'InVRT/1.0',
-        ]);
-
-        $body     = curl_exec($ch);
-        $errno    = curl_errno($ch);
-        $errMsg   = curl_error($ch);
-        $info     = curl_getinfo($ch);
-
-        if ($errno !== 0 || $body === false) {
-            $this->logger->error("Failed to connect to $url: $errMsg");
-            return 1;
-        }
-
-        $finalUrl      = (string) ($info['url']            ?? $url);
-        $redirectCount = (int) ($info['redirect_count']  ?? 0);
-
-        // Detect whether a permanent redirect was followed by re-requesting with no follow.
-        $redirectedFrom = null;
-        if ($redirectCount > 0) {
-            $firstCode = $this->getInitialHttpCode($url);
-            if ($firstCode === 301) {
-                $redirectedFrom = rtrim($url, '/');
-            }
-        }
-
-        $title   = $this->extractTitle((string) $body);
-        $isHttps = str_starts_with($finalUrl, 'https://');
-
-        $data = array_filter([
-            'url'             => rtrim($finalUrl, '/'),
-            'title'           => $title,
-            'https'           => $isHttps,
-            'redirected_from' => $redirectedFrom,
-            'checked_at'      => (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM),
-        ], fn($v) => $v !== null);
-
-        $dir = dirname($checkFile);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
-
-        file_put_contents($checkFile, Yaml::dump($data, 2, 2));
-
-        $this->logger->notice("✓ Site check complete. Title: \"$title\". HTTPS: " . ($isHttps ? 'yes' : 'no') . ". Written to $checkFile");
-
-        return 0;
+        return $this->runNode('check.js');
     }
 
     /** Crawl the target URL and write unique paths to the crawl file. */
     public function crawl(): int
     {
-        $env     = $this->config->all();
-        $url     = $env['INVRT_URL']       ?? '';
-        $crawlDir = $env['INVRT_CRAWL_DIR'] ?? '';
-
-        if (empty($url)) {
-            $this->logger->error('INVRT_URL must be set');
-            return 1;
-        }
-
-        if (empty($crawlDir)) {
-            $this->logger->error('INVRT_CRAWL_DIR must be set');
-            return 1;
-        }
-
-        $crawlLog  = $env['INVRT_CRAWL_LOG']  ?? '';
-        $crawlFile = $env['INVRT_CRAWL_FILE'] ?? '';
-        $cloneDir  = $env['INVRT_CLONE_DIR']  ?? '';
-        $maxDepth  = $env['INVRT_MAX_CRAWL_DEPTH'] ?? 3;
-        $maxPages  = $env['INVRT_MAX_PAGES']       ?? 100;
-        $excludeFile = $env['INVRT_EXCLUDE_FILE']  ?? '';
-        $profile     = $env['INVRT_PROFILE']       ?? '';
-        $environment = $env['INVRT_ENVIRONMENT']   ?? '';
-        $checkFile   = $env['INVRT_CHECK_FILE']    ?? '';
-
-        $filesystem = new Filesystem();
-        $crawlLog  && $filesystem->dumpFile($crawlLog, '');
-        if ($crawlFile && $filesystem->exists($crawlFile)) {
-            $filesystem->remove($crawlFile);
-        }
-
-        $this->logger->info("🕸️ Crawling '$environment' environment ($url) with profile: '$profile' to depth: $maxDepth, max pages: $maxPages");
-
-        if ($checkFile !== '' && !file_exists($checkFile)) {
-            $this->logger->notice('🔍 No site check found — running check first.');
-            $this->check();
-        }
-
-        foreach ([$cloneDir, dirname($crawlLog)] as $dir) {
-            $this->logger->info("Preparing directory: $dir");
-            $this->prepareDirectory($dir);
-        }
-
-        $args = array_values(array_filter([
-            $this->resolveExcludeArg($excludeFile),
-            $this->resolveCookieArg($env),
-            "--level=$maxDepth",
-            '--domains=' . (parse_url($url, PHP_URL_HOST) ?? ''),
-            "--directory-prefix=$cloneDir",
-            '--recursive',
-            '--max-redirect=3',
-            '--user-agent=invrt/crawler',
-            '--ignore-length',
-            '--no-verbose',
-            '--no-check-certificate',
-            '--reject=css,js,woff,jpg,png,gif,svg,ico,pdf,ppt,pptx,doc,docx,xls,xlsx',
-            '--reject-regex=(edit|devel|delete|logout|webform|files|file|login|register)',
-            '--no-host-directories',
-            '--execute',
-            'robots=off',
-            $url,
-        ]));
-
-        $cmd = 'wget ' . implode(' ', array_map('escapeshellarg', $args))
-            . ' 2> ' . escapeshellarg($crawlLog);
-
-        $this->logger->debug("Running command: \n wget " . implode("\\\n  ", array_map('escapeshellarg', $args)));
-
-        exec($cmd, $stdout, $exitCode);
-
-        $stdout && $this->logger->notice(implode("\n", $stdout));
-
-        if ($exitCode !== 0) {
-            $this->logger->warning("There were errors during the crawl. See logs at $crawlLog");
-            $this->logger->warning("Crawl exit code: $exitCode");
-        }
-
-        $paths = self::parseUrlsFromLog($crawlLog, $url);
-        $count = count($paths);
-
-        file_put_contents($crawlFile, implode("\n", $paths));
-
-        if ($count === 0) {
-            $this->logger->notice('No usable URLs were found during crawl. See crawl log details below:');
-            $this->logCrawlLogTail($crawlLog);
-            return 1;
-        }
-
-        $this->logger->notice("Crawling completed. Found $count unique paths. Results saved to $crawlFile");
-
-        $this->generateBackstopConfig();
-
-        return 0;
+        return $this->runNode('crawl.js');
     }
 
     /** Capture reference screenshots, running a crawl first if needed. */
@@ -463,37 +297,6 @@ EOF;
     // Public static helpers
     // -------------------------------------------------------------------------
 
-    /**
-     * Parse crawled URLs from a wget log file.
-     *
-     * @return list<string>
-     */
-    public static function parseUrlsFromLog(string $logFile, string $baseUrl): array
-    {
-        $lines = file_exists($logFile)
-            ? (file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [])
-            : [];
-
-        $marker = "URL:$baseUrl";
-        $paths  = [];
-
-        foreach ($lines as $line) {
-            if (!str_contains($line, $marker)) {
-                continue;
-            }
-            $rest = substr($line, strpos($line, $marker) + strlen($marker));
-            $path = strtok($rest, " \t");
-            if ($path !== false) {
-                $paths[] = $path;
-            }
-        }
-
-        $paths = array_unique($paths);
-        sort($paths);
-
-        return $paths;
-    }
-
     /** Generate a stable, short project identifier from project URL + random seed. */
     public static function generateProjectId(string $url): string
     {
@@ -545,13 +348,14 @@ EOF;
     // Private helpers
     // -------------------------------------------------------------------------
 
-    /** Generate the BackstopJS config file from crawled URLs. */
-    public function generateBackstopConfig(): int
+    /** Run a Node.js script from the app's JS directory, streaming output through NodeOutputParser. */
+    private function runNode(string $script, string ...$args): int
     {
-        $env = $this->config->all();
-        $script = rtrim($this->appDir, '/') . '/backstop-config.js';
-        $cmd = 'node ' . escapeshellarg($script);
-        $this->logger->debug('Generating backstop config: ' . $cmd);
+        $env  = $this->config->all();
+        $file = rtrim($this->appDir, '/') . '/' . $script;
+        $cmd  = 'node ' . escapeshellarg($file)
+            . ($args ? ' ' . implode(' ', array_map('escapeshellarg', $args)) : '');
+        $this->logger->debug("Running Node script: $cmd");
 
         $process = Process::fromShellCommandline($cmd, null, $env);
         $process->setTimeout(null);
@@ -561,12 +365,7 @@ EOF;
         });
         $parser->flush();
 
-        $exitCode = $process->getExitCode() ?? 0;
-        if ($exitCode !== 0) {
-            $this->logger->warning('Failed to generate backstop config');
-        }
-
-        return $exitCode;
+        return $process->getExitCode() ?? 0;
     }
 
     /** Generate backstop config if it doesn't exist yet. */
@@ -577,13 +376,13 @@ EOF;
             return;
         }
 
-        $this->generateBackstopConfig();
+        $this->runNode('backstop-config.js');
     }
 
     private function runBackstop(string $mode, array $env): int
     {
-        $script = rtrim($this->appDir, '/') . '/backstop.js';
-        $cmd    = 'node ' . escapeshellarg($script) . ' ' . $mode;
+        $file   = rtrim($this->appDir, '/') . '/backstop.js';
+        $cmd    = 'node ' . escapeshellarg($file) . ' ' . $mode;
         $this->logger->debug('Running BackstopJS command: ' . $cmd);
 
         $process = Process::fromShellCommandline($cmd, null, $env);
@@ -669,58 +468,6 @@ EOF;
         return $file === '' || !file_exists($file);
     }
 
-    private function resolveCookieArg(array $env): string
-    {
-        if ($rawCookie = ($env['INVRT_COOKIE'] ?? '')) {
-            $this->logger->info('Using provided cookie for crawling.');
-            return "--header=Cookie: $rawCookie";
-        }
-
-        $cookieTxt = ($env['INVRT_COOKIES_FILE'] ?? '') . '.txt';
-        if (file_exists($cookieTxt)) {
-            $this->logger->info("Using cookies from file: $cookieTxt");
-            return "--load-cookies=$cookieTxt";
-        }
-
-        $this->logger->info('No cookie provided. Crawling without authentication.');
-        touch($cookieTxt);
-        return '';
-    }
-
-    private function resolveExcludeArg(string $excludeFile): string
-    {
-        if (!file_exists($excludeFile)) {
-            $defaults = '/user/*';
-            $this->logger->info("No exclude file found at $excludeFile. Excluding defaults: $defaults");
-            return "--exclude-directories=$defaults";
-        }
-
-        $lines = file($excludeFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
-        $lines = array_values(array_filter($lines, fn($l) => !str_starts_with(ltrim($l), '#')));
-        $excludeUrls = implode(',', $lines);
-        $this->logger->info("Excluding URLs: $excludeUrls");
-        return "--exclude-directories=$excludeUrls";
-    }
-
-    private function logCrawlLogTail(string $logFile, int $lineCount = 5): void
-    {
-        if (!is_readable($logFile)) {
-            $this->logger->notice("Unable to read crawl log at $logFile");
-            return;
-        }
-
-        $lines = file($logFile, FILE_IGNORE_NEW_LINES);
-        if ($lines === false || $lines === []) {
-            $this->logger->notice('Crawl log is empty.');
-            return;
-        }
-
-        $this->logger->notice("Last $lineCount lines of crawl log:");
-        foreach (array_slice($lines, -$lineCount) as $line) {
-            $this->logger->notice($line);
-        }
-    }
-
     /** Count PNG files recursively in a directory. */
     private function countScreenshots(string $dir): int
     {
@@ -758,33 +505,4 @@ EOF;
         return array_values(array_slice($lines, -$lineCount));
     }
 
-    /** Make a single non-following HEAD/GET request and return the HTTP status code. */
-    private function getInitialHttpCode(string $url): int
-    {
-        $ch = curl_init();
-        if ($ch === false) {
-            return 0;
-        }
-
-        curl_setopt_array($ch, [
-            CURLOPT_URL            => $url,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_NOBODY         => true,
-            CURLOPT_TIMEOUT        => 10,
-            CURLOPT_SSL_VERIFYPEER => false,
-        ]);
-        curl_exec($ch);
-        $code = (int) (curl_getinfo($ch, CURLINFO_HTTP_CODE) ?? 0);
-        return $code;
-    }
-
-    /** Extract the text content of the first <title> element in an HTML string. */
-    private function extractTitle(string $html): string
-    {
-        if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $html, $m)) {
-            return trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-        }
-        return '';
-    }
 }

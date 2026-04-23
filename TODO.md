@@ -24,10 +24,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 - [x] Standardize output from js/node
 
-- [ ] Move more logic to js/ts/node
-  - Make the runner slimmer by offloading more work to js/ts scripts run with node
-  - Use the standardized pino log output to send responses to the console.
-
 
 ## Tests
 

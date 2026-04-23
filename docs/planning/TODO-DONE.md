@@ -4,6 +4,12 @@ Completed tasks moved from TODO.md.
 
 ## Tech Debt
 
+- [x] Move more logic to js/node
+  - Created `src/js/check.js` and `src/js/crawl.js` for site check and crawl operations
+  - Refactored `backstop-config.js` to export `generateBackstopConfig()` so crawl.js can call it directly
+  - Slimmed `Runner.php`: `check()` and `crawl()` are now thin `runNode()` wrappers; removed 6 private helpers
+  - Updated `NodeOutputParser` to map pino level 30 → PSR-3 `notice` (shows at default verbosity)
+
 - [x] Standardize output from js/node
   - Use pino to write output from node
     - https://getpino.io
