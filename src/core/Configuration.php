@@ -24,6 +24,9 @@ class Configuration
 
     private bool $fileExists;
 
+    /** Non-fatal warnings accumulated during load (e.g. schema validation issues). */
+    private array $warnings = [];
+
     /**
      * @param string  $filepath  Absolute path to config.yaml (need not exist yet).
      * @param array   $env       Env-var overrides (e.g. from getenv() or test fixtures).
@@ -35,8 +38,17 @@ class Configuration
         private readonly array $env = [],
     ) {
         $this->fileExists = file_exists($filepath);
-        $this->parsed     = $this->fileExists ? YamlLoader::fromFile($filepath) : [];
-        $this->resolved   = $this->resolve();
+
+        if ($this->fileExists) {
+            $result          = YamlLoader::fromFile($filepath);
+            $this->parsed    = $result['data'];
+
+            if ($result['warning'] !== null) {
+                $this->warnings[] = $result['warning'];
+            }
+        }
+
+        $this->resolved = $this->resolve();
     }
 
     public function get(string $key, mixed $default = null): mixed
@@ -73,6 +85,12 @@ class Configuration
     public function fileExists(): bool
     {
         return $this->fileExists;
+    }
+
+    /** Returns any non-fatal warnings accumulated during config load. */
+    public function getWarnings(): array
+    {
+        return $this->warnings;
     }
 
     public function getFilepath(): string
@@ -112,7 +130,7 @@ class Configuration
         $device      = $this->env['INVRT_DEVICE']      ?? 'desktop';
 
         $base = $this->buildDefaults($profile, $environment, $device);
-
+        
         $project     = $this->parsed['project'] ?? [];
         unset($project['name']);
         $settings    = $this->asEnv($project);
@@ -128,7 +146,7 @@ class Configuration
                   + $settings
                   + $base;
 
-        // Keep only INVRT_* keys, then resolve placeholders
+                  // Keep only INVRT_* keys, then resolve placeholders
         $cleaned = array_filter($combined, fn($k) => str_starts_with($k, 'INVRT_'), ARRAY_FILTER_USE_KEY);
 
         $result = $this->interpolate($cleaned);

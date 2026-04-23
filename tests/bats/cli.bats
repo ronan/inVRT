@@ -103,6 +103,25 @@ teardown() {
   assert_output_contains "Error reading config file"
 }
 
+@test "config: shows warning but succeeds when config has unexpected keys" {
+  mkdir -p "$TEST_DIR/.invrt"
+  cat > "$TEST_DIR/.invrt/config.yaml" <<'EOF'
+project:
+  url: https://example.test
+  unknown_key: some_value
+environments:
+  local:
+    url: https://example.test
+EOF
+
+  run_invrt config
+
+  [ "$status" -eq 0 ]
+  assert_output_contains "warning"
+  assert_output_contains "unexpected"
+  assert_output_contains "INVRT_URL: https://example.test"
+}
+
 @test "info: shows project summary and crawled page count" {
   mkdir -p "$TEST_DIR/.invrt/data/local/anonymous"
   cat > "$TEST_DIR/.invrt/config.yaml" <<'EOF'

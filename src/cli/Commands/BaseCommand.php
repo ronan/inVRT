@@ -64,6 +64,10 @@ abstract class BaseCommand
             return Command::FAILURE;
         }
 
+        foreach ($config->getWarnings() as $warning) {
+            $io->warning($warning);
+        }
+
         if ($requiresConfig && !$config->fileExists()) {
             $io->writeln('# Configuration file not found at: ' . $filepath, OutputInterface::VERBOSITY_QUIET);
             $io->writeln("# Run '<comment>invrt init</comment>' to create a new configuration.", OutputInterface::VERBOSITY_QUIET);
@@ -74,7 +78,7 @@ abstract class BaseCommand
 
         $io->writeln(
             sprintf(
-                '[debug] Resolved config (config=%s, url=%s)',
+                '[debug] Resolved config (config: %s, url: %s)',
                 $config->get('INVRT_CONFIG_FILE', '(not set)'),
                 $config->get('INVRT_URL', '(not set)'),
             ),

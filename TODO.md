@@ -24,7 +24,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 - [x] Standardize output from js/node
 
-
 ## Tests
 
 ### CMS-Specific Testing
@@ -40,6 +39,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 ## Features
 
 ### Advanced flow
+
 - [x] Implement `invrt check` to load the homepage and retrieve the site title
     - Have the check function run automatically after init and before crawl if it hasn't been run yet.
     - Add cms_detector binary to dockerfile to check the cms version/platform.
@@ -63,6 +63,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 
 ### Move to Playwright
+
 - [ ] Generate a playwrite test script instead of backstop.js
 - [ ] Run references and test capture by running the test script
 - [ ] Allow the user to insert custom behavior into the playwright tests

@@ -2,6 +2,11 @@
 
 Completed tasks moved from TODO.md.
 
+## Config
+
+- [x] Make an invalid config a warning instead of a fatal error.
+  - If the config file loads as valid yaml but doesn't pass the custom validation step (ie: if it has unexpected values), show a warning explaining the issue in a friendly user readable way but continue as long as the url value is valid and readable.
+
 ## Tech Debt
 
 - [x] Move more logic to js/node

@@ -2,6 +2,7 @@
 
 namespace InVRT\Core;
 
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\FileLoader;
@@ -28,10 +29,27 @@ class YamlLoader extends FileLoader
         return is_string($resource) && str_ends_with($resource, '.yaml');
     }
 
+    /**
+     * Load and validate a config file.
+     *
+     * Returns ['data' => array, 'warning' => ?string].
+     * On schema validation failure, returns the raw YAML as data and a friendly warning string.
+     * YAML parse errors and file-read errors are still thrown.
+     */
     public static function fromFile(string $filepath): array
     {
         $locator = new FileLocator(dirname($filepath));
         $loader  = new self($locator);
-        return $loader->load($filepath);
+
+        try {
+            return ['data' => $loader->load($filepath), 'warning' => null];
+        } catch (InvalidConfigurationException $e) {
+            // Load raw YAML as fallback so execution can continue
+            $raw = Yaml::parse((string) file_get_contents($filepath)) ?: [];
+            return [
+                'data'    => $raw,
+                'warning' => 'Config file has unexpected values and may not behave as expected: ' . $e->getMessage(),
+            ];
+        }
     }
 }
