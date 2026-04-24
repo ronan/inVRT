@@ -73,12 +73,12 @@ const run = async () => {
       return `
 test(${JSON.stringify(id)}, async ({ page }) => {
   await page.goto(${JSON.stringify(fullUrl)}, { waitUntil: 'networkidle' });
-  const screenshot = await page.screenshot({ path: ${JSON.stringify(`${relScreenshotDir}/${id}.png`)}, fullPage: true });
-  expect(screenshot).toMatchSnapshot(${JSON.stringify(`${id}-desktop.png`)});
+  const screenshot = await page.screenshot();
+  expect(screenshot).toMatchSnapshot(${JSON.stringify(`${id}.png`)});
 });`;
     }).join('\n');
 
-    const spec = `import { test, use, expect } from '@playwright/test';
+    const spec = `import { test, expect } from '@playwright/test';
 
 ${storageState}
 ${tests}
