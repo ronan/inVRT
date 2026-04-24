@@ -43,14 +43,14 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Future Features
 
-- [ ] New flags
-  - [ ] remove (rm) -- Delete the .invrt directory
-  - [ ] init --force -- Re-init the project even if an .invrt directory exists. If an INVRT_URL is already defined, use that and don't require a url to be passed.
-  - [ ] init --unhide
-  - [ ] --skip-<step>
+- [ ] remove (rm) -- Delete the .invrt directory
+- [ ] init --force -
+    - Re-init the project even if an .invrt directory exists. 
+    - If an INVRT_URL is already defined, use that and don't require a url to be passed.
+- [ ] init --unhide
     - Make the invrt directory visible (`invrt` not `.invrt`)
-  - [ ] --[config-option] override any config option at runtime
-    - [ ] eg: invrt test --viewport-width=1600
+- [ ] --[config-option] override any config option at runtime
+- [ ] eg: invrt test --viewport-width=1600
 
 ## Documentation
 - [ ] Clean up docs
