@@ -9,6 +9,29 @@ Completed tasks moved from TODO.md.
 
 ## Tech Debt
 
+- [x] Refactor Runner to only contain public command methods
+  - Extracted `Service\PlaywrightRunner`, `Service\ProjectId`, `Service\UrlNormalizer`, `Service\Filesystem`
+  - Runner now holds only public command methods + one private `runNode()` dispatcher
+  - Dropped private helpers `validateCrawledUrls`, `referencesAreMissing`, `countScreenshots`, `readLogTail`, `writeResultsFile`
+
+- [x] Use INVRT_PLAN_FILE instead of INVRT_CRAWL_FILE where appropriate
+  - `configure-backstop` now reads plan.yaml instead of crawled-paths.text
+  - `reference`/`test` prerequisite checks look at `plan.yaml` pages
+  - Crawl file remains the output artifact of `crawl.js` only
+
+- [x] Remove `array $env` from `runPlaywright` and use `$this->config` directly
+  - Now lives in `Service\PlaywrightRunner` which holds `Configuration` directly
+
+- [x] Remove config validation and defaults from Runner
+  - Runner no longer supplies fallback values for keys that have defaults in `ConfigSchema`
+  - Guards for unset `INVRT_PLAYWRIGHT_CONFIG_FILE`, `INVRT_PLAN_FILE`, etc. removed — trust the config handler
+
+- [x] Remove more business logic from Runner.php and move to the ts scripts
+  - Added `src/js/info.js` (replaces the PHP `info()` body; drops the crawl-log tail)
+  - Added `src/js/configure-playwright.js` (replaces the heredoc in Runner)
+
+## Tech Debt (earlier)
+
 - [x] Move more logic to js/node
   - Created `src/js/check.js` and `src/js/crawl.js` for site check and crawl operations
   - Refactored `backstop-config.js` to export `generateBackstopConfig()` so crawl.js can call it directly

@@ -43,17 +43,10 @@ class InfoCommand extends BaseCommand
         );
 
         $io->definitionList(
-            ['Crawled pages'           => (string) $data['crawled_pages']],
-            ['Reference screenshots'   => (string) $data['reference_screenshots']],
-            ['Test screenshots'        => (string) $data['test_screenshots']],
+            ['Planned pages'           => (string) ($data['planned_pages'] ?? 0)],
+            ['Reference screenshots'   => (string) ($data['reference_screenshots'] ?? 0)],
+            ['Test screenshots'        => (string) ($data['test_screenshots'] ?? 0)],
         );
-
-        if (!empty($data['crawl_log_tail'])) {
-            $io->section('Crawl log (last 5 lines)');
-            foreach ($data['crawl_log_tail'] as $line) {
-                $io->text($line);
-            }
-        }
 
         return Command::SUCCESS;
     }

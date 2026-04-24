@@ -164,6 +164,6 @@ EOF
   assert_output_contains "admin"
   assert_output_contains "desktop"
   assert_output_contains "mobile"
-  assert_output_contains "Crawled pages"
+  assert_output_contains "Planned pages"
   assert_output_contains "3"
 }

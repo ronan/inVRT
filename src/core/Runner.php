@@ -2,9 +2,13 @@
 
 namespace InVRT\Core;
 
+use InVRT\Core\Service\Filesystem;
 use InVRT\Core\Service\LoginService;
 use InVRT\Core\Service\NodeOutputParser;
 use InVRT\Core\Service\PlanService;
+use InVRT\Core\Service\PlaywrightRunner;
+use InVRT\Core\Service\ProjectId;
+use InVRT\Core\Service\UrlNormalizer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
@@ -14,6 +18,10 @@ use Symfony\Component\Yaml\Yaml;
  * Core orchestration layer for inVRT operations.
  *
  * All exit codes follow Unix conventions: 0 = success, non-zero = failure.
+ *
+ * Runner is an orchestrator: each public method maps to a CLI command and
+ * dispatches to JS scripts or services. Non-orchestration logic belongs in
+ * src/js/*.js or src/core/Service/*.
  */
 class Runner
 {
@@ -23,28 +31,24 @@ class Runner
         private readonly LoggerInterface $logger,
     ) {}
 
-    // -------------------------------------------------------------------------
-    // Public commands
-    // -------------------------------------------------------------------------
-
     /** Initialize a new inVRT project directory with default config. */
     public function init(?string $url = null): int
     {
-        $cwd        = $this->config->get('INVRT_CWD', '');
-        $directory  = $this->config->get('INVRT_DIRECTORY', '');
-        $configFile = $this->config->get('INVRT_CONFIG_FILE', '');
-        $environment = $this->config->get('INVRT_ENVIRONMENT', 'local');
-        $profile     = $this->config->get('INVRT_PROFILE', 'anonymous');
-        $device      = $this->config->get('INVRT_DEVICE', 'desktop');
+        $cwd         = $this->config->get('INVRT_CWD');
+        $directory   = $this->config->get('INVRT_DIRECTORY');
+        $configFile  = $this->config->get('INVRT_CONFIG_FILE');
+        $environment = $this->config->get('INVRT_ENVIRONMENT');
+        $profile     = $this->config->get('INVRT_PROFILE');
+        $device      = $this->config->get('INVRT_DEVICE');
         $excludeFile = $this->config->get('INVRT_EXCLUDE_FILE');
-        $planFile    = $this->config->get('INVRT_PLAN_FILE', '');
+        $planFile    = $this->config->get('INVRT_PLAN_FILE');
 
         if (empty($cwd)) {
             $this->logger->error("⚠️  I can't make a directory here because I don't know where I am.");
             return 1;
         }
 
-        $url = $this::normalizeURL((string) $url);
+        $url = UrlNormalizer::normalize((string) $url);
         if ($url === '') {
             $this->logger->error('A valid URL is required to initialize inVRT.');
             return 1;
@@ -57,84 +61,36 @@ class Runner
 
         $this->logger->notice('🚀 Initializing InVRT for the project at ' . $cwd);
 
-        if (!mkdir($directory, 0755, true)) {
-            $this->logger->error('Failed to create invrt directory at ' . $directory);
-            return 1;
-        }
+        Filesystem::ensureDir($directory);
         $this->logger->info('✓ Created invrt directory at ' . $directory);
 
-        if (!mkdir(Path::join($directory, 'data'), 0755, true)) {
-            $this->logger->error('Failed to create data directory');
-            return 1;
-        }
+        Filesystem::ensureDir(Path::join($directory, 'data'));
+        Filesystem::ensureDir(Path::join($directory, 'scripts'));
 
-        if (!mkdir(Path::join($directory, 'scripts'), 0755, true)) {
-            $this->logger->error('Failed to create scripts directory');
-            return 1;
-        }
-
-        $onreadyScript = Path::join($directory, 'scripts', 'onready.ts');
-        $onreadyContent = "// Runs after the page is ready and before the screenshot is captured.\n";
-        if (file_put_contents($onreadyScript, $onreadyContent) === false) {
-            $this->logger->error('Failed to create default onready.ts script');
-            return 1;
-        }
+        Filesystem::writeFile(
+            Path::join($directory, 'scripts', 'onready.ts'),
+            "// Runs after the page is ready and before the screenshot is captured.\n",
+        );
 
         $this->logger->info('✓ Created data directories for generated data, and user scripts.');
 
-        $projectId = self::generateProjectId($url);
+        $projectId = ProjectId::generate($url);
 
         $configContent = Yaml::dump([
             'project' => [
                 'name' => basename($cwd) ?: 'My InVRT Project',
                 'id'   => $projectId,
             ],
-            'environments' => [
-                $environment => [
-                    'url' => $url,
-                ],
-            ],
-            'profiles' => [
-                $profile => [],
-            ],
-            'devices' => [
-                $device => [],
-            ],
+            'environments' => [$environment => ['url' => $url]],
+            'profiles'     => [$profile     => []],
+            'devices'      => [$device      => []],
         ], 4, 2);
 
-        if (file_put_contents($configFile, $configContent) === false) {
-            $this->logger->error('Failed to create config.yaml');
-            return 1;
-        }
+        Filesystem::writeFile($configFile, $configContent);
         $this->logger->info('✓ Initialized InVRT configuration file at ' . $configFile);
 
-        $excludeUrls = <<<'EOF'
-/logout
-/user/logout
-/files
-/download
-/assets
-/images
-EOF;
-        if (!empty($excludeFile)) {
-            $excludeDir = dirname($excludeFile);
-            if (!is_dir($excludeDir)) {
-                mkdir($excludeDir, 0755, true);
-            }
-        }
-
-        if (
-            !empty($excludeFile)
-            && !file_exists($excludeFile)
-            && file_put_contents($excludeFile, $excludeUrls) === false
-        ) {
-            $this->logger->error('Failed to create exclude_paths.txt');
-            return 1;
-        }
-
-        if ($planFile === '') {
-            $this->logger->error('INVRT_PLAN_FILE is not set.');
-            return 1;
+        if (!empty($excludeFile) && !file_exists($excludeFile)) {
+            Filesystem::writeFile($excludeFile, "/logout\n/user/logout\n/files\n/download\n/assets\n/images\n");
         }
 
         if (!PlanService::update($planFile, $url, $projectId)) {
@@ -143,8 +99,7 @@ EOF;
         }
         $this->logger->info('✓ Initialized plan file at ' . $planFile);
 
-        // init runs check() before the command re-boots configuration from disk.
-        // Seed the in-memory config so Node check.js receives the URL immediately.
+        // Seed in-memory config so the immediate check() has project URL + ID.
         $this->config->set('INVRT_URL', $url);
         $this->config->set('INVRT_ID', $projectId);
 
@@ -157,37 +112,15 @@ EOF;
         return 0;
     }
 
-    /** Returns a project status summary. */
+    /** Returns a project status summary by delegating to js/info.js. */
     public function info(): array
     {
-        $env         = $this->config->all();
-        $crawlFile   = $env['INVRT_CRAWL_FILE']  ?? '';
-        $crawlLog    = $env['INVRT_CRAWL_LOG']   ?? '';
-        $captureDir  = $env['INVRT_CAPTURE_DIR'] ?? '';
-        $device      = $env['INVRT_DEVICE']      ?? 'desktop';
-        $environment = $env['INVRT_ENVIRONMENT'] ?? 'local';
-
-        $crawledPages = 0;
-        if ($crawlFile !== '' && is_readable($crawlFile)) {
-            $lines = file($crawlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            $crawledPages = $lines !== false ? count($lines) : 0;
+        [$exit, $stdout] = $this->runNodeCapturing('info.js');
+        if ($exit !== 0) {
+            return [];
         }
-
-        return [
-            'name'         => ($this->config->getSection('project')['name'] ?? '') ?: '',
-            'id'           => $env['INVRT_ID'] ?? '',
-            'config_file'  => $env['INVRT_CONFIG_FILE'] ?? '',
-            'environment'  => $env['INVRT_ENVIRONMENT'] ?? '',
-            'profile'      => $env['INVRT_PROFILE']     ?? '',
-            'device'       => $env['INVRT_DEVICE']      ?? '',
-            'environments' => array_keys((array) ($this->config->getSection('environments') ?? [])),
-            'profiles'     => array_keys((array) ($this->config->getSection('profiles')     ?? [])),
-            'devices'      => array_keys((array) ($this->config->getSection('devices')      ?? [])),
-            'crawled_pages'         => $crawledPages,
-            'reference_screenshots' => $this->countScreenshots($captureDir . '/reference/' . $device),
-            'test_screenshots'      => $this->countScreenshots($captureDir . '/' . $environment . '/' . $device),
-            'crawl_log_tail'        => $this->readLogTail($crawlLog),
-        ];
+        $decoded = json_decode($stdout, true);
+        return is_array($decoded) ? $decoded : [];
     }
 
     /** Returns the resolved configuration for display or inspection. */
@@ -196,41 +129,32 @@ EOF;
         return $this->config->all();
     }
 
-    /**
-     * Fetch the site homepage and write a check.yaml with metadata.
-     *
-     * Follows redirects, detects HTTPS, extracts the page title, and records
-     * the resolved URL. Returns 0 on success, 1 on failure.
-     */
+    /** Fetch the site homepage, enrich plan.yaml with resolved URL + title. */
     public function check(): int
     {
-        $outputFile = $this->config->get('INVRT_CHECK_FILE', '') ?: null;
+        $outputFile = $this->config->get('INVRT_CHECK_FILE');
         $result = $this->runNode('check.js', null, $outputFile);
         if ($result !== 0) {
             return $result;
         }
 
-        if ($outputFile === null || !is_readable($outputFile)) {
+        if (!is_readable($outputFile)) {
             $this->logger->warning('Check completed but no check file was found to enrich plan.yaml.');
             return 0;
         }
 
-        $planFile = $this->config->get('INVRT_PLAN_FILE', '');
-        if ($planFile === '') {
-            $this->logger->error('INVRT_PLAN_FILE is not set.');
-            return 1;
-        }
-
+        $planFile  = $this->config->get('INVRT_PLAN_FILE');
         $checkData = Yaml::parseFile($outputFile);
-        if (!is_array($checkData)) {
-            $checkData = [];
-        }
+        $checkData = is_array($checkData) ? $checkData : [];
 
-        $projectUrl = (string) $this->config->get('INVRT_URL', '');
-        $projectId = (string) $this->config->get('INVRT_ID', '');
-        $projectTitle = (string) ($checkData['title'] ?? '');
-
-        if (!PlanService::update($planFile, $projectUrl, $projectId, $projectTitle, $projectTitle)) {
+        $title = (string) ($checkData['title'] ?? '');
+        if (!PlanService::update(
+            $planFile,
+            (string) $this->config->get('INVRT_URL'),
+            (string) $this->config->get('INVRT_ID'),
+            $title,
+            $title,
+        )) {
             $this->logger->error('Failed to update plan.yaml at ' . $planFile);
             return 1;
         }
@@ -242,157 +166,110 @@ EOF;
     /** Crawl the target URL and write unique paths to the crawl file. */
     public function crawl(): int
     {
-        $outputFile = $this->config->get('INVRT_CRAWL_FILE', '') ?: null;
-        return $this->runNode('crawl.js', null, $outputFile);
+        return $this->runNode('crawl.js', null, $this->config->get('INVRT_CRAWL_FILE'));
     }
 
     /** Capture reference screenshots, running a crawl first if needed. */
     public function reference(): int
     {
-        $env         = $this->config->all();
-        $url         = $env['INVRT_URL']         ?? '';
-        $profile     = $env['INVRT_PROFILE']     ?? '';
-        $device      = $env['INVRT_DEVICE']      ?? '';
-        $environment = $env['INVRT_ENVIRONMENT'] ?? '';
-        $crawlFile   = $env['INVRT_CRAWL_FILE']  ?? '';
+        $url         = $this->config->get('INVRT_URL');
+        $profile     = $this->config->get('INVRT_PROFILE');
+        $device      = $this->config->get('INVRT_DEVICE');
+        $environment = $this->config->get('INVRT_ENVIRONMENT');
 
         $this->logger->info("📸 Capturing references from '$environment' environment ($url) with profile: '$profile' and device: '$device'");
 
-        if ($crawlFile === '' || !is_readable($crawlFile)) {
-            $this->logger->notice('🕸️ No crawled URLs found — running crawl first.');
+        if (!$this->planHasPages()) {
+            $this->logger->notice('🕸️ No planned pages found — running crawl first.');
             if (($result = $this->crawl()) !== 0) {
                 return $result;
             }
-        }
-
-        if (($result = $this->validateCrawledUrls()) !== 0) {
-            return $result;
+            if (!$this->planHasPages()) {
+                $this->logger->notice('No pages are available. Crawl has run but found no usable URLs.');
+                return 1;
+            }
         }
 
         if (($result = $this->generatePlaywright()) !== 0) {
             return $result;
         }
 
-        return $this->runPlaywright('reference', $env);
+        return (new PlaywrightRunner($this->config, $this->logger))->run('reference');
     }
 
     /** Run visual regression tests, capturing references first if needed. */
     public function test(): int
     {
-        $env         = $this->config->all();
-        $url         = $env['INVRT_URL']         ?? '';
-        $profile     = $env['INVRT_PROFILE']     ?? '';
-        $device      = $env['INVRT_DEVICE']      ?? '';
-        $environment = $env['INVRT_ENVIRONMENT'] ?? '';
+        $url         = $this->config->get('INVRT_URL');
+        $profile     = $this->config->get('INVRT_PROFILE');
+        $device      = $this->config->get('INVRT_DEVICE');
+        $environment = $this->config->get('INVRT_ENVIRONMENT');
 
         $this->logger->notice("🔬 Testing '$environment' environment ($url) with profile: '$profile' and device: '$device'");
 
-        if ($this->referencesAreMissing()) {
+        $referenceFile = $this->config->get('INVRT_REFERENCE_FILE');
+        if (!file_exists($referenceFile)) {
             $this->logger->notice('📸 No reference screenshots found — capturing references first.');
-            // Reuse reference() so first-run prerequisites (crawl + URL validation) are enforced.
             if (($result = $this->reference()) !== 0) {
                 return $result;
             }
         } elseif (($result = $this->generatePlaywright()) !== 0) {
-            // Keep the Playwright spec in sync with plan.yaml even when references already exist.
             return $result;
         }
 
-        return $this->runPlaywright('test', $env);
+        return (new PlaywrightRunner($this->config, $this->logger))->run('test');
     }
 
     /** Approve the latest results by re-running Playwright with --update-snapshots. */
     public function approve(): int
     {
-        $env         = $this->config->all();
-        $url         = $env['INVRT_URL']         ?? '';
-        $profile     = $env['INVRT_PROFILE']     ?? '';
-        $device      = $env['INVRT_DEVICE']      ?? '';
-        $environment = $env['INVRT_ENVIRONMENT'] ?? '';
+        $url         = $this->config->get('INVRT_URL');
+        $profile     = $this->config->get('INVRT_PROFILE');
+        $device      = $this->config->get('INVRT_DEVICE');
+        $environment = $this->config->get('INVRT_ENVIRONMENT');
 
         $this->logger->notice("✅ Approving latest results for '$environment' environment ($url) with profile: '$profile' and device: '$device'");
 
-        return $this->runPlaywright('reference', $env);
+        return (new PlaywrightRunner($this->config, $this->logger))->run('reference');
     }
 
-    /**
-     * Run the full baseline workflow from scratch: check → crawl → generate-playwright → reference → test → approve.
-     *
-     * Always re-runs every step regardless of prior artifacts.
-     */
+    /** Full baseline workflow: check → crawl → generate-playwright → reference → test → approve. */
     public function baseline(): int
     {
-        if (($result = $this->check()) !== 0) {
-            return $result;
+        foreach (['check', 'crawl'] as $step) {
+            if (($r = $this->$step()) !== 0) {
+                return $r;
+            }
+        }
+        if (($r = $this->generatePlaywright()) !== 0) {
+            return $r;
         }
 
-        if (($result = $this->crawl()) !== 0) {
-            return $result;
+        $playwright = new PlaywrightRunner($this->config, $this->logger);
+        if (($r = $playwright->run('reference')) !== 0) {
+            return $r;
         }
-
-        $env = $this->config->all();
-
-        if (($result = $this->generatePlaywright()) !== 0) {
-            return $result;
-        }
-
-        if (($result = $this->runPlaywright('reference', $env)) !== 0) {
-            return $result;
-        }
-
-        if (($result = $this->runPlaywright('test', $env)) !== 0) {
-            return $result;
+        if (($r = $playwright->run('test')) !== 0) {
+            return $r;
         }
 
         return $this->approve();
     }
 
-    /** Generate or regenerate the BackstopJS configuration from the crawled URL list. */
+    /** Generate or regenerate the BackstopJS configuration from plan.yaml. */
     public function configureBackstop(): int
     {
-        $inputFile  = $this->config->get('INVRT_CRAWL_FILE', '') ?: null;
-        $outputFile = $this->config->get('INVRT_BACKSTOP_CONFIG_FILE', '') ?: null;
-        return $this->runNode('backstop-config.js', $inputFile, $outputFile);
+        return $this->runNode(
+            'backstop-config.js',
+            $this->config->get('INVRT_PLAN_FILE'),
+            $this->config->get('INVRT_BACKSTOP_CONFIG_FILE'),
+        );
     }
 
-    /** Write the bundled playwright.config.ts to INVRT_PLAYWRIGHT_CONFIG_FILE. */
+    /** Write the bundled playwright.config.ts via js/configure-playwright.js. */
     public function configurePlaywright(): int
     {
-        $configFile = $this->config->get('INVRT_PLAYWRIGHT_CONFIG_FILE', '');
-        if ($configFile === '') {
-            $this->logger->error('INVRT_PLAYWRIGHT_CONFIG_FILE is not set.');
-            return 1;
-        }
-
-        $dir = dirname($configFile);
-        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
-            $this->logger->error('Failed to create directory for playwright config: ' . $dir);
-            return 1;
-        }
-
-        $content = <<<'TS'
-import { defineConfig } from '@playwright/test';
-
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
-export default defineConfig({
-  outputDir: 'results',
-  snapshotPathTemplate: 'reference/{arg}{ext}',
-  reporter: [['html', { outputFolder: 'report' }]],
-  use: {
-    screenshot: 'on',
-  }
-});
-TS;
-
-        if (file_put_contents($configFile, $content) === false) {
-            $this->logger->error('Failed to write playwright config to ' . $configFile);
-            return 1;
-        }
-
-        $this->logger->info('✓ Wrote playwright config to ' . $configFile);
-        return 0;
+        return $this->runNode('configure-playwright.js');
     }
 
     /** Generate a Playwright TypeScript spec from plan.yaml pages. */
@@ -402,103 +279,66 @@ TS;
             return $result;
         }
 
-        $inputFile  = $this->config->get('INVRT_PLAN_FILE', '') ?: null;
-        $outputFile = $this->config->get('INVRT_PLAYWRIGHT_SPEC_FILE', '') ?: null;
-        return $this->runNode('generate-playwright.js', $inputFile, $outputFile);
+        return $this->runNode(
+            'generate-playwright.js',
+            $this->config->get('INVRT_PLAN_FILE'),
+            $this->config->get('INVRT_PLAYWRIGHT_SPEC_FILE'),
+        );
     }
 
     /** Attempt login using credentials from the resolved config. */
     public function login(): int
     {
-        $env = $this->config->all();
-
         $this->logger->debug(sprintf(
             'Login pre-check (username=%s, has_password=%s, cookies_file=%s)',
-            empty($env['INVRT_USERNAME']) ? 'no' : 'yes',
-            empty($env['INVRT_PASSWORD']) ? 'no' : 'yes',
-            $env['INVRT_COOKIES_FILE'] ?? '(not set)',
+            empty($this->config->get('INVRT_USERNAME')) ? 'no' : 'yes',
+            empty($this->config->get('INVRT_PASSWORD')) ? 'no' : 'yes',
+            $this->config->get('INVRT_COOKIES_FILE') ?: '(not set)',
         ));
 
         return LoginService::loginIfCredentialsExist(
-            $env['INVRT_USERNAME']    ?? '',
-            $env['INVRT_PASSWORD']    ?? '',
-            $env['INVRT_URL']         ?? '',
-            $env['INVRT_COOKIES_FILE'] ?? '',
+            (string) $this->config->get('INVRT_USERNAME'),
+            (string) $this->config->get('INVRT_PASSWORD'),
+            (string) $this->config->get('INVRT_URL'),
+            (string) $this->config->get('INVRT_COOKIES_FILE'),
             $this->appDir,
             $this->logger,
         );
     }
 
     // -------------------------------------------------------------------------
-    // Public static helpers
-    // -------------------------------------------------------------------------
-
-    /** Generate a stable, short project identifier from project URL + random seed. */
-    public static function generateProjectId(string $url): string
-    {
-        return self::encodeId($url, random_int(0, 0xFFFF));
-    }
-
-    /** Generate a stable, short identifier from a string and optional seed/salt. */
-    public static function encodeId(string $value, int $seed = 0): string
-    {
-        $hash = (int) hexdec(hash('crc32b', $value));
-        $alphabet = 'swxdyktzhgjfblrpmcqvn';
-        $number = (($hash & 0xFFFFFFFF) << 16) | ($seed & 0xFFFF);
-        $base = strlen($alphabet);
-
-        if ($number === 0) {
-            return $alphabet[0];
-        }
-
-        $encoded = '';
-        while ($number > 0) {
-            $index = $number % $base;
-            $encoded = $alphabet[$index] . $encoded;
-            $number = intdiv($number, $base);
-        }
-
-        return $encoded;
-    }
-
-    /** Normalize a URL by ensuring it has a scheme, host, and properly formatted components. */
-    public function normalizeURL(string $url): string
-    {
-        $parts = parse_url($url);
-        if ($parts === false) {
-            return '';
-        }
-
-        $scheme = isset($parts['scheme']) ? strtolower($parts['scheme']) : 'http';
-        $host   = isset($parts['host']) ? strtolower($parts['host']) : '';
-        $port   = isset($parts['port']) ? ':' . $parts['port'] : '';
-        $path   = $parts['path'] ?? '';
-        $query  = isset($parts['query']) ? '?' . $parts['query'] : '';
-        $fragment = isset($parts['fragment']) ? '#' . $parts['fragment'] : '';
-
-        return $scheme . '://' . $host . $port . $path . $query . $fragment;
-    }
-
-
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
 
     /**
      * Run a Node.js script from the app's JS directory.
      *
-     * Streams $inputFile content to the process stdin if provided. Captures
-     * stdout and writes it to $outputFile if provided. Log messages arrive on
-     * stderr as pino NDJSON and are routed to the PSR-3 logger.
+     * Streams $inputFile content to stdin if provided. Captures stdout and
+     * writes it to $outputFile if provided. Log messages arrive on stderr as
+     * pino NDJSON and are routed to the PSR-3 logger.
      */
     private function runNode(string $script, ?string $inputFile = null, ?string $outputFile = null): int
     {
-        $env  = $this->config->all();
+        [$exit, $stdout] = $this->runNodeCapturing($script, $inputFile);
+
+        if ($outputFile !== null && $outputFile !== '') {
+            $this->logger->debug("Writing output to $outputFile");
+            Filesystem::writeFile($outputFile, $stdout);
+        }
+
+        return $exit;
+    }
+
+    /**
+     * Run a Node.js script and return [exitCode, stdout].
+     *
+     * @return array{0: int, 1: string}
+     */
+    private function runNodeCapturing(string $script, ?string $inputFile = null): array
+    {
         $file = rtrim($this->appDir, '/') . '/' . $script;
         $cmd  = 'node ' . escapeshellarg($file);
         $this->logger->debug("Running Node script: $cmd");
 
-        $process = Process::fromShellCommandline($cmd, null, $env);
+        $process = Process::fromShellCommandline($cmd, null, $this->config->all());
         $process->setTimeout(null);
 
         if ($inputFile !== null && is_readable($inputFile)) {
@@ -516,152 +356,30 @@ TS;
         });
         $parser->flush();
 
-        if ($outputFile !== null) {
-            $dir = dirname($outputFile);
-            if (!is_dir($dir)) {
-                mkdir($dir, 0755, true);
-            }
-            $this->logger->debug("Writing output to $outputFile");
-            file_put_contents($outputFile, $stdout);
-        }
-
-        return $process->getExitCode() ?? 0;
+        return [$process->getExitCode() ?? 0, $stdout];
     }
 
     /**
-     * Run Playwright tests for the given mode using the resolved config file.
+     * Does plan.yaml contain at least one testable page path?
      *
-     * mode 'reference' — runs with --update-snapshots to capture/update baseline.
-     * mode 'test'      — runs normally and compares against stored snapshots.
+     * @phpstan-impure
      */
-    private function runPlaywright(string $mode, array $env): int
+    private function planHasPages(): bool
     {
-        $configFile = $this->config->get('INVRT_PLAYWRIGHT_CONFIG_FILE', '');
-        $specFile   = $this->config->get('INVRT_PLAYWRIGHT_SPEC_FILE', '');
-        $configDir  = $configFile !== '' ? dirname($configFile) : '';
-
-        $cmd = 'npx playwright test';
-        if ($configFile !== '') {
-            $cmd .= ' --config=' . escapeshellarg($configFile);
+        $planFile = $this->config->get('INVRT_PLAN_FILE');
+        if (!$planFile || !is_readable($planFile)) {
+            return false;
         }
-        if ($specFile !== '') {
-            $cmd .= ' ' . escapeshellarg($specFile);
+        $parsed = Yaml::parseFile($planFile);
+        $pages  = is_array($parsed) ? ($parsed['pages'] ?? []) : [];
+        if (!is_array($pages)) {
+            return false;
         }
-        if ($mode === 'reference') {
-            $cmd .= ' --update-snapshots';
-        }
-
-        $this->logger->debug('Running Playwright command: ' . $cmd);
-        $this->logger->notice('Running playwright test' . ($mode === 'reference' ? ' --update-snapshots' : ''));
-
-        $process = Process::fromShellCommandline($cmd, $configDir ?: null, $env);
-        $process->setTimeout(null);
-
-        $parser = new NodeOutputParser($this->logger);
-        $output = '';
-        $process->run(function (mixed $type, mixed $buffer) use ($parser, &$output): void {
-            if ($type === Process::ERR) {
-                $parser->write($buffer);
-            } else {
-                $output .= $buffer;
-                // Forward stdout lines as notices
-                foreach (explode("\n", $buffer) as $line) {
-                    $line = trim($line);
-                    if ($line !== '') {
-                        $this->logger->notice($line);
-                    }
-                }
-            }
-        });
-        $parser->flush();
-
-        $exitCode = $process->getExitCode() ?? 0;
-        $this->logger->debug('Playwright exit code: ' . $exitCode);
-
-        $this->writeResultsFile($mode === 'reference' ? 'reference' : 'test', $output . $parser->getMessages());
-
-        return $exitCode;
-    }
-
-    /** Write output to the appropriate results file for the given mode. */
-    private function writeResultsFile(string $mode, string $output): void
-    {
-        $file = match ($mode) {
-            'reference' => $this->config->get('INVRT_REFERENCE_FILE', ''),
-            'test'      => $this->config->get('INVRT_TEST_FILE', ''),
-            default     => '',
-        };
-
-        if ($file === '') {
-            return;
-        }
-
-        $dir = dirname($file);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
-
-        file_put_contents($file, $output);
-    }
-
-    private function validateCrawledUrls(): int
-    {
-        $crawlFile = $this->config->get('INVRT_CRAWL_FILE', '');
-        if ($crawlFile === '' || !is_readable($crawlFile)) {
-            $this->logger->notice('No crawled URLs file found. Run `invrt crawl` first.');
-            return 1;
-        }
-
-        $lines = file($crawlFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($lines === false || $lines === []) {
-            $this->logger->notice('No crawled URLs are available. Crawl has run but found no usable URLs.');
-            return 1;
-        }
-
-        return 0;
-    }
-
-    private function referencesAreMissing(): bool
-    {
-        $file = $this->config->get('INVRT_REFERENCE_FILE', '');
-        return $file === '' || !file_exists($file);
-    }
-
-    /** Count PNG files recursively in a directory. */
-    private function countScreenshots(string $dir): int
-    {
-        if (!is_dir($dir)) {
-            return 0;
-        }
-
-        $count = 0;
-        $iter  = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
-        foreach ($iter as $file) {
-            if ($file->isFile() && strtolower($file->getExtension()) === 'png') {
-                $count++;
+        foreach (array_keys($pages) as $key) {
+            if (is_string($key) && str_starts_with($key, '/')) {
+                return true;
             }
         }
-
-        return $count;
+        return false;
     }
-
-    /**
-     * Read the last N lines of a log file.
-     *
-     * @return list<string>
-     */
-    private function readLogTail(string $logFile, int $lineCount = 5): array
-    {
-        if (!is_readable($logFile)) {
-            return [];
-        }
-
-        $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($lines === false || $lines === []) {
-            return [];
-        }
-
-        return array_values(array_slice($lines, -$lineCount));
-    }
-
 }

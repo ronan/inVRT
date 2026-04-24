@@ -127,7 +127,6 @@ Displays a status summary for the selected environment/profile/device:
 - crawled page count
 - reference screenshot count
 - test screenshot count
-- last 5 lines of the crawl log, when available
 
 `info` does not attempt login.
 
@@ -292,7 +291,7 @@ Config generation and BackstopJS execution are separated into two scripts:
 `src/js/backstop-config.js` builds a BackstopJS config from the resolved `INVRT_*` environment and writes it to `INVRT_BACKSTOP_CONFIG_FILE`:
 
 - viewport comes from `INVRT_VIEWPORT_WIDTH` and `INVRT_VIEWPORT_HEIGHT`
-- scenarios come from the newline-delimited paths in `INVRT_CRAWL_FILE`
+- scenarios come from the pages map in `INVRT_PLAN_FILE`
 - each scenario URL is `INVRT_URL + <path>`
 - scenario labels are normalized from the path and suffixed with a SHA-1 hash for stability
 - only the first `INVRT_MAX_PAGES` crawl entries are used

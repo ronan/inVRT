@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const yaml = require('js-yaml');
 const log = require('./logger');
 
 const ENCODE_ALPHABET = 'swxdyktzhgjfblrpmcqvn';
@@ -98,10 +99,28 @@ const run = async () => {
   try {
     const input = await readStdin();
     const maxPages = parseInt(INVRT_MAX_PAGES || '', 10);
-    const crawlEntries = input
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean);
+
+    // Input is plan.yaml content. Walk the pages map to collect testable paths.
+    const parsed = input.trim() ? yaml.load(input) : null;
+    const pagesNode = (parsed && typeof parsed === 'object' && parsed.pages) || {};
+    const crawlEntries = [];
+    const walk = (pagePath, node) => {
+      if (typeof node === 'string') { crawlEntries.push(pagePath); return; }
+      if (!node || typeof node !== 'object' || Array.isArray(node)) { crawlEntries.push(pagePath); return; }
+      const keys = Object.keys(node);
+      const childKeys = keys.filter((k) => k === '' || k === '/' || k.startsWith('/') || k.startsWith('?'));
+      const metaKeys  = keys.filter((k) => !childKeys.includes(k));
+      if (metaKeys.length > 0 || childKeys.length === 0) crawlEntries.push(pagePath);
+      for (const k of childKeys) {
+        if (k === '')      walk(pagePath, node[k]);
+        else if (k === '/') walk(pagePath.endsWith('/') ? pagePath : `${pagePath}/`, node[k]);
+        else if (k.startsWith('?')) walk(`${pagePath}${k}`, node[k]);
+        else                walk(pagePath === '/' ? k : `${pagePath}${k}`, node[k]);
+      }
+    };
+    for (const [key, node] of Object.entries(pagesNode)) {
+      if (typeof key === 'string' && key.startsWith('/')) walk(key, node);
+    }
 
     const scopedEntries = Number.isFinite(maxPages) && maxPages > 0
       ? crawlEntries.slice(0, maxPages)

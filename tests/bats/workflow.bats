@@ -159,7 +159,7 @@ EOF
   run_invrt reference
 
   [ "$status" -eq 0 ]
-  assert_output_contains "No crawled URLs found"
+  assert_output_contains "No planned pages found"
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
   assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/reference" 1
 }
@@ -175,17 +175,6 @@ EOF
   assert_output_contains "[debug] Bootstrapping command"
   assert_output_contains "[debug] Running Playwright command"
   assert_output_contains "[debug] Playwright exit code: 0"
-}
-
-@test "reference: fails when the crawl file is empty" {
-  start_fixture_server
-  seed_basic_config "$SERVER_URL"
-  seed_crawled_urls anonymous
-
-  run_invrt reference
-
-  [ "$status" -ne 0 ]
-  assert_output_contains "No crawled URLs are available. Crawl has run but found no usable URLs."
 }
 
 @test "test: fails without config when no url is available" {
@@ -224,7 +213,7 @@ EOF
 
   [ "$status" -eq 0 ]
   assert_output_contains "No reference screenshots found"
-  assert_output_contains "No crawled URLs found"
+  assert_output_contains "No planned pages found"
   assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/reference" 1
   assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
 }
@@ -251,8 +240,8 @@ EOF
   cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
 project: {}
 pages:
-  /:
-    /about.html: {}
+  /about.html: {}
+  /contact.html: {}
 EOF
 
   run_invrt reference
@@ -263,8 +252,7 @@ EOF
   cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
 project: {}
 pages:
-  /:
-    /contact.html: {}
+  /contact.html: {}
 EOF
 
   run_invrt test
