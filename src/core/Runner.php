@@ -293,17 +293,17 @@ class Runner
     public function login(): int
     {
         $this->logger->debug(sprintf(
-            'Login pre-check (username=%s, has_password=%s, cookies_file=%s)',
+            'Login pre-check (username=%s, has_password=%s, session_file=%s)',
             empty($this->config->get('INVRT_USERNAME')) ? 'no' : 'yes',
             empty($this->config->get('INVRT_PASSWORD')) ? 'no' : 'yes',
-            $this->config->get('INVRT_COOKIES_FILE') ?: '(not set)',
+            $this->config->get('INVRT_SESSION_FILE') ?: '(not set)',
         ));
 
         return LoginService::loginIfCredentialsExist(
             (string) $this->config->get('INVRT_USERNAME'),
             (string) $this->config->get('INVRT_PASSWORD'),
             (string) $this->config->get('INVRT_URL'),
-            (string) $this->config->get('INVRT_COOKIES_FILE'),
+            (string) $this->config->get('INVRT_SESSION_FILE'),
             $this->appDir,
             $this->logger,
         );

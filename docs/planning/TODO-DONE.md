@@ -2,6 +2,17 @@
 
 Completed tasks moved from TODO.md.
 
+## Authentication
+
+- [x] Replace cookies.json with session.json
+  - Renamed config `cookies_file` → `session_file` (default `INVRT_CRAWL_DIR/session.json`); regenerated `ConfigSchema.php`
+  - `playwright-login.js` now writes Playwright `storageState` (cookies + origins) directly via `context.storageState({ path })`
+  - `generate-playwright.js` emits `test.use({ storageState })` when `INVRT_SESSION_FILE` exists
+  - Removed `playwright-onbefore.js` cookie loading (no longer needed; storageState applied at test level)
+  - Deleted `src/core/Service/CookieService.php` and the Netscape conversion call in `LoginService`
+  - Renamed `tests/fixtures/cookies.json` → `tests/fixtures/session.json` (storageState shape)
+  - Updated `usage.md`, `configuration.md`, `APP_SUMMARY.md`, `AGENTS.md`, `.github/copilot-instructions.md`
+
 ## Config
 
 - [x] Make an invalid config a warning instead of a fatal error.

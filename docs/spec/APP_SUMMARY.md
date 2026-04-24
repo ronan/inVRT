@@ -241,7 +241,7 @@ These keys are accepted in `settings`, `environments.*`, `profiles.*`, and `devi
 | `config_file` | `INVRT_CONFIG_FILE` | `INVRT_DIRECTORY/config.yaml` |
 | `scripts_dir` | `INVRT_SCRIPTS_DIR` | `INVRT_DIRECTORY/scripts` |
 | `crawl_dir` | `INVRT_CRAWL_DIR` | `INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE` |
-| `cookies_file` | `INVRT_COOKIES_FILE` | `INVRT_CRAWL_DIR/cookies` |
+| `session_file` | `INVRT_SESSION_FILE` | `INVRT_CRAWL_DIR/session.json` |
 | `crawl_log` | `INVRT_CRAWL_LOG` | `INVRT_CRAWL_DIR/logs/crawl.log` |
 | `clone_dir` | `INVRT_CLONE_DIR` | `INVRT_CRAWL_DIR/clone` |
 | `crawl_file` | `INVRT_CRAWL_FILE` | `INVRT_CRAWL_DIR/crawled_urls.txt` |
@@ -271,12 +271,11 @@ Flow:
 
 1. Resolve `login_url`, defaulting to `<url>/user/login` when not set.
 2. Run `src/js/playwright-login.js`.
-3. Save cookies to `INVRT_COOKIES_FILE.json`.
-4. Convert that file to `INVRT_COOKIES_FILE.txt` in Netscape format for `wget`.
+3. Save Playwright `storageState` (cookies + origins) to `INVRT_SESSION_FILE`.
 
 `approve`, `check`, `config`, `info`, and `init` do not auto-login.
 
-For crawling, `INVRT_COOKIE` takes precedence over the cookie jar and is sent as a raw `Cookie:` header.
+For crawling, `INVRT_COOKIE` takes precedence over the session file and is sent as a raw `Cookie:` header.
 
 ---
 
@@ -284,7 +283,7 @@ For crawling, `INVRT_COOKIE` takes precedence over the cookie jar and is sent as
 
 Reference, test, and approve all run via Playwright. The PHP `Runner` delegates to `PlaywrightRunner`, which runs `npx playwright test` (with `--update-snapshots` for `reference` and `approve`).
 
-`generate-playwright` writes a TypeScript spec from `INVRT_PLAN_FILE` and a `playwright.config.ts` into `INVRT_CRAWL_DIR`. Each scenario navigates to `INVRT_URL + <path>`, applies any resolved page hooks (`setup`/`onready`/`teardown`), and captures a screenshot. Cookies are loaded from `INVRT_COOKIES_FILE` when present.
+`generate-playwright` writes a TypeScript spec from `INVRT_PLAN_FILE` and a `playwright.config.ts` into `INVRT_CRAWL_DIR`. When `INVRT_SESSION_FILE` exists the spec emits `test.use({ storageState: <path> })` so authenticated runs reuse the saved session. Each scenario navigates to `INVRT_URL + <path>`, applies any resolved page hooks (`setup`/`onready`/`teardown`), and captures a screenshot.
 
 Hook scripts are resolved from `INVRT_SCRIPTS_DIR` when these files exist there:
 
@@ -295,7 +294,6 @@ Otherwise the built-in scripts from `src/js/` are used.
 
 The built-in hooks:
 
-- load cookies from `scenario.cookiePath` before each page
 - record `pageTitle`
 - optionally perform hover, click, keypress, post-interaction wait, and scroll interactions when scenario fields define them
 

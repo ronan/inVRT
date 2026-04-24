@@ -104,14 +104,14 @@ Symfony Console Commands (src/cli/Commands/)
   InVRT\Core\Runner (src/core/Runner.php)
          ↓
   InVRT\Core\Configuration (src/core/Configuration.php)
-  InVRT\Core\Service\LoginService, CookieService
+  InVRT\Core\Service\LoginService
          ↓
   Node.js (src/js/*.js, Playwright)
 ```
 
 The codebase is split into two layers:
 
-- **`src/core/`** (`InVRT\Core\`) — framework-independent business logic. `Configuration` loads, merges, and exports config. `Runner` orchestrates crawl, reference, test, init, and config operations. `Service\LoginService` and `Service\CookieService` are utility services. Core accepts a PSR-3 `LoggerInterface` for output.
+- **`src/core/`** (`InVRT\Core\`) — framework-independent business logic. `Configuration` loads, merges, and exports config. `Runner` orchestrates crawl, reference, test, init, and config operations. `Service\LoginService` is a utility service. Core accepts a PSR-3 `LoggerInterface` for output.
 - **`src/cli/`** (`App\`) — thin Symfony Console wiring. Commands extend `BaseCommand`, call `$this->boot($opts, $io)`, then delegate to `$this->runner`.
 
 `BaseCommand::boot()` creates a `Configuration` from resolved env vars + options, exports it to the process environment, creates a `ConsoleLogger` wrapping the Symfony output, and builds a `Runner`. Commands call `$this->runner->crawl()` etc. and return the exit code.
@@ -149,7 +149,7 @@ Refer to [The configuration documentation](docs/user/en/configuration.md) for de
 9. Use `$this->requiresLogin = false` in the command class if login should be skipped; pass `requiresConfig: false` to `boot()` if the config file need not exist
 
 ### Static Service Classes
-`LoginService` and `CookieService` (both in `InVRT\Core\Service\` → `src/core/Service/`) are entirely static — no instantiation. Keep new utility-style services static unless state is required.
+`LoginService` (in `InVRT\Core\Service\` → `src/core/Service/`) is entirely static — no instantiation. Keep new utility-style services static unless state is required.
 
 ### Tests
 

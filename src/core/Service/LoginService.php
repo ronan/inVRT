@@ -20,7 +20,7 @@ class LoginService
         string $username,
         string $password,
         string $url,
-        string $cookiesFile,
+        string $sessionFile,
         string $appDir,
         LoggerInterface $logger,
     ): int {
@@ -39,7 +39,7 @@ class LoginService
 
             $logger->notice('🔐 Logging in with provided credentials...');
             $logger->debug("Login URL: $loginUrl");
-            $logger->debug("Cookies output file: $cookiesFile.json");
+            $logger->debug("Session output file: $sessionFile");
 
             $script = rtrim($appDir, '/') . '/playwright-login.js';
 
@@ -52,7 +52,7 @@ class LoginService
                 'INVRT_LOGIN_URL'    => $loginUrl,
                 'INVRT_USERNAME'     => $username,
                 'INVRT_PASSWORD'     => $password,
-                'INVRT_COOKIES_FILE' => $cookiesFile,
+                'INVRT_SESSION_FILE' => $sessionFile,
             ];
 
             $cmd = 'node ' . escapeshellarg($script);
@@ -74,8 +74,6 @@ class LoginService
             }
 
             $logger->notice('✅ Login successful!');
-
-            CookieService::convertToNetscapeFormat("$cookiesFile.json");
 
             return self::EXIT_SUCCESS;
         } catch (\Exception $error) {

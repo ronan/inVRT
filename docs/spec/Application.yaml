@@ -69,9 +69,9 @@ Files:
   test_file:
     default: INVRT_CRAWL_DIR/logs/test.log
     description: Path to the file storing the test output for visual regression testing.
-  cookies_file:
-    default: INVRT_CRAWL_DIR/cookies
-    description: Base path for generated cookie files. Login writes .json and .txt variants.
+  session_file:
+    default: INVRT_CRAWL_DIR/session.json
+    description: Playwright storageState file written by login and consumed by tests.
   playwright_spec_file:
     default: INVRT_CRAWL_DIR/INVRT_DEVICE.spec.ts
     description: Generated Playwright TypeScript spec file for screenshot capture.

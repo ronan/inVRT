@@ -185,7 +185,7 @@ max_pages: 90
 | `directory`               | `$INVRT_DIRECTORY`               | `{INIT_CWD}/.invrt`             | -        | all                    | Path to `.invrt/` directory                |
 | `config_file`             | `$INVRT_CONFIG_FILE`             | `{INVRT_DIRECTORY}/config.yaml` | -        | all                    | Path to `config.yaml`                      |
 | `data_dir`                | `$INVRT_DATA_DIR`                | _(varies)_                      | -        | all                    | `.invrt/data/<profile>/<env>/`             |
-| `cookies_file`            | `$INVRT_COOKIES_FILE`            | _(varies)_                      | -        | all                    | `.invrt/data/<profile>/<env>/cookies`      |
+| `session_file`            | `$INVRT_SESSION_FILE`            | _(varies)_                      | -        | all                    | `.invrt/data/<profile>/<env>/session.json` |
 | `scripts_dir`             | `$INVRT_SCRIPTS_DIR`             | _(varies)_                      | -        | all                    | Path to the user scripts                   |
 | `url`                     | `$INVRT_URL`                     | _(empty)_                       | settings | crawl, reference, test | Base URL to crawl and test                 |
 | `id`                      | `$INVRT_ID`                      | _(empty)_                       | settings | reference, test        | Stable project identifier used in reports  |

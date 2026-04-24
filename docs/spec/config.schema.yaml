@@ -135,10 +135,10 @@ $defs:
         type: string
         description: Directory where inVRT stores crawl output for a given profile and environment.
         default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE
-      cookies_file:
+      session_file:
         type: string
-        description: File where inVRT stores cookies captured during crawl.
-        default: INVRT_CRAWL_DIR/cookies
+        description: Playwright storageState file written by login and consumed by tests.
+        default: INVRT_CRAWL_DIR/session.json
       crawl_log:
         type: string
         description: Log file for crawl output.

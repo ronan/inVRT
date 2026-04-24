@@ -466,15 +466,13 @@ invrt test -vvv
 When a configured project has `username` and `password` set, inVRT runs an authenticated flow before crawling or screenshotting:
 
 1. A Playwright browser session navigates to `login_url` (defaults to `<url>/user/login`).
-2. Credentials are submitted. Session cookies are saved to `<INVRT_COOKIES_FILE>.json`.
-3. Cookies are converted to Netscape format (`<INVRT_COOKIES_FILE>.txt`) for use by `wget`.
-4. Subsequent crawl and screenshot steps use these cookies.
+2. Credentials are submitted. The Playwright `storageState` (cookies + origins) is saved to `<INVRT_SESSION_FILE>` (default: `session.json`).
+3. Subsequent screenshot runs load that session via `test.use({ storageState })`.
 
-**Re-login is skipped** if a cookies file already exists for the active profile/environment combination. Delete the file to force a fresh login:
+**Re-login is skipped** if a session file already exists for the active profile/environment combination. Delete the file to force a fresh login:
 
 ```bash
-rm .invrt/data/admin/local/cookies.json
-rm .invrt/data/admin/local/cookies.txt
+rm .invrt/data/admin/local/session.json
 ```
 
 **Custom login URL:**
@@ -499,8 +497,7 @@ inVRT stores all generated data under `.invrt/data/`, namespaced by profile and 
     └── <profile>/
         └── <environment>/
             ├── crawled_urls.txt          # URL list produced by `crawl`
-            ├── cookies.json              # Playwright session cookies
-            ├── cookies.txt               # Netscape-format cookies for wget
+            ├── session.json              # Playwright storageState (cookies + origins)
             └── logs/
                 └── crawl.log             # wget crawl log
             └── <device>/

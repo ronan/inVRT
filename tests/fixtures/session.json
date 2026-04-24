@@ -1,0 +1,25 @@
+{
+  "cookies": [
+    {
+      "name": "session_id",
+      "value": "abc123xyz789",
+      "domain": ".example.com",
+      "path": "/",
+      "expires": 1735689600,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "user_pref",
+      "value": "dark_mode",
+      "domain": "example.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

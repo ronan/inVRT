@@ -20,7 +20,7 @@ project:
   capture_dir: 'INVRT_DEVICE_DIR'
 
   crawl_dir: 'INVRT_PROFILE_DIR'
-  cookies_file: 'INVRT_CRAWL_DIR/cookies'
+  session_file: 'INVRT_CRAWL_DIR/session.json'
   crawl_log: 'INVRT_CRAWL_DIR/logs/crawl.log'
   clone_dir: 'INVRT_CRAWL_DIR/clone'
   crawl_file: 'INVRT_CRAWL_DIR/crawled_urls.txt'

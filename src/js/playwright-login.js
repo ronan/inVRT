@@ -89,29 +89,18 @@ async function loginAndSaveCookies(
 
     log.info('Login successful!');
 
-    // Get all cookies
-    const cookies = await context.cookies();
-
-    if (!cookies || cookies.length === 0) {
-      throw new Error('No cookies were retrieved after login');
-    }
-
-    // Create output directory if it doesn't exist
-    jsonFile = outputFile.endsWith('.json') ? outputFile : `${outputFile}.json`;
-    const dir = path.dirname(jsonFile);
+    // Save Playwright storageState (cookies + origins) to the session file
+    const dir = path.dirname(outputFile);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-
-    // Save cookies to JSON file
-    fs.writeFileSync(jsonFile, JSON.stringify(cookies, null, 2));
-    log.info(`Cookies saved to ${jsonFile}`);
-    log.debug(`Total cookies: ${cookies.length}`);
+    await context.storageState({ path: outputFile });
+    log.info(`Session saved to ${outputFile}`);
 
     // Close browser
     await browser.close();
 
-    return cookies;
+    return outputFile;
   } catch (error) {
     log.error({ err: error }, error.message || String(error));
     if (browser) {
@@ -124,11 +113,11 @@ async function loginAndSaveCookies(
 // Example usage
 async function main() {
   try {
-    const cookies = await loginAndSaveCookies(
+    await loginAndSaveCookies(
       process.env.INVRT_LOGIN_URL,
       process.env.INVRT_USERNAME,
       process.env.INVRT_PASSWORD,
-      process.env.INVRT_COOKIES_FILE,
+      process.env.INVRT_SESSION_FILE,
       {
         usernameSelector: 'input[name="name"]',
         passwordSelector: 'input[type="password"]',
@@ -137,8 +126,6 @@ async function main() {
         timeout: 30000,
       }
     );
-
-    log.debug({ count: cookies.length }, 'Cookies retrieved');
   } catch (error) {
     process.exit(1);
   }

@@ -186,7 +186,7 @@ const run = async () => {
     INVRT_SCRIPTS_DIR,
     INVRT_ENVIRONMENT,
     INVRT_DEVICE,
-    INVRT_COOKIES_FILE,
+    INVRT_SESSION_FILE,
     INVRT_MAX_PAGES,
     INVRT_ID,
   } = process.env;
@@ -201,9 +201,9 @@ const run = async () => {
 
   const maxPages = parseInt(INVRT_MAX_PAGES || '', 10);
   const screenshotDir = `${INVRT_CAPTURE_DIR}/${INVRT_ENVIRONMENT}/${INVRT_DEVICE}`;
-  const cookieFile = INVRT_COOKIES_FILE ? `${INVRT_COOKIES_FILE}.json` : null;
+  const sessionFile = INVRT_SESSION_FILE && fs.existsSync(INVRT_SESSION_FILE) ? INVRT_SESSION_FILE : null;
   const relScreenshotDir = path.relative(INVRT_SCRIPTS_DIR, screenshotDir);
-  const relCookieFile = null; // cookieFile ? path.relative(INVRT_SCRIPTS_DIR, cookieFile) : null;
+  const relSessionFile = sessionFile ? path.relative(INVRT_SCRIPTS_DIR, sessionFile) : null;
 
   try {
     const input = await readStdin();
@@ -216,8 +216,8 @@ const run = async () => {
 
     const scoped = Number.isFinite(maxPages) && maxPages > 0 ? pages.slice(0, maxPages) : pages;
 
-    const storageState = relCookieFile
-      ? `\nuse({ storageState: ${JSON.stringify(relCookieFile)} });`
+    const storageState = relSessionFile
+      ? `\ntest.use({ storageState: ${JSON.stringify(relSessionFile)} });`
       : '';
 
     const tests = scoped.map(({ path: urlPath, hooks }) => {
