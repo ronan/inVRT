@@ -269,16 +269,6 @@ class Runner
         return $this->approve();
     }
 
-    /** Generate or regenerate the BackstopJS configuration from plan.yaml. */
-    public function configureBackstop(): int
-    {
-        return $this->node->run(
-            'backstop-config.js',
-            $this->config->get('INVRT_PLAN_FILE'),
-            $this->config->get('INVRT_BACKSTOP_CONFIG_FILE'),
-        );
-    }
-
     /** Write the bundled playwright.config.ts via js/configure-playwright.js. */
     public function configurePlaywright(): int
     {

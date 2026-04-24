@@ -9,6 +9,13 @@ Completed tasks moved from TODO.md.
 
 ## Tech Debt
 
+- [x] Remove backstop.js as a requirement
+  - Playwright already drives reference/test/approve via `PlaywrightRunner`
+  - Deleted `ConfigureBackstopCommand`, `Runner::configureBackstop()`, `src/js/backstop.js`, `src/js/backstop-config.js`
+  - Removed `backstop_config_file` from `Application.yaml`, `config.schema.yaml`, and regenerated `ConfigSchema.php`
+  - Dropped `backstopjs` npm dependency
+  - Cleaned BackstopJS references from help text, AGENTS.md, APP_SUMMARY.md, and usage.md
+
 - [x] Extend the use of plan.yaml
   - `init` seeds `project:` (url/id/name), `profiles:` (selected profile), and `exclude:` (default paths) in `plan.yaml`
   - `check` merges `title`, `home_title`, `checked_at` into `project:` and writes configured `profiles`

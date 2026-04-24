@@ -69,9 +69,6 @@ Files:
   test_file:
     default: INVRT_CRAWL_DIR/logs/test.log
     description: Path to the file storing the test output for visual regression testing.
-  backstop_config_file:
-    default: INVRT_SCRIPTS_DIR/backstop.json
-    description: Path to the generated BackstopJS configuration file.
   cookies_file:
     default: INVRT_CRAWL_DIR/cookies
     description: Base path for generated cookie files. Login writes .json and .txt variants.
@@ -135,7 +132,6 @@ Commands:
     success: InVRT successfully crawled the site!
     login: true
     requires: [ check ]
-    triggers: [ configure-backstop ]
     directories: 
       crawl_dir:
         default: INVRT_DIRECTORY/data/INVRT_PROFILE
@@ -145,26 +141,17 @@ Commands:
         description: Temporary wget mirror output directory.
     log: INVRT_CRAWL_DIR/crawl.log
 
-  configure-backstop:
-    description: Configure BackstopJS for visual regression testing.
-    help: Generates or updates the BackstopJS configuration for the specified profile, device, and environment.
-    success: InVRT successfully configured BackstopJS!
-    requires: [ crawl ]
-    internal: true
-
   reference:
     description: Create reference screenshots for comparison.
     help: Creates reference screenshots for the specified profile, device, and environment to use as baseline for comparison.
     login: true
-    requires: [ backstop-config ]
+    requires: [ crawl ]
     directories:
       capture_dir:
         default: INVRT_CRAWL_DIR/bitmaps
-        description: Root directory for BackstopJS capture and report artifacts.
+        description: Root directory for capture and report artifacts.
     writes:
       - INVRT_CAPTURE_DIR/reference/INVRT_DEVICE
-      - INVRT_CAPTURE_DIR/reports/html
-      - INVRT_CAPTURE_DIR/reports/json
 
   test:
     description: Run visual regression tests.
@@ -177,8 +164,8 @@ Commands:
 
   approve:
     description: Approve the latest visual test results.
-    help: Runs BackstopJS approve for the current profile, device, and environment.
-    success: Approved baseline images via BackstopJS
+    help: Promotes the latest test screenshots to be the new reference baseline.
+    success: Approved baseline images.
     requires: [ test ]
 
   baseline:

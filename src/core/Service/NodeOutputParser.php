@@ -8,7 +8,7 @@ use Psr\Log\LoggerInterface;
  * Parses NDJSON output from Node.js scripts using pino and routes each log
  * line to the PSR-3 logger at the appropriate level.
  *
- * Non-JSON lines (e.g. backstop's own output) are forwarded as debug.
+ * Non-JSON lines are forwarded as debug.
  */
 class NodeOutputParser
 {

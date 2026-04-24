@@ -46,7 +46,6 @@ class ConfigSchema implements ConfigurationInterface
         'plan_file'                => 'INVRT_DIRECTORY/plan.yaml',
         'reference_file'                => 'INVRT_CRAWL_DIR/logs/reference.log',
         'test_file'                => 'INVRT_CRAWL_DIR/logs/test.log',
-        'backstop_config_file'                => 'INVRT_SCRIPTS_DIR/backstop.json',
         'cookies_file'                => 'INVRT_CRAWL_DIR/cookies',
         'playwright_spec_file'                => 'INVRT_CRAWL_DIR/INVRT_DEVICE.spec.ts',
         'playwright_config_file'                => 'INVRT_CRAWL_DIR/playwright.config.ts',

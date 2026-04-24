@@ -12,7 +12,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(
     name: 'baseline',
     description: 'Capture a fresh baseline from check through approve',
-    help: 'Runs the full pipeline — check, crawl, configure-backstop, reference, test, approve — to establish a new approved baseline.',
+    help: 'Runs the full pipeline — check, crawl, generate-playwright, reference, test, approve — to establish a new approved baseline.',
 )]
 class BaselineCommand extends BaseCommand
 {

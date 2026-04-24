@@ -77,7 +77,6 @@ Crawls `INVRT_URL` with Playwright Chromium, scoped to the current environment/p
 - merges discovered paths into `INVRT_PLAN_FILE` using a tree-style `pages` structure
 - generates stable page IDs and updates each discovered page with active-profile access in `profiles`
 - preserves existing page metadata where possible while updating managed crawl fields
-- generates BackstopJS config to `INVRT_BACKSTOP_CONFIG_FILE` after a successful crawl
 
 If no usable URLs are found, it fails and prints the tail of the crawl log.
 
@@ -248,7 +247,6 @@ These keys are accepted in `settings`, `environments.*`, `profiles.*`, and `devi
 | `crawl_file` | `INVRT_CRAWL_FILE` | `INVRT_CRAWL_DIR/crawled_urls.txt` |
 | `exclude_file` | `INVRT_EXCLUDE_FILE` | `INVRT_CRAWL_DIR/exclude_paths.txt` |
 | `capture_dir` | `INVRT_CAPTURE_DIR` | `INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE` |
-| `backstop_config_file` | `INVRT_BACKSTOP_CONFIG_FILE` | `INVRT_CAPTURE_DIR/backstop-config.json` |
 | `check_file` | `INVRT_CHECK_FILE` | `INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/check.yaml` |
 | `plan_file` | `INVRT_PLAN_FILE` | `INVRT_DIRECTORY/plan.yaml` |
 | `reference_results_file` | `INVRT_REFERENCE_RESULTS_FILE` | `INVRT_CAPTURE_DIR/reference_results.txt` |
@@ -284,25 +282,11 @@ For crawling, `INVRT_COOKIE` takes precedence over the cookie jar and is sent as
 
 ## Screenshot Engine
 
-Config generation and BackstopJS execution are separated into two scripts:
+Reference, test, and approve all run via Playwright. The PHP `Runner` delegates to `PlaywrightRunner`, which runs `npx playwright test` (with `--update-snapshots` for `reference` and `approve`).
 
-### Config generation (`src/js/backstop-config.js`)
+`generate-playwright` writes a TypeScript spec from `INVRT_PLAN_FILE` and a `playwright.config.ts` into `INVRT_CRAWL_DIR`. Each scenario navigates to `INVRT_URL + <path>`, applies any resolved page hooks (`setup`/`onready`/`teardown`), and captures a screenshot. Cookies are loaded from `INVRT_COOKIES_FILE` when present.
 
-`src/js/backstop-config.js` builds a BackstopJS config from the resolved `INVRT_*` environment and writes it to `INVRT_BACKSTOP_CONFIG_FILE`:
-
-- viewport comes from `INVRT_VIEWPORT_WIDTH` and `INVRT_VIEWPORT_HEIGHT`
-- scenarios come from the pages map in `INVRT_PLAN_FILE`
-- each scenario URL is `INVRT_URL + <path>`
-- scenario labels are normalized from the path and suffixed with a SHA-1 hash for stability
-- only the first `INVRT_MAX_PAGES` crawl entries are used
-
-Config generation runs automatically at the end of a successful `crawl`. If the config file is missing when `reference` or `test` starts, it is regenerated before BackstopJS runs.
-
-### BackstopJS runner (`src/js/backstop.js`)
-
-`src/js/backstop.js` loads the pre-generated config from `INVRT_BACKSTOP_CONFIG_FILE` and runs the requested BackstopJS operation (reference, test, or approve).
-
-Hook scripts are resolved from `INVRT_SCRIPTS_DIR` when both of these files exist there:
+Hook scripts are resolved from `INVRT_SCRIPTS_DIR` when these files exist there:
 
 - `playwright-onbefore.js`
 - `playwright-onready.js`
@@ -337,16 +321,11 @@ The built-in hooks:
             ├── logs/
             │   └── crawl.log
             └── <device>/
-                ├── backstop-config.json
                 ├── reference_results.txt
                 ├── test_results.txt
-                ├── bitmaps/
-                │   ├── reference/
-                │   └── test/
-                └── reports/
-                    ├── ci/
-                    ├── html/
-                    └── json/
+                ├── reference/
+                ├── results/
+                └── report/
 ```
 
 Note that `init` seeds `.invrt/exclude_paths.txt`, while the default resolved `exclude_file` path is `.invrt/data/<environment>/<profile>/exclude_paths.txt` unless overridden in config.

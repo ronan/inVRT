@@ -159,10 +159,6 @@ $defs:
         type: string
         description: Directory where inVRT stores captured screenshots for this device.
         default: INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE
-      backstop_config_file:
-        type: string
-        description: Path to the generated BackstopJS configuration file.
-        default: INVRT_CAPTURE_DIR/backstop.json
       check_file:
         type: string
         description: File where inVRT stores the list of checks for this device.

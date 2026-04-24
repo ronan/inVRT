@@ -14,9 +14,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Tech Debt
 
-- [ ] Remove backstop.js as a requirement
-    - Playwright should now do everything backstop was doing before.
-
 ## Features
 
 ### Authentication

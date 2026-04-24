@@ -506,11 +506,9 @@ inVRT stores all generated data under `.invrt/data/`, namespaced by profile and 
             └── <device>/
                 ├── reference_results.txt     # Output from last `reference` run
                 ├── test_results.txt          # Output from last `test` run
-                ├── bitmaps/
-                │   ├── reference/            # Baseline screenshots (`reference` command)
-                │   └── test/                 # Latest test screenshots (`test` command)
-                └── reports/
-                    └── index.html            # BackstopJS comparison report
+                ├── reference/                # Baseline screenshots (`reference` command)
+                ├── results/                  # Latest test results (`test` command)
+                └── report/                   # Playwright HTML report
 ```
 
 Add `.invrt/data/` to `.gitignore` to keep generated artifacts out of version control.

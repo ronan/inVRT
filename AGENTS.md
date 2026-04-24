@@ -4,7 +4,7 @@
 
 inVRT is a **Symfony Console CLI application** (not Laravel) for running Visual Regression Testing (VRT) against cms-driven websites (Drupal, Backdrop, and Wordpress). The tool is able to capture the authenticated and unauthenticated user experience on multiple web environments (local, stage, live), and can simulate different devices (desktop/mobile) by setting the viewport size for screenshots.
 
-PHP orchestrates configuration and runs the cli; bash scripts handle crawling (wget); Node.js tools (Playwright, BackstopJS) handle browser automation and screenshot comparison.
+PHP orchestrates configuration and runs the cli; bash scripts handle crawling (wget); Node.js tools (Playwright) handle browser automation and screenshot comparison.
 
 The tool is built of composable parts and uses environment variables internally to make configuration passing easy between processes and to allow flexibility with the individual parts.
 
@@ -106,7 +106,7 @@ Symfony Console Commands (src/cli/Commands/)
   InVRT\Core\Configuration (src/core/Configuration.php)
   InVRT\Core\Service\LoginService, CookieService
          ↓
-  Node.js (src/js/*.js, Playwright, BackstopJS)
+  Node.js (src/js/*.js, Playwright)
 ```
 
 The codebase is split into two layers:

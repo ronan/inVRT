@@ -11,7 +11,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(
     name: 'approve',
     description: 'Approve the latest visual test results',
-    help: 'Runs BackstopJS approve for the current profile, device, and environment.',
+    help: 'Promotes the latest test screenshots to the new reference baseline for the current profile, device, and environment.',
 )]
 class ApproveCommand extends BaseCommand
 {
