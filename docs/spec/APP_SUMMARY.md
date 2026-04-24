@@ -1,6 +1,6 @@
 # inVRT Application Summary
 
-inVRT is a Symfony Console CLI for visual regression testing of CMS-driven sites. It can initialize a project, check site reachability, crawl pages with `wget`, log in with Playwright when credentials are configured, capture reference screenshots with BackstopJS/Playwright, run visual comparisons, and approve a new baseline.
+inVRT is a Symfony Console CLI for visual regression testing of CMS-driven sites. It can initialize a project, check site reachability, crawl pages with `wget`, log in with Playwright when credentials are configured, capture reference screenshots with Playwright, run visual comparisons, and approve a new baseline.
 
 ---
 
@@ -12,7 +12,7 @@ invrt check       # Fetch homepage metadata and write check.yaml
 invrt crawl       # Crawl the configured site and save discovered paths
 invrt reference   # Capture reference screenshots from the crawled paths
 invrt test        # Capture fresh screenshots and compare against reference
-invrt approve     # Approve the latest BackstopJS test results
+invrt approve     # Re-run Playwright with --update-snapshots to promote latest screenshots
 invrt baseline    # Ensure reference + test artifacts exist, then approve
 invrt info        # Show current project status for the selected context
 invrt config      # Print the resolved INVRT_* configuration
@@ -73,34 +73,37 @@ If no usable URLs are found, it fails and prints the tail of the crawl log.
 
 ### `reference`
 
-Captures reference screenshots with BackstopJS/Playwright for the current environment/profile/device. If the crawl file is missing, it runs `crawl` first. It fails when the crawl file exists but contains no usable URLs.
+Captures reference screenshots using Playwright for the current environment/profile/device. If the crawl file is missing, it runs `crawl` first. It fails when the crawl file exists but contains no usable URLs.
 
-Artifacts are written beneath `INVRT_CAPTURE_DIR`, including:
+Before capturing, it runs `generate-playwright` (which in turn runs `configure-playwright`) to write `playwright.config.ts` and the device spec to `INVRT_CRAWL_DIR`. It then runs `npx playwright test --update-snapshots`.
 
-- `bitmaps/reference/`
-- `reports/html/`
-- `reports/json/`
-- `reports/ci/`
-- `backstop-config.json`
+Artifacts are written to `INVRT_CRAWL_DIR`:
+
+- `reference/` — snapshot PNG files (Playwright snapshot dir)
+- `results/` — Playwright test results
+- `report/` — Playwright HTML report
 - `reference_results.txt`
 
 ### `test`
 
-Runs visual regression comparison with BackstopJS. If `INVRT_REFERENCE_RESULTS_FILE` is missing, it runs `reference` first. Test output is written under `INVRT_CAPTURE_DIR`, including `bitmaps/test/`, reports, and `test_results.txt`.
+Runs visual regression comparison with Playwright. If `INVRT_REFERENCE_FILE` is missing, it runs `reference` first. Runs `npx playwright test` (no `--update-snapshots`). Test output is written to `INVRT_CRAWL_DIR/results/` and `report/`, and `test_results.txt`.
 
-Exit code is BackstopJS' exit code: `0` on pass, non-zero on failure.
+Exit code is Playwright's exit code: `0` on pass, non-zero on failure.
 
 ### `approve`
 
-Runs BackstopJS `approve` for the selected environment/profile/device. It requires a config file but does not attempt login first.
+Re-runs Playwright with `--update-snapshots` for the selected environment/profile/device, promoting the latest screenshots to the reference baseline. Does not attempt login first.
 
 ### `baseline`
 
-Refreshes the approved baseline. It runs:
+Refreshes the approved baseline from scratch:
 
-1. `reference` if reference results are missing
-2. `test` if test results are missing
-3. `approve`
+1. `check`
+2. `crawl`
+3. `generate-playwright` (includes `configure-playwright`)
+4. Playwright `reference` (`--update-snapshots`)
+5. Playwright `test`
+6. Playwright `reference` again (approve — update snapshots to match test results)
 
 ### `info`
 

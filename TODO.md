@@ -62,8 +62,12 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Move to Playwright
 
-- [ ] Copy `tooling/config/playwright.config.ts` to the .invrt directory during `init`
-- [ ] Run references and test capture by running the playwright test script
+- [x] Put the contents of `tooling/config/playwright.config.ts` to the CRAWL_DIR before running `generate-playwright`
+    Create a hidden `configure-playwright` command that saves the contetns of that file to the crawl directory
+    Trigger the `configure-playright` command when `generate-playwright` is run
+    Use the INVRT_PLAYWRIGHT_CONFIG_FILE option to determine the path for the config file.
+- [x] Run references and test capture by running the playwright test script
+    Use the `--config=` option to point to the playwright.config.ts file in the crawl directory
 
 ## Create plan.yaml
 

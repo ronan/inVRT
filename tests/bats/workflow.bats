@@ -114,8 +114,8 @@ teardown() {
   run_invrt reference
 
   [ "$status" -eq 0 ]
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop" 2
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/reference"
+  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/reference" 2
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/reference.log"
 }
 
@@ -128,7 +128,7 @@ teardown() {
   [ "$status" -eq 0 ]
   assert_output_contains "No crawled URLs found"
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop" 1
+  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/reference" 1
 }
 
 @test "reference: shows debug output at vvv" {
@@ -140,8 +140,8 @@ teardown() {
 
   [ "$status" -eq 0 ]
   assert_output_contains "[debug] Bootstrapping command"
-  assert_output_contains "[debug] Running BackstopJS command"
-  assert_output_contains "[debug] BackstopJS exit code: 0"
+  assert_output_contains "[debug] Running Playwright command"
+  assert_output_contains "[debug] Playwright exit code: 0"
 }
 
 @test "reference: fails when the crawl file is empty" {
@@ -171,8 +171,8 @@ teardown() {
 
   [ "$status" -eq 0 ]
   assert_output_contains "No reference screenshots found"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/reference.log"
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/test.log"
 
@@ -192,8 +192,8 @@ teardown() {
   [ "$status" -eq 0 ]
   assert_output_contains "No reference screenshots found"
   assert_output_contains "No crawled URLs found"
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop" 1
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop" 1
+  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/reference" 1
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
 }
 
 @test "test: handles very long crawled url paths" {
@@ -208,7 +208,7 @@ teardown() {
   run_invrt test
 
   [ "$status" -eq 0 ]
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop" 1
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
 }
 
 @test "approve: succeeds after a test run" {
@@ -233,9 +233,10 @@ teardown() {
 
   [ "$status" -eq 0 ]
   assert_output_contains "Generated playwright spec"
-  assert_file_exists "$TEST_DIR/.invrt/scripts/anonymous.spec.ts"
-  assert_file_contains "$TEST_DIR/.invrt/scripts/anonymous.spec.ts" "import { test"
-  assert_file_contains "$TEST_DIR/.invrt/scripts/anonymous.spec.ts" "networkidle"
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts"
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/playwright.config.ts"
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "import { test"
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "networkidle"
 }
 
 @test "baseline: runs full pipeline and produces approved screenshots" {
@@ -247,10 +248,10 @@ teardown() {
   [ "$status" -eq 0 ]
   assert_output_contains "Site check complete"
   assert_output_contains "Crawling completed"
-  assert_output_contains "Generated backstop config"
+  assert_output_contains "Generated playwright spec"
   assert_output_contains "Approving latest results"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/reference.log"
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/test.log"
 }
@@ -263,8 +264,8 @@ teardown() {
   [ "$status" -eq 0 ]
   assert_output_contains "InVRT successfully initialized!"
   assert_output_contains "Running baseline"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/local/desktop"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
 }
 
 @test "init: skips baseline with --skip-baseline" {

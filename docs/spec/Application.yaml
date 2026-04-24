@@ -81,6 +81,9 @@ Files:
   playwright_spec_file:
     default: INVRT_CRAWL_DIR/INVRT_DEVICE.spec.ts
     description: Generated Playwright TypeScript spec file for screenshot capture.
+  playwright_config_file:
+    default: INVRT_CRAWL_DIR/playwright.config.ts
+    description: Generated Playwright TypeScript configuration file for screenshot capture.
 
 Commands:
   config:

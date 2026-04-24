@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Auto generated. Do not edit.
- * 
- * See 
+ *
+ * See
  *  - @tooling/templates/ConfigSchema.tpl.php
  *  - @docs/spec/Application.yaml
- * and run 
+ * and run
  *  `task build:templates`
  * to regenerate.
  */
@@ -49,6 +50,7 @@ class ConfigSchema implements ConfigurationInterface
         'cookies_file'                => 'INVRT_CRAWL_DIR/cookies',
         'exclude_file'                => 'INVRT_DIRECTORY/exclude-paths.txt',
         'playwright_spec_file'                => 'INVRT_CRAWL_DIR/INVRT_DEVICE.spec.ts',
+        'playwright_config_file'                => 'INVRT_CRAWL_DIR/playwright.config.ts',
     ];
 
     public function getConfigTreeBuilder(): TreeBuilder

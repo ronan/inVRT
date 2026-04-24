@@ -29,9 +29,20 @@ Completed tasks moved from TODO.md.
   - [x] Add a project id to distinguish final reports.
     - [x] The project id should be saved to the config.yml file as 'id' in settings
 
-## Move to Playwright
+## Move to Playwright (phase 2)
 
-- [x] Create a command to generate a playwright test script
+- [x] Put the contents of `tooling/config/playwright.config.ts` to the CRAWL_DIR before running `generate-playwright`
+    - Created hidden `configure-playwright` command that writes the hardcoded config content to `INVRT_PLAYWRIGHT_CONFIG_FILE`
+    - `generate-playwright` now calls `configure-playwright` first
+    - Config file path controlled by `INVRT_PLAYWRIGHT_CONFIG_FILE`
+- [x] Run references and test capture by running the playwright test script
+    - `reference` now runs `generatePlaywright()` + `runPlaywright('reference')` (with `--update-snapshots`)
+    - `test` now runs `runPlaywright('test')`
+    - `approve` now runs `runPlaywright('reference')` (re-captures with `--update-snapshots`)
+    - `baseline` updated to use the Playwright pipeline end-to-end
+    - Removed `runBackstop()`, `ensureBackstopConfig()`, and `prepareDirectory()` from Runner
+
+
     - save to INVRT_DIRECTORY/scripts/playwright.spec.ts
     - test steps
       - Visits each page in the crawl list

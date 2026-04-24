@@ -140,7 +140,7 @@ Approve the latest test images for the current profile/device/environment combin
 invrt approve [--profile=<name>] [--device=<name>] [--environment=<name>]
 ```
 
-This runs `backstop approve` against the current capture directory.
+Re-runs Playwright with `--update-snapshots` to promote the latest captured screenshots to the reference baseline.
 
 ### `baseline`
 
@@ -210,7 +210,7 @@ Capture reference (baseline) screenshots for the current profile/device/environm
 invrt reference [--profile=<name>] [--device=<name>] [--environment=<name>]
 ```
 
-Reads the URL list produced by `crawl` and captures a screenshot of each page using Playwright (Chromium). Screenshots are stored in `.invrt/data/<profile>/<environment>/bitmaps/reference/`.
+Reads the URL list produced by `crawl` and captures a screenshot of each page using Playwright (Chromium). The Playwright config and spec are generated into `.invrt/data/<profile>/` before running. Screenshots are stored in `.invrt/data/<profile>/<environment>/bitmaps/reference/`.
 
 If no `crawled_urls.txt` file exists for the current profile/device/environment combination, `crawl` is run automatically before capturing screenshots.
 
@@ -235,7 +235,7 @@ invrt reference --profile=admin --environment=prod
 
 ```
 📸 Capturing references from 'local' environment (https://example.com) with profile: 'anonymous' and device: 'desktop'
-[BackstopJS] Reference complete.
+Running playwright test -- update-snapshots
 ```
 
 ---
@@ -248,7 +248,7 @@ Run a visual regression test — compare current screenshots against the referen
 invrt test [--profile=<name>] [--device=<name>] [--environment=<name>]
 ```
 
-Captures fresh screenshots of all crawled URLs and compares them against the reference images using BackstopJS (ResembleJS). Generates an HTML report in `.invrt/data/<profile>/<environment>/reports/`.
+Captures fresh screenshots of all crawled URLs and compares them against the reference images using Playwright's snapshot comparison. Generates an HTML report in `.invrt/data/<profile>/report/`.
 
 If no reference screenshots exist for the current profile/device/environment combination, the
 reference step is run automatically before the test. If crawled URLs are also missing, `reference`
@@ -276,8 +276,9 @@ invrt test --device=desktop
 
 ```
 🔬 Testing 'local' environment (https://example.com) with profile: 'anonymous' and device: 'desktop'
-[BackstopJS] Testing complete. 42 tests run. 40 passed. 2 failed.
-[BackstopJS] Report: .invrt/data/anonymous/local/reports/index.html
+Running playwright test
+42 tests ran. 40 passed. 2 failed.
+Report: .invrt/data/anonymous/report/index.html
 ```
 
 ---

@@ -198,7 +198,6 @@ EOF;
         $profile     = $env['INVRT_PROFILE']     ?? '';
         $device      = $env['INVRT_DEVICE']      ?? '';
         $environment = $env['INVRT_ENVIRONMENT'] ?? '';
-        $captureDir  = $env['INVRT_CAPTURE_DIR'] ?? '';
         $crawlFile   = $env['INVRT_CRAWL_FILE']  ?? '';
 
         $this->logger->info("📸 Capturing references from '$environment' environment ($url) with profile: '$profile' and device: '$device'");
@@ -214,10 +213,11 @@ EOF;
             return $result;
         }
 
-        $this->prepareDirectory($captureDir . '/reference/' . $device);
-        $this->ensureBackstopConfig();
+        if (($result = $this->generatePlaywright()) !== 0) {
+            return $result;
+        }
 
-        return $this->runBackstop('reference', $env);
+        return $this->runPlaywright('reference', $env);
     }
 
     /** Run visual regression tests, capturing references first if needed. */
@@ -239,10 +239,10 @@ EOF;
             }
         }
 
-        return $this->runBackstop('test', $env);
+        return $this->runPlaywright('test', $env);
     }
 
-    /** Approve the latest BackstopJS test results. */
+    /** Approve the latest results by re-running Playwright with --update-snapshots. */
     public function approve(): int
     {
         $env         = $this->config->all();
@@ -253,11 +253,11 @@ EOF;
 
         $this->logger->notice("✅ Approving latest results for '$environment' environment ($url) with profile: '$profile' and device: '$device'");
 
-        return $this->runBackstop('approve', $env);
+        return $this->runPlaywright('reference', $env);
     }
 
     /**
-     * Run the full baseline workflow from scratch: check → crawl → configure-backstop → reference → test → approve.
+     * Run the full baseline workflow from scratch: check → crawl → generate-playwright → reference → test → approve.
      *
      * Always re-runs every step regardless of prior artifacts.
      */
@@ -271,22 +271,17 @@ EOF;
             return $result;
         }
 
-        $env         = $this->config->all();
-        $captureDir  = $env['INVRT_CAPTURE_DIR'] ?? '';
-        $device      = $env['INVRT_DEVICE']      ?? 'desktop';
-        $environment = $env['INVRT_ENVIRONMENT'] ?? 'local';
-        $this->prepareDirectory($captureDir . '/reference/' . $device);
-        $this->prepareDirectory($captureDir . '/' . $environment . '/' . $device);
+        $env = $this->config->all();
 
-        if (($result = $this->configureBackstop()) !== 0) {
+        if (($result = $this->generatePlaywright()) !== 0) {
             return $result;
         }
 
-        if (($result = $this->runBackstop('reference', $env)) !== 0) {
+        if (($result = $this->runPlaywright('reference', $env)) !== 0) {
             return $result;
         }
 
-        if (($result = $this->runBackstop('test', $env)) !== 0) {
+        if (($result = $this->runPlaywright('test', $env)) !== 0) {
             return $result;
         }
 
@@ -301,9 +296,53 @@ EOF;
         return $this->runNode('backstop-config.js', $inputFile, $outputFile);
     }
 
+    /** Write the bundled playwright.config.ts to INVRT_PLAYWRIGHT_CONFIG_FILE. */
+    public function configurePlaywright(): int
+    {
+        $configFile = $this->config->get('INVRT_PLAYWRIGHT_CONFIG_FILE', '');
+        if ($configFile === '') {
+            $this->logger->error('INVRT_PLAYWRIGHT_CONFIG_FILE is not set.');
+            return 1;
+        }
+
+        $dir = dirname($configFile);
+        if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+            $this->logger->error('Failed to create directory for playwright config: ' . $dir);
+            return 1;
+        }
+
+        $content = <<<'TS'
+import { defineConfig } from '@playwright/test';
+
+/**
+ * See https://playwright.dev/docs/test-configuration.
+ */
+export default defineConfig({
+  outputDir: 'results',
+  snapshotPathTemplate: 'reference/{arg}{ext}',
+  reporter: [['html', { outputFolder: 'report' }]],
+  use: {
+    screenshot: 'on',
+  }
+});
+TS;
+
+        if (file_put_contents($configFile, $content) === false) {
+            $this->logger->error('Failed to write playwright config to ' . $configFile);
+            return 1;
+        }
+
+        $this->logger->info('✓ Wrote playwright config to ' . $configFile);
+        return 0;
+    }
+
     /** Generate a Playwright TypeScript spec from the crawled URL list. */
     public function generatePlaywright(): int
     {
+        if (($result = $this->configurePlaywright()) !== 0) {
+            return $result;
+        }
+
         $inputFile  = $this->config->get('INVRT_CRAWL_FILE', '') ?: null;
         $outputFile = $this->config->get('INVRT_PLAYWRIGHT_SPEC_FILE', '') ?: null;
         return $this->runNode('generate-playwright.js', $inputFile, $outputFile);
@@ -430,48 +469,62 @@ EOF;
         return $process->getExitCode() ?? 0;
     }
 
-    /** Generate backstop config if it doesn't exist yet. */
-    private function ensureBackstopConfig(): void
+    /**
+     * Run Playwright tests for the given mode using the resolved config file.
+     *
+     * mode 'reference' — runs with --update-snapshots to capture/update baseline.
+     * mode 'test'      — runs normally and compares against stored snapshots.
+     */
+    private function runPlaywright(string $mode, array $env): int
     {
-        $configFile = $this->config->get('INVRT_BACKSTOP_CONFIG_FILE', '');
-        if ($configFile !== '' && file_exists($configFile)) {
-            return;
+        $configFile = $this->config->get('INVRT_PLAYWRIGHT_CONFIG_FILE', '');
+        $specFile   = $this->config->get('INVRT_PLAYWRIGHT_SPEC_FILE', '');
+        $configDir  = $configFile !== '' ? dirname($configFile) : '';
+
+        $cmd = 'npx playwright test';
+        if ($configFile !== '') {
+            $cmd .= ' --config=' . escapeshellarg($configFile);
+        }
+        if ($specFile !== '') {
+            $cmd .= ' ' . escapeshellarg($specFile);
+        }
+        if ($mode === 'reference') {
+            $cmd .= ' --update-snapshots';
         }
 
-        $this->configureBackstop();
-    }
+        $this->logger->debug('Running Playwright command: ' . $cmd);
+        $this->logger->notice('Running playwright test' . ($mode === 'reference' ? ' --update-snapshots' : ''));
 
-    private function runBackstop(string $mode, array $env): int
-    {
-        $configFile = $this->config->get('INVRT_BACKSTOP_CONFIG_FILE', '');
-        $file       = rtrim($this->appDir, '/') . '/backstop.js';
-        $cmd        = 'node ' . escapeshellarg($file) . ' ' . $mode;
-        $this->logger->debug('Running BackstopJS command: ' . $cmd);
-
-        $process = Process::fromShellCommandline($cmd, null, $env);
+        $process = Process::fromShellCommandline($cmd, $configDir ?: null, $env);
         $process->setTimeout(null);
 
-        if ($configFile !== '' && is_readable($configFile)) {
-            $process->setInput(file_get_contents($configFile));
-        }
-
         $parser = new NodeOutputParser($this->logger);
-        $process->run(function (mixed $type, mixed $buffer) use ($parser): void {
+        $output = '';
+        $process->run(function (mixed $type, mixed $buffer) use ($parser, &$output): void {
             if ($type === Process::ERR) {
                 $parser->write($buffer);
+            } else {
+                $output .= $buffer;
+                // Forward stdout lines as notices
+                foreach (explode("\n", $buffer) as $line) {
+                    $line = trim($line);
+                    if ($line !== '') {
+                        $this->logger->notice($line);
+                    }
+                }
             }
         });
         $parser->flush();
 
         $exitCode = $process->getExitCode() ?? 0;
-        $this->logger->debug('BackstopJS exit code: ' . $exitCode);
+        $this->logger->debug('Playwright exit code: ' . $exitCode);
 
-        $this->writeResultsFile($mode, $parser->getMessages());
+        $this->writeResultsFile($mode === 'reference' ? 'reference' : 'test', $output . $parser->getMessages());
 
         return $exitCode;
     }
 
-    /** Write BackstopJS output to the appropriate results file for the given mode. */
+    /** Write output to the appropriate results file for the given mode. */
     private function writeResultsFile(string $mode, string $output): void
     {
         $file = match ($mode) {
@@ -490,23 +543,6 @@ EOF;
         }
 
         file_put_contents($file, $output);
-    }
-
-    /** Create dir if absent, or clear contents if present. */
-    private function prepareDirectory(string $dir): void
-    {
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-            return;
-        }
-
-        $items = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST,
-        );
-        foreach ($items as $item) {
-            $item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
-        }
     }
 
     private function validateCrawledUrls(): int
