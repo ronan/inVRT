@@ -19,6 +19,21 @@ project:
     login_url: /user/login
 ```
 
+## Exclude
+
+The `exclude` section contains an array of paths or path-prefixes to be excluded from crawling and testing:
+
+```
+project:
+    url: http://invrt.sh
+    id: zzytgghxc
+
+exclude:
+    - admin
+    - login
+    - images
+```
+
 ## Pages
 
 The pages that make up the site are listed in a 'pages' object at the top level.
