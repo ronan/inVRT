@@ -23,6 +23,31 @@ teardown() {
   assert_yaml_equals "$TEST_DIR/.invrt/check.yaml" "title" "Home"
   assert_yaml_equals "$TEST_DIR/.invrt/check.yaml" "https" "false"
   assert_file_not_contains "$TEST_DIR/.invrt/check.yaml" "redirected_from:"
+  assert_file_exists "$TEST_DIR/.invrt/plan.yaml"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.url" "$SERVER_URL"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.title" "Home"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "pages./.title" "Home"
+}
+
+@test "check: preserves user-defined plan keys while updating metadata" {
+  start_fixture_server
+  seed_basic_config "$SERVER_URL"
+
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+project:
+  custom_key: keep-me
+pages:
+  /:
+    onready: scripts/home.onready.js
+EOF
+
+  run_invrt check
+
+  [ "$status" -eq 0 ]
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.custom_key" "keep-me"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.title" "Home"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "pages./.onready" "scripts/home.onready.js"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "pages./.title" "Home"
 }
 
 @test "check: fails when the site is unreachable" {

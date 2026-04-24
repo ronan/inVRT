@@ -4,6 +4,7 @@ namespace InVRT\Core;
 
 use InVRT\Core\Service\LoginService;
 use InVRT\Core\Service\NodeOutputParser;
+use InVRT\Core\Service\PlanService;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
@@ -36,6 +37,7 @@ class Runner
         $profile     = $this->config->get('INVRT_PROFILE', 'anonymous');
         $device      = $this->config->get('INVRT_DEVICE', 'desktop');
         $excludeFile = $this->config->get('INVRT_EXCLUDE_FILE');
+        $planFile    = $this->config->get('INVRT_PLAN_FILE', '');
 
         if (empty($cwd)) {
             $this->logger->error("⚠️  I can't make a directory here because I don't know where I am.");
@@ -123,6 +125,17 @@ EOF;
             return 1;
         }
 
+        if ($planFile === '') {
+            $this->logger->error('INVRT_PLAN_FILE is not set.');
+            return 1;
+        }
+
+        if (!PlanService::update($planFile, $url, $projectId)) {
+            $this->logger->error('Failed to create or update plan.yaml at ' . $planFile);
+            return 1;
+        }
+        $this->logger->info('✓ Initialized plan file at ' . $planFile);
+
         $this->logger->notice('✅ InVRT successfully initialized!');
 
         if ($this->check() !== 0) {
@@ -180,7 +193,38 @@ EOF;
     public function check(): int
     {
         $outputFile = $this->config->get('INVRT_CHECK_FILE', '') ?: null;
-        return $this->runNode('check.js', null, $outputFile);
+        $result = $this->runNode('check.js', null, $outputFile);
+        if ($result !== 0) {
+            return $result;
+        }
+
+        if ($outputFile === null || !is_readable($outputFile)) {
+            $this->logger->warning('Check completed but no check file was found to enrich plan.yaml.');
+            return 0;
+        }
+
+        $planFile = $this->config->get('INVRT_PLAN_FILE', '');
+        if ($planFile === '') {
+            $this->logger->error('INVRT_PLAN_FILE is not set.');
+            return 1;
+        }
+
+        $checkData = Yaml::parseFile($outputFile);
+        if (!is_array($checkData)) {
+            $checkData = [];
+        }
+
+        $projectUrl = (string) $this->config->get('INVRT_URL', '');
+        $projectId = (string) $this->config->get('INVRT_ID', '');
+        $projectTitle = (string) ($checkData['title'] ?? '');
+
+        if (!PlanService::update($planFile, $projectUrl, $projectId, $projectTitle, $projectTitle)) {
+            $this->logger->error('Failed to update plan.yaml at ' . $planFile);
+            return 1;
+        }
+
+        $this->logger->debug('Updated plan.yaml with latest check metadata.');
+        return 0;
     }
 
     /** Crawl the target URL and write unique paths to the crawl file. */

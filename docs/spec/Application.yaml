@@ -63,6 +63,9 @@ Files:
   check_file:
     default: INVRT_DIRECTORY/check.yaml
     description: Path to the file storing the results of the site check.
+  plan_file:
+    default: INVRT_DIRECTORY/plan.yaml
+    description: Path to the generated and user-editable site plan file.
   reference_file:
     default: INVRT_CRAWL_DIR/logs/reference.log
     description: Path to the file storing the reference output for visual regression testing.

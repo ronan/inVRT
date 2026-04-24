@@ -8,6 +8,7 @@ inVRT is a Symfony Console CLI for visual regression testing of CMS-driven sites
 
 ```bash
 invrt init <url>  # Create .invrt/ and seed config for the selected env/profile/device
+                 # Also create .invrt/plan.yaml
 invrt check       # Fetch homepage metadata and write check.yaml
 invrt crawl       # Crawl the configured site and save discovered paths
 invrt reference   # Capture reference screenshots from the crawled paths
@@ -35,11 +36,22 @@ Initializes a new inVRT project in the current working directory. Creates:
 
 It writes a minimal config with the currently selected environment/profile/device keys and stores the provided URL at `environments.<selected-environment>.url`. If no URL argument is provided and stdin is interactive, it prompts for one. It fails if `.invrt/` already exists. After initialization it runs `check`, warning if the site is not reachable yet.
 
+`init` also creates `.invrt/plan.yaml` and seeds:
+
+- `project.url` from the initialized URL
+- `project.id` from resolved project ID when available
+- `pages['/']` as the initial homepage entry
+
 During init, inVRT also generates a stable project identifier and stores it at `settings.id`. The ID is derived from the URL hostname plus a random seed so projects with the same URL still get distinct report IDs.
 
 ### `check`
 
 Fetches the configured site URL, follows redirects, extracts the page title, detects whether the resolved URL uses HTTPS, and records any permanent redirect source. Writes the result to `INVRT_CHECK_FILE`, which defaults to `.invrt/data/<environment>/check.yaml`.
+
+After writing `check.yaml`, `check` updates `INVRT_PLAN_FILE` (default `.invrt/plan.yaml`) by merging discovered metadata without removing user-defined keys:
+
+- updates `project.title` when title is discovered
+- ensures homepage exists in `pages` as `/`
 
 The written YAML may include:
 
@@ -241,6 +253,7 @@ These keys are accepted in `settings`, `environments.*`, `profiles.*`, and `devi
 | `capture_dir` | `INVRT_CAPTURE_DIR` | `INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE/INVRT_DEVICE` |
 | `backstop_config_file` | `INVRT_BACKSTOP_CONFIG_FILE` | `INVRT_CAPTURE_DIR/backstop-config.json` |
 | `check_file` | `INVRT_CHECK_FILE` | `INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/check.yaml` |
+| `plan_file` | `INVRT_PLAN_FILE` | `INVRT_DIRECTORY/plan.yaml` |
 | `reference_results_file` | `INVRT_REFERENCE_RESULTS_FILE` | `INVRT_CAPTURE_DIR/reference_results.txt` |
 | `test_results_file` | `INVRT_TEST_RESULTS_FILE` | `INVRT_CAPTURE_DIR/test_results.txt` |
 
@@ -312,6 +325,7 @@ The built-in hooks:
 ```text
 .invrt/
 ├── config.yaml
+├── plan.yaml
 ├── exclude_paths.txt
 ├── scripts/
 └── data/

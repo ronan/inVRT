@@ -44,6 +44,7 @@ class ConfigSchema implements ConfigurationInterface
         'crawl_file'                => 'INVRT_CRAWL_DIR/crawled-paths.text',
         'crawl_log'                => 'INVRT_CRAWL_DIR/logs/crawl.log',
         'check_file'                => 'INVRT_DIRECTORY/check.yaml',
+        'plan_file'                => 'INVRT_DIRECTORY/plan.yaml',
         'reference_file'                => 'INVRT_CRAWL_DIR/logs/reference.log',
         'test_file'                => 'INVRT_CRAWL_DIR/logs/test.log',
         'backstop_config_file'                => 'INVRT_SCRIPTS_DIR/backstop.json',

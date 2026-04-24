@@ -43,9 +43,12 @@ teardown() {
   assert_dir_exists "$TEST_DIR/.invrt/data"
   assert_dir_exists "$TEST_DIR/.invrt/scripts"
   assert_file_exists "$TEST_DIR/.invrt/exclude-paths.txt"
+  assert_file_exists "$TEST_DIR/.invrt/plan.yaml"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "environments.stage.url" "https://example.test"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "profiles.editor" "[]"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "devices.tablet" "[]"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.url" "https://example.test"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "pages./" "[]"
 
   local project_id
   project_id="$(yaml_get "$TEST_DIR/.invrt/config.yaml" "project.id")"

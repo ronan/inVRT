@@ -93,6 +93,13 @@ Completed tasks moved from TODO.md.
 
 ### Advanced flow
 
+- [x] Create a plan.yaml file (at `.invrt/plan.yaml`) during init.
+  - Uses the format in [Plan Yaml Spec](docs/planning/proposals/Plan.yaml.specification.md)
+  - `plan.yaml` is auto-generated and updated but remains user-editable
+  - User-defined keys are preserved when updates run
+  - `invrt init` adds base URL to `project`
+  - `invrt check` adds discovered title and ensures homepage entry in `pages` (`/`)
+
 - [x] Implement `invrt check` to load the homepage and retrieve the site title
   - Have the check function run automatically after init and before crawl if it hasn't been run yet.
   - Add cms_detector binary to dockerfile to check the cms version/platform.

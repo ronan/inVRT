@@ -29,6 +29,7 @@ inVRT is a CLI tool for running Visual Regression Testing (VRT) against CMS-driv
 
 ``` 
 invrt init <url>  # One-time setup — creates .invrt/ and saves the site URL
+                 # and initializes .invrt/plan.yaml
 invrt check       # Verify site connectivity and collect metadata (auto-runs after init)
 invrt crawl       # Discover URLs by crawling the site
 invrt reference   # Capture baseline screenshots
@@ -62,12 +63,15 @@ Creates the following structure:
 ```
 .invrt/
 ├── config.yaml           # Main configuration — edit this
+├── plan.yaml             # Auto-generated site plan; safe to edit
 ├── exclude_urls.txt      # URL path patterns to skip during crawl
 ├── data/                 # Generated screenshots, reports, logs (gitignore this)
 └── scripts/              # Optional user-defined hook scripts
 ```
 
 The generated `config.yaml` is intentionally minimal. It writes the URL to `environments.<selected-environment>.url` and creates the selected environment, profile, and device keys.
+
+`init` also creates `.invrt/plan.yaml` and seeds `project.url` (and `project.id` when available), plus an initial homepage entry in `pages`.
 
 If you omit the URL argument in an interactive terminal, inVRT prompts for it.
 
@@ -96,6 +100,12 @@ invrt check [--environment=<name>] [--profile=<name>] [--device=<name>]
 ```
 
 Fetches the site homepage, extracts the page title, detects HTTPS, and records any permanent (301) redirects. Results are written to `.invrt/data/<environment>/check.yaml`.
+
+After a successful check, inVRT updates `.invrt/plan.yaml` with discovered metadata:
+
+- `project.title` is set from the homepage title when available.
+- The homepage entry is ensured under `pages` as `/`.
+- Existing user-defined keys in `plan.yaml` are preserved.
 
 `check` runs automatically after `init` and before `crawl` when no check file exists yet.
 
