@@ -68,10 +68,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Tests
 
-### Test Cleanup
-- [ ] Remove unit tests. Add or update e2e tests for any edge cases that are missing
-- [ ] Remove phpstan, phpunit and rector
-
 ### End to End Testing
     - [ ] Create a 99 page website which goes 4 levels deep
         Make it look like nice but generic business page. Add Lorum Ipsem test content.

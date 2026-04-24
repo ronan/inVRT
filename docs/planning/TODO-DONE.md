@@ -254,6 +254,10 @@ Completed tasks moved from TODO.md.
 
 ## Tests
 
+- [x] Test Cleanup
+  - [x] Remove unit tests. Add or update e2e tests for any edge cases that are missing.
+  - [x] Remove phpstan, phpunit and rector.
+
 - [x] Add all e2e tests to bats.
 
 - [x] **E2E: ReferenceCommandTest**

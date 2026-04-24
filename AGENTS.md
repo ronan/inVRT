@@ -70,7 +70,7 @@ Add a verbosity level for all calls to $logger
 
 All code should be tested.
 
-Write tests with PHPUnit, including end-to-end tests that execute real bash scripts.
+Tests are written as end-to-end Bats tests under `tests/bats/` that run the real `bin/invrt` binary.
 
 Test the happy path
 
@@ -80,11 +80,9 @@ Don't test glue code.
 
 Test the behavior not the implementation.
 
-Use mocks and stubs for external dependencies in unit tests.
+Use real subprocess execution to verify that the bash scripts work as expected.
 
-Use real subprocess execution in E2E tests to verify that the bash scripts work as expected.
-
-Clean up after testing. E2E tests should use temporary directories and remove them after tests run.
+Clean up BEFORE testing not after. Tests should use temporary directories in `/scratch` and leave artifacts for inspection after tests run. `/scratch` is ignored by git.
 
 ### Testing Tools
 
@@ -138,9 +136,6 @@ Refer to [The configuration documentation](docs/user/en/configuration.md) for de
 - `App\Input\` → `src/cli/Input/`
 - `InVRT\Core\` → `src/core/`
 - `InVRT\Core\Service\` → `src/core/Service/`
-- `Tests\Unit\` → `tests/Unit/`
-- `Tests\E2E\` → `tests/e2e/`
-- `Tests\Fixtures\` → `tests/fixtures/`
 
 ### Adding a New Command
 1. Use Symfony's attribute-based command registration with `#[AsCommand(name: '...', description: '...', help: '...')]`
@@ -158,8 +153,6 @@ Refer to [The configuration documentation](docs/user/en/configuration.md) for de
 
 ### Tests
 
-**Unit tests** (`tests/Unit/`) test PHP services in isolation using PHPUnit mocking. No filesystem or subprocess access.
-
 **CLI end-to-end tests** live in `tests/bats/` and run the real `bin/invrt` binary via Bats.
 
 - Use `tests/bats/test_helper.bash` for shared setup, command runners, YAML helpers, and webserver lifecycle helpers.
@@ -167,6 +160,3 @@ Refer to [The configuration documentation](docs/user/en/configuration.md) for de
 - Prefer `/scratch/tests/` for artifacts; the helper falls back to `scratch/tests/` when `/scratch/tests/` is unavailable on the host.
 - Workflow tests should use the real PHP built-in server against `tests/fixtures/website/`.
 - Interactive CLI flows should be exercised through a pseudo-TTY (`script`), not by mocking Symfony input classes.
-
-### PHPStan
-Level 5, strict. A baseline file (`tooling/phpstan-baseline.neon`) tracks accepted violations. Run `task baseline:phpstan` after intentional type changes, not to hide new issues.

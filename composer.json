@@ -26,11 +26,6 @@
             "InVRT\\Core\\": "src/core/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
     "bin": [
         "src/cli/invrt.php"
     ],
@@ -38,9 +33,6 @@
         "allow-plugins": {}
     },
     "require-dev": {
-        "phpunit/phpunit": "^13.0",
-        "friendsofphp/php-cs-fixer": "^3.94",
-        "rector/rector": "^2.3",
-        "phpstan/phpstan": "^2.1"
+        "friendsofphp/php-cs-fixer": "^3.94"
     }
 }

@@ -46,7 +46,7 @@ tasks:
 
   test:
     desc: Run all tests and quality checks
-    deps: [fix, test:phpstan, test:php, test:bats]
+    deps: [fix, test:bats]
 
   livecode:
     desc: Run the live coding session
@@ -57,11 +57,11 @@ tasks:
   watch:
     desc: Watch for file changes and rerun tasks
     watch: true
-    deps: [fix:lint, test:php:unit, build:templates]
+    deps: [fix:lint, test:bats, build:templates]
  
   fix:
-    desc: Run all code fixes (modernize, lint)
-    deps: [fix:modernize, fix:lint]
+    desc: Run all code fixes (lint)
+    deps: [fix:lint]
 
   build:
     desc: Build the project
@@ -143,51 +143,6 @@ tasks:
       - mkdir -p {{.TASKFILE_DIR}}/scratch/tests
       - docker build --target test -t invrt:test .
       - docker run --rm -v {{.TASKFILE_DIR}}/scratch/tests:/scratch/tests invrt:test
-
-  test:php:
-    desc: Run all tests with PHPUnit
-    dir: /tmp
-    cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/config/phpunit.xml --testdox --stop-on-failure {{.TASKFILE_DIR}}/tests {{.CLI_ARGS}}
-    sources:
-      - 'src/core/**/*.php'
-      - 'src/cli/**/*.php'
-      - 'tests/**/*.php'
-
-  test:php:unit:
-    desc: Run unit tests with PHPUnit
-    dir: /tmp
-    cmds:
-      - php {{.TASKFILE_DIR}}/vendor/bin/phpunit --configuration={{.TASKFILE_DIR}}/tooling/config/phpunit.xml --testdox {{.TASKFILE_DIR}}/tests/Unit {{.CLI_ARGS}}
-    sources:
-      - 'src/core/**/*.php'
-      - 'src/cli/**/*.php'
-      - 'tests/**/*.php'
-    
-  test:coverage:
-    desc: Run tests with code coverage report
-    cmds:
-      - XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=tooling/config/phpunit.xml --coverage-text --coverage-html=reports/coverage/
-
-  test:modernize:
-    desc: Dry-run Rector code modernization
-    cmds:
-      - vendor/bin/rector process --config=tooling/config/rector.php --dry-run
-
-  fix:modernize:
-    desc: Run Rector code modernization (applies safe rules)
-    cmds:
-      - vendor/bin/rector process --config=tooling/config/rector.php
-
-  test:phpstan:
-    desc: Run PHPStan static analysis
-    cmds:
-      - vendor/bin/phpstan analyse --configuration=tooling/config/phpstan.neon
-
-  baseline:phpstan:
-    desc: Generate PHPStan baseline for current violations
-    cmds:
-      - vendor/bin/phpstan analyse --generate-baseline --allow-empty-baseline --configuration=tooling/config/phpstan.neon
 
   test:lint:
     desc: Check code style with PHP CS Fixer
