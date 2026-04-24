@@ -14,6 +14,8 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Tech Debt
 
+- [ ] Remove backstop.js as a requirement
+    - Playwright should now do everything backstop was doing before.
 
 ## Features
 
@@ -22,6 +24,9 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 - [ ] Replace cookies.json with session.json
     - Add test.use({ storageState: session.json })
     - Have playwright wright the session directly to the file during login
+    - Remove the code that converts to netscape/wget text format
+        - It is no longer used since we aren't using wget to crawl
+
  
 ### User Scripting
 

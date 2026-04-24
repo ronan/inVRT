@@ -44,7 +44,6 @@ teardown() {
   assert_dir_exists "$TEST_DIR/.invrt/data"
   assert_dir_exists "$TEST_DIR/.invrt/scripts"
   assert_file_exists "$TEST_DIR/.invrt/scripts/onready.ts"
-  assert_file_exists "$TEST_DIR/.invrt/exclude-paths.txt"
   assert_file_exists "$TEST_DIR/.invrt/plan.yaml"
   assert_file_contains "$TEST_DIR/.invrt/scripts/onready.ts" "Runs after the page is ready"
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "environments.stage.url" "https://example.test"
@@ -52,6 +51,9 @@ teardown() {
   assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "devices.tablet" "[]"
   assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.url" "https://example.test"
   assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "pages./" "[]"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "exclude:"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/logout"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "profiles.0" "editor"
 
   local project_id
   project_id="$(yaml_get "$TEST_DIR/.invrt/config.yaml" "project.id")"

@@ -101,39 +101,39 @@ Verify that the configured site is reachable and collect metadata.
 invrt check [--environment=<name>] [--profile=<name>] [--device=<name>]
 ```
 
-Fetches the site homepage, extracts the page title, detects HTTPS, and records any permanent (301) redirects. Results are written to `.invrt/data/<environment>/check.yaml`.
+Fetches the site homepage, extracts the page title, and merges the result into `.invrt/plan.yaml`.
 
 After a successful check, inVRT updates `.invrt/plan.yaml` with discovered metadata:
 
 - `project.title` is set from the homepage title when available.
+- `project.checked_at` records the last check time.
+- The configured profiles are listed under top-level `profiles`.
 - The homepage entry is ensured under `pages` as `/`.
 - Existing user-defined keys in `plan.yaml` are preserved.
 
-`check` runs automatically after `init` and before `crawl` when no check file exists yet.
+`check` runs automatically after `init` and before `crawl` when no plan pages exist yet.
 
 **Output:**
 
 ```
-✓ Site check complete. Title: "My Site". HTTPS: yes. Written to .invrt/data/local/check.yaml
+✓ Site check complete. Title: "My Site". HTTPS: yes.
 ```
 
-**check.yaml example:**
+**plan.yaml after check:**
 
 ```yaml
-url: 'https://example.com'
-title: 'My Site'
-https: true
-checked_at: '2026-04-17T23:38:44+00:00'
-```
-
-If the configured URL permanently redirects, `redirected_from` is included:
-
-```yaml
-url: 'https://example.com'
-title: 'My Site'
-https: true
-redirected_from: 'http://example.com'
-checked_at: '2026-04-17T23:38:44+00:00'
+project:
+  url: 'https://example.com'
+  title: 'My Site'
+  checked_at: '2026-04-17T23:38:44+00:00'
+profiles:
+  - anonymous
+exclude:
+  - /logout
+  - /user/logout
+pages:
+  /:
+    title: 'My Site'
 ```
 
 **Failure output (unreachable site):**
@@ -180,8 +180,7 @@ If no config exists yet, `crawl` initializes the project first. When no URL argu
 
 If the selected profile has credentials, inVRT logs in first and crawls as the authenticated user (using session cookies).
 
-URLs matching patterns in `.invrt/exclude_urls.txt` are skipped. Default exclusions (used when the file doesn't exist): `/files`, `/sites`, `/user/logout`.
-URLs matching patterns in `.invrt/exclude-paths.txt` are skipped.
+URLs matching patterns in the `exclude:` list of `.invrt/plan.yaml` are skipped. Default exclusions (used when no list is set): `/user/*`.
 
 As pages are discovered, `crawl` updates `.invrt/plan.yaml`:
 
@@ -497,8 +496,6 @@ inVRT stores all generated data under `.invrt/data/`, namespaced by profile and 
 ```
 .invrt/
 └── data/
-    ├── <environment>/
-    │   └── check.yaml                # Site metadata written by `check` command
     └── <profile>/
         └── <environment>/
             ├── crawled_urls.txt          # URL list produced by `crawl`

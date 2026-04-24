@@ -24,6 +24,15 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Runner
 {
+    private const DEFAULT_EXCLUDE_PATHS = [
+        '/logout',
+        '/user/logout',
+        '/files',
+        '/download',
+        '/assets',
+        '/images',
+    ];
+
     private readonly NodeRunner $node;
 
     public function __construct(
@@ -32,6 +41,13 @@ class Runner
         private readonly LoggerInterface $logger,
     ) {
         $this->node = new NodeRunner($this->config, $this->appDir, $this->logger);
+    }
+
+    /** Configured profile names from config.yaml (may be empty). */
+    private function configuredProfiles(): array
+    {
+        $profiles = $this->config->getSection('profiles');
+        return is_array($profiles) ? array_keys($profiles) : [];
     }
 
     /** Initialize a new inVRT project directory with default config. */
@@ -43,7 +59,6 @@ class Runner
         $environment = $this->config->get('INVRT_ENVIRONMENT');
         $profile     = $this->config->get('INVRT_PROFILE');
         $device      = $this->config->get('INVRT_DEVICE');
-        $excludeFile = $this->config->get('INVRT_EXCLUDE_FILE');
         $planFile    = $this->config->get('INVRT_PLAN_FILE');
 
         if (empty($cwd)) {
@@ -65,23 +80,21 @@ class Runner
         $this->logger->notice('🚀 Initializing InVRT for the project at ' . $cwd);
 
         Filesystem::ensureDir($directory);
-        $this->logger->info('✓ Created invrt directory at ' . $directory);
-
         Filesystem::ensureDir(Path::join($directory, 'data'));
         Filesystem::ensureDir(Path::join($directory, 'scripts'));
-
         Filesystem::writeFile(
             Path::join($directory, 'scripts', 'onready.ts'),
             "// Runs after the page is ready and before the screenshot is captured.\n",
         );
 
-        $this->logger->info('✓ Created data directories for generated data, and user scripts.');
+        $this->logger->info("✓ Created an invrt directory at: $directory");
 
-        $projectId = ProjectId::generate($url);
+        $projectId   = ProjectId::generate($url);
+        $projectName = basename($cwd) ?: 'My InVRT Project';
 
         $configContent = Yaml::dump([
             'project' => [
-                'name' => basename($cwd) ?: 'My InVRT Project',
+                'name' => $projectName,
                 'id'   => $projectId,
             ],
             'environments' => [$environment => ['url' => $url]],
@@ -92,11 +105,13 @@ class Runner
         Filesystem::writeFile($configFile, $configContent);
         $this->logger->info('✓ Initialized InVRT configuration file at ' . $configFile);
 
-        if (!empty($excludeFile) && !file_exists($excludeFile)) {
-            Filesystem::writeFile($excludeFile, "/logout\n/user/logout\n/files\n/download\n/assets\n/images\n");
-        }
-
-        if (!PlanService::update($planFile, $url, $projectId)) {
+        if (!PlanService::update($planFile, [
+            'url'      => $url,
+            'id'       => $projectId,
+            'name'     => $projectName,
+            'profiles' => [$profile],
+            'exclude'  => self::DEFAULT_EXCLUDE_PATHS,
+        ])) {
             $this->logger->error('Failed to create or update plan.yaml at ' . $planFile);
             return 1;
         }
@@ -135,30 +150,25 @@ class Runner
     /** Fetch the site homepage, enrich plan.yaml with resolved URL + title. */
     public function check(): int
     {
-        $outputFile = $this->config->get('INVRT_CHECK_FILE');
-        $result = $this->node->run('check.js', null, $outputFile);
-        if ($result !== 0) {
-            return $result;
+        [$exit, $stdout] = $this->node->runCapturing('check.js');
+        if ($exit !== 0) {
+            return $exit;
         }
 
-        if (!is_readable($outputFile)) {
-            $this->logger->warning('Check completed but no check file was found to enrich plan.yaml.');
-            return 0;
-        }
-
-        $planFile  = $this->config->get('INVRT_PLAN_FILE');
-        $checkData = Yaml::parseFile($outputFile);
+        $checkData = Yaml::parse($stdout);
         $checkData = is_array($checkData) ? $checkData : [];
 
         $title = (string) ($checkData['title'] ?? '');
-        if (!PlanService::update(
-            $planFile,
-            (string) $this->config->get('INVRT_URL'),
-            (string) $this->config->get('INVRT_ID'),
-            $title,
-            $title,
-        )) {
-            $this->logger->error('Failed to update plan.yaml at ' . $planFile);
+
+        if (!PlanService::update($this->config->get('INVRT_PLAN_FILE'), [
+            'url'        => (string) ($checkData['url'] ?? $this->config->get('INVRT_URL')),
+            'id'         => (string) $this->config->get('INVRT_ID'),
+            'title'      => $title,
+            'home_title' => $title,
+            'checked_at' => (string) ($checkData['checked_at'] ?? ''),
+            'profiles'   => $this->configuredProfiles(),
+        ])) {
+            $this->logger->error('Failed to update plan.yaml at ' . $this->config->get('INVRT_PLAN_FILE'));
             return 1;
         }
 

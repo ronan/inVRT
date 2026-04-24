@@ -9,6 +9,12 @@ Completed tasks moved from TODO.md.
 
 ## Tech Debt
 
+- [x] Extend the use of plan.yaml
+  - `init` seeds `project:` (url/id/name), `profiles:` (selected profile), and `exclude:` (default paths) in `plan.yaml`
+  - `check` merges `title`, `home_title`, `checked_at` into `project:` and writes configured `profiles`
+  - Removed `check.yaml` and `exclude-paths.txt`; `crawl` reads exclude list from `plan.exclude`
+  - `PlanService::update()` preserves user edits and enforces top-level key order
+
 - [x] More Runner.php cleanup
   - Moved `planHasPages` to `PlanService::hasPages`
   - Extracted `runNode` / `runNodeCapturing` to `Service\NodeRunner`

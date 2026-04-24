@@ -10,7 +10,7 @@ teardown() {
   teardown_invrt_test
 }
 
-@test "check: writes check yaml with site metadata" {
+@test "check: enriches plan.yaml with site metadata" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
 
@@ -19,14 +19,13 @@ teardown() {
   [ "$status" -eq 0 ]
   assert_output_contains "Site check complete"
   assert_output_contains "Home"
-  assert_file_exists "$TEST_DIR/.invrt/check.yaml"
-  assert_yaml_equals "$TEST_DIR/.invrt/check.yaml" "title" "Home"
-  assert_yaml_equals "$TEST_DIR/.invrt/check.yaml" "https" "false"
-  assert_file_not_contains "$TEST_DIR/.invrt/check.yaml" "redirected_from:"
   assert_file_exists "$TEST_DIR/.invrt/plan.yaml"
   assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.url" "$SERVER_URL"
   assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.title" "Home"
   assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "pages./.title" "Home"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "checked_at:"
+  assert_file_not_contains "$TEST_DIR/.invrt/plan.yaml" "https:"
+  assert_file_not_contains "$TEST_DIR/.invrt/plan.yaml" "redirected_from:"
 }
 
 @test "check: preserves user-defined plan keys while updating metadata" {

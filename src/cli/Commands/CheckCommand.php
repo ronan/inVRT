@@ -11,7 +11,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(
     name: 'check',
     description: 'Check site connectivity and collect metadata',
-    help: 'Fetches the site homepage, extracts the page title, detects HTTPS, and records any permanent redirects. Results are written to .invrt/data/<environment>/check.yaml.',
+    help: 'Fetches the site homepage, extracts the page title, and merges the result into .invrt/plan.yaml.',
 )]
 class CheckCommand extends BaseCommand
 {

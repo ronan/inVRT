@@ -8,57 +8,69 @@ class PlanService
 {
     /**
      * Merge known project/page metadata into plan.yaml while preserving user keys.
+     *
+     * Recognised $data keys:
+     *   url            string  → project.url
+     *   id             string  → project.id
+     *   name           string  → project.name
+     *   title          string  → project.title
+     *   home_title     string  → pages./.title
+     *   checked_at     string  → project.checked_at
+     *   profiles       string[] (replaces top-level profiles list)
+     *   exclude        string[] (only seeded when current value is empty)
+     *
+     * @param array<string, mixed> $data
      */
-    public static function update(
-        string $planFile,
-        string $projectUrl,
-        string $projectId = '',
-        string $projectTitle = '',
-        string $homePageTitle = '',
-    ): bool {
-        $data = self::read($planFile);
+    public static function update(string $planFile, array $data): bool
+    {
+        $plan = self::read($planFile);
 
-        if (!isset($data['project']) || !is_array($data['project'])) {
-            $data['project'] = [];
+        if (!isset($plan['project']) || !is_array($plan['project'])) {
+            $plan['project'] = [];
         }
-        if (!isset($data['pages']) || !is_array($data['pages'])) {
-            $data['pages'] = [];
+        if (!isset($plan['pages']) || !is_array($plan['pages'])) {
+            $plan['pages'] = [];
         }
 
-        $projectUrl = trim($projectUrl);
-        if ($projectUrl !== '') {
-            $data['project']['url'] = $projectUrl;
-        }
-
-        $projectId = trim($projectId);
-        if ($projectId !== '') {
-            $data['project']['id'] = $projectId;
-        }
-
-        $projectTitle = trim($projectTitle);
-        if ($projectTitle !== '') {
-            $data['project']['title'] = $projectTitle;
-        }
-
-        if (!array_key_exists('/', $data['pages'])) {
-            $data['pages']['/'] = [];
-        }
-
-        $homePageTitle = trim($homePageTitle);
-        if ($homePageTitle !== '') {
-            if (is_array($data['pages']['/'])) {
-                $data['pages']['/']['title'] = $homePageTitle;
-            } else {
-                $data['pages']['/'] = $homePageTitle;
+        foreach (['url', 'id', 'name', 'title', 'checked_at'] as $key) {
+            $value = isset($data[$key]) ? trim((string) $data[$key]) : '';
+            if ($value !== '') {
+                $plan['project'][$key] = $value;
             }
         }
+
+        if (!empty($data['profiles']) && is_array($data['profiles'])) {
+            $plan['profiles'] = array_values(array_unique(array_map('strval', $data['profiles'])));
+        }
+
+        if (!empty($data['exclude']) && is_array($data['exclude'])) {
+            $existing = $plan['exclude'] ?? null;
+            if (!is_array($existing) || $existing === []) {
+                $plan['exclude'] = array_values(array_map('strval', $data['exclude']));
+            }
+        }
+
+        if (!array_key_exists('/', $plan['pages'])) {
+            $plan['pages']['/'] = [];
+        }
+
+        $homeTitle = isset($data['home_title']) ? trim((string) $data['home_title']) : '';
+        if ($homeTitle !== '') {
+            if (is_array($plan['pages']['/'])) {
+                $plan['pages']['/']['title'] = $homeTitle;
+            } else {
+                $plan['pages']['/'] = $homeTitle;
+            }
+        }
+
+        $plan = self::orderTopLevel($plan);
 
         $dir = dirname($planFile);
         if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
             return false;
         }
 
-        return file_put_contents($planFile, Yaml::dump($data, 6, 2)) !== false;
+        return file_put_contents($planFile, Yaml::dump($plan, 6, 2)) !== false;
     }
 
     /** Does plan.yaml contain at least one testable page path? */
@@ -90,5 +102,22 @@ class PlanService
 
         $parsed = Yaml::parseFile($planFile);
         return is_array($parsed) ? $parsed : [];
+    }
+
+    /**
+     * @param array<string, mixed> $plan
+     * @return array<string, mixed>
+     */
+    private static function orderTopLevel(array $plan): array
+    {
+        $order  = ['project', 'profiles', 'exclude', 'pages'];
+        $sorted = [];
+        foreach ($order as $key) {
+            if (array_key_exists($key, $plan)) {
+                $sorted[$key] = $plan[$key];
+                unset($plan[$key]);
+            }
+        }
+        return $sorted + $plan;
     }
 }

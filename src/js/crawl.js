@@ -11,7 +11,6 @@ const {
   INVRT_CRAWL_DIR,
   INVRT_MAX_CRAWL_DEPTH,
   INVRT_MAX_PAGES,
-  INVRT_EXCLUDE_FILE,
   INVRT_PLAN_FILE,
   INVRT_USER_AGENT,
   INVRT_PROFILE,
@@ -46,20 +45,16 @@ const deriveProjectSeed = () => {
   return parseInt(crypto.createHash('sha1').update(INVRT_ID).digest('hex').slice(0, 4), 16) & 0xFFFF;
 };
 
-/** Resolve excluded path matchers from file or defaults. */
-const resolveExcludeMatchers = () => {
-  if (!INVRT_EXCLUDE_FILE || !fs.existsSync(INVRT_EXCLUDE_FILE)) {
-    const defaults = ['/user/*'];
-    log.info(`No exclude file found at ${INVRT_EXCLUDE_FILE}. Excluding defaults: ${defaults.join(',')}`);
-    return defaults;
+/** Resolve excluded path matchers from plan.yaml `exclude` list, or defaults. */
+const resolveExcludeMatchers = (plan) => {
+  const fromPlan = Array.isArray(plan && plan.exclude) ? plan.exclude.filter((l) => typeof l === 'string' && l.trim() !== '') : [];
+  if (fromPlan.length > 0) {
+    log.info(`Excluding URLs: ${fromPlan.join(',')}`);
+    return fromPlan;
   }
-
-  const lines = fs.readFileSync(INVRT_EXCLUDE_FILE, 'utf-8')
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter((l) => l && !l.startsWith('#'));
-  log.info(`Excluding URLs: ${lines.join(',')}`);
-  return lines;
+  const defaults = ['/user/*'];
+  log.info(`No exclude list in plan.yaml. Excluding defaults: ${defaults.join(',')}`);
+  return defaults;
 };
 
 const appendLog = (line) => {
@@ -222,8 +217,8 @@ const seedPathsFromPlan = (plan) => {
 const crawl = async () => {
   const maxDepth = Number.parseInt(INVRT_MAX_CRAWL_DEPTH || '3', 10);
   const maxPages = Number.parseInt(INVRT_MAX_PAGES || '100', 10);
-  const excludes = resolveExcludeMatchers();
   const plan = readPlan();
+  const excludes = resolveExcludeMatchers(plan);
   const seedPaths = seedPathsFromPlan(plan);
   const base = new URL(INVRT_URL);
   const origin = base.origin;

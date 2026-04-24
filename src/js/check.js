@@ -60,14 +60,6 @@ const run = async () => {
 
   log.info(`🔍 Checking site at ${INVRT_URL}`);
 
-  let initialStatusCode = 0;
-  try {
-    const head = await request(INVRT_URL, { follow: false, headOnly: true });
-    initialStatusCode = head.statusCode;
-  } catch {
-    // Non-fatal — will be caught in main request below if site is truly unreachable.
-  }
-
   let result;
   try {
     result = await request(INVRT_URL, { follow: true });
@@ -76,11 +68,7 @@ const run = async () => {
     process.exit(1);
   }
 
-  const { finalUrl, body, redirectCount } = result;
-
-  const redirectedFrom = redirectCount > 0 && initialStatusCode === 301
-    ? INVRT_URL.replace(/\/$/, '')
-    : null;
+  const { finalUrl, body } = result;
 
   const titleMatch = body.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const title = titleMatch
@@ -92,8 +80,6 @@ const run = async () => {
   const data = {
     url: finalUrl.replace(/\/$/, ''),
     title,
-    https: isHttps,
-    ...(redirectedFrom ? { redirected_from: redirectedFrom } : {}),
     checked_at: new Date().toISOString(),
   };
 

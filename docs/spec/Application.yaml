@@ -60,9 +60,6 @@ Files:
   crawl_log:
     default: INVRT_CRAWL_DIR/logs/crawl.log
     description: Log file capturing the output of the crawl process.
-  check_file:
-    default: INVRT_DIRECTORY/check.yaml
-    description: Path to the file storing the results of the site check.
   plan_file:
     default: INVRT_DIRECTORY/plan.yaml
     description: Path to the generated and user-editable site plan file.
@@ -78,9 +75,6 @@ Files:
   cookies_file:
     default: INVRT_CRAWL_DIR/cookies
     description: Base path for generated cookie files. Login writes .json and .txt variants.
-  exclude_file:
-    default: INVRT_DIRECTORY/exclude-paths.txt
-    description: Path list used to exclude URL directories during crawl.
   playwright_spec_file:
     default: INVRT_CRAWL_DIR/INVRT_DEVICE.spec.ts
     description: Generated Playwright TypeScript spec file for screenshot capture.
@@ -127,14 +121,12 @@ Commands:
 
   check:
     description: Check site connectivity and collect metadata.
-    help: Fetches the site homepage, extracts the page title, detects HTTPS, and records any permanent redirects. Results are written to .invrt/data/check.yaml.
+    help: Fetches the site homepage, extracts the page title, and merges the result into .invrt/plan.yaml.
     success: InVRT successfully checked the site!
     requires: [ init ]
     output_fields:
       - url
       - title
-      - https
-      - redirected_from
       - checked_at
 
   crawl:
@@ -159,7 +151,6 @@ Commands:
     success: InVRT successfully configured BackstopJS!
     requires: [ crawl ]
     internal: true
-    output_file: INVRT_CAPTURE_DIR/backstop.json
 
   reference:
     description: Create reference screenshots for comparison.
