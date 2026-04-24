@@ -57,6 +57,10 @@ Completed tasks moved from TODO.md.
 
 ## Bugs
 
+- [x] Init throws an error "[error] INVRT_URL must be set" even when a url is passed as an argument
+  - `Runner::init()` now seeds in-memory `INVRT_URL`/`INVRT_ID` before calling `check()`
+  - Prevents false `INVRT_URL` missing error before command-level re-boot
+
 - [x] Exclud path file is not being read.
 
 - [x] The path of playwright-onbefore.js and playwright-onload.js are incorrect

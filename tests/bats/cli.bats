@@ -39,6 +39,7 @@ teardown() {
   run_invrt init https://example.test --environment=stage --profile=editor --device=tablet --skip-baseline
 
   [ "$status" -eq 0 ]
+  assert_output_not_contains "INVRT_URL must be set"
   assert_dir_exists "$TEST_DIR/.invrt"
   assert_dir_exists "$TEST_DIR/.invrt/data"
   assert_dir_exists "$TEST_DIR/.invrt/scripts"

@@ -11,8 +11,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Bugs
 
-- [ ] Init throws an error "[error] INVRT_URL must be set" even when a url is passed as an argument
-
 
 ## Tech Debt
 

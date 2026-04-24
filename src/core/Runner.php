@@ -136,6 +136,11 @@ EOF;
         }
         $this->logger->info('✓ Initialized plan file at ' . $planFile);
 
+        // init runs check() before the command re-boots configuration from disk.
+        // Seed the in-memory config so Node check.js receives the URL immediately.
+        $this->config->set('INVRT_URL', $url);
+        $this->config->set('INVRT_ID', $projectId);
+
         $this->logger->notice('✅ InVRT successfully initialized!');
 
         if ($this->check() !== 0) {
