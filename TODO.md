@@ -19,9 +19,14 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
  
 ## Rebuild the Crawler
 
-- [ ] Rebuild `invrt generate-playwright` and `generate-backstop` to use plan.yaml to create tests
+- [ ] Generate page ids during crawl and add them to plan.yaml
+- [ ] Improve the crawler to build a tree-like structure for nested pages.
+    - When multiple paths begin with the same prefix and that prefix ends in '/' or '?' they should
+    be combined under a parent item whose path is that prefix. 
+    - The separating character (/?) should be added to the child items and removed from the parent
+    - If the prefix represents a navigable page, add a child with the key `?`, `/` or `` depending on the actual resolved path of the parent page.
 
-## User Scripting (requires Move to Playwright and Create plan.yaml)
+## User Scripting
 
 - [ ] Optionally read the onload/onready playwright event script from `INVRT_SCRIPTS_DIR`
 - [ ] Allow specification of per-path scripts in plan.yaml
@@ -34,19 +39,20 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 - [ ] Scripts can be paths to a script in `INVRT_SCRIPTS_DIR`
 - [ ] Scripts can be literal codeblock in plan.yaml in javascript or typescript
 - [ ] Allow some 'pages' to be functional tests which are not necessarily a URL
-- [ ] Future feature: Create a yaml shorthand for often used steps
+
+## No-code Testing
+
+- [ ] Create a yaml shorthand for often used testing steps
 
     ```yaml
     /about.html:
         steps:
-            # Automatically run: snap onready
             - click .search-trigger
             - snap 'search popup'
             - type 'Test' in .search
             - click 'Search'
             - snap 'search results'
             - click .search-close
-            # Automatically run snap done
     ,,,
 
 ### Reporting

@@ -93,6 +93,10 @@ Completed tasks moved from TODO.md.
 
 ### Advanced flow
 
+- [x] Rebuild `invrt generate-playwright` to use plan.yaml to create tests
+  - `Runner::generatePlaywright()` now pipes `INVRT_PLAN_FILE` to `generate-playwright.js`
+  - `generate-playwright.js` parses plan YAML and generates tests from `pages` path keys
+
 - [x] Rewrite the crawler
   - Uses Playwright to crawl from plan.yaml seed paths
   - Scrapes links and adds in-scope HTML pages back into plan.yaml
