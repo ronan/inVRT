@@ -59,7 +59,9 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 - [x] Improve `approve` to make the last results of the last test the new baseline
   - If no tests have been run, run `crawl`, `reference` then `test` and then approve the capture
-
+- [ ] Convert all file paths to relative paths.
+    File paths should all be relative to the project directory. That is: one level up from the .invrt directory
+    This allows variance in run environment due to docker config and makes generated tests more portable
 
 ### Move to Playwright
 

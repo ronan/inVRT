@@ -423,6 +423,7 @@ EOF;
             if (!is_dir($dir)) {
                 mkdir($dir, 0755, true);
             }
+            $this->logger->debug("Writing output to $outputFile");
             file_put_contents($outputFile, $stdout);
         }
 

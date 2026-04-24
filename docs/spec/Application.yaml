@@ -79,7 +79,7 @@ Files:
     default: INVRT_DIRECTORY/exclude-paths.txt
     description: Path list used to exclude URL directories during crawl.
   playwright_spec_file:
-    default: INVRT_SCRIPTS_DIR/INVRT_PROFILE.spec.ts
+    default: INVRT_DIRECTORY/playwright/INVRT_PROFILE-INVRT_DEVICE.spec.ts
     description: Generated Playwright TypeScript spec file for screenshot capture.
 
 Commands:

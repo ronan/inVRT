@@ -52,7 +52,7 @@ const run = async () => {
   const screenshotDir = `${INVRT_CAPTURE_DIR}/${INVRT_ENVIRONMENT}/${INVRT_DEVICE}`;
   const cookieFile = INVRT_COOKIES_FILE ? `${INVRT_COOKIES_FILE}.json` : null;
   const relScreenshotDir = path.relative(INVRT_SCRIPTS_DIR, screenshotDir);
-  const relCookieFile = cookieFile ? path.relative(INVRT_SCRIPTS_DIR, cookieFile) : null;
+  const relCookieFile = null; // cookieFile ? path.relative(INVRT_SCRIPTS_DIR, cookieFile) : null;
 
   try {
     const input = await readStdin();
@@ -73,11 +73,12 @@ const run = async () => {
       return `
 test(${JSON.stringify(id)}, async ({ page }) => {
   await page.goto(${JSON.stringify(fullUrl)}, { waitUntil: 'networkidle' });
-  await page.screenshot({ path: ${JSON.stringify(`${relScreenshotDir}/${id}.png`)}, fullPage: true });
+  const screenshot = await page.screenshot({ path: ${JSON.stringify(`${relScreenshotDir}/${id}.png`)}, fullPage: true });
+  expect(screenshot).toMatchSnapshot(${JSON.stringify(`${id}-desktop.png`)});
 });`;
     }).join('\n');
 
-    const spec = `import { test, use } from '@playwright/test';
+    const spec = `import { test, use, expect } from '@playwright/test';
 
 ${storageState}
 ${tests}
