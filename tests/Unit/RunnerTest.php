@@ -57,9 +57,11 @@ class RunnerTest extends TestCase
         $this->assertFileExists($configFile);
     }
 
-    public function testConfigurePlaywrightFailsWhenConfigFileNotSet(): void
+    public function testConfigurePlaywrightFailsWhenConfigFileEmpty(): void
     {
-        $config = new Configuration('', []);
+        $config = new Configuration('', [
+            'INVRT_PLAYWRIGHT_CONFIG_FILE' => '',
+        ]);
         $runner = new Runner($config, __DIR__ . '/../../src/js', new NullLogger());
         $result = $runner->configurePlaywright();
 

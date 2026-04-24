@@ -45,9 +45,63 @@ const extractPathsFromPlan = (content) => {
     return [];
   }
 
-  return Object.keys(pages)
-    .filter((k) => typeof k === 'string' && k.startsWith('/'))
-    .sort();
+  const isChildKey = (k) => k === '' || k === '/' || k.startsWith('/') || k.startsWith('?');
+  const hasMetadata = (node) => Object.keys(node).some((k) => !isChildKey(k));
+  const hasChildren = (node) => Object.keys(node).some((k) => isChildKey(k));
+  const out = new Set();
+
+  const walk = (pagePath, node) => {
+    if (typeof node === 'string') {
+      out.add(pagePath);
+      return;
+    }
+
+    if (!node || typeof node !== 'object' || Array.isArray(node)) {
+      out.add(pagePath);
+      return;
+    }
+
+    if (hasMetadata(node)) {
+      out.add(pagePath);
+    }
+
+    if (!hasMetadata(node) && !hasChildren(node)) {
+      // Empty object shorthand means this path is testable.
+      out.add(pagePath);
+    }
+
+    for (const [key, child] of Object.entries(node)) {
+      if (key === '') {
+        out.add(pagePath);
+        continue;
+      }
+
+      if (key === '/') {
+        const slashPath = pagePath.endsWith('/') ? pagePath : `${pagePath}/`;
+        out.add(slashPath);
+        continue;
+      }
+
+      if (key.startsWith('?')) {
+        out.add(`${pagePath}${key}`);
+        continue;
+      }
+
+      if (key.startsWith('/')) {
+        const childPath = pagePath === '/' ? key : `${pagePath}${key}`;
+        walk(childPath, child);
+      }
+    }
+  };
+
+  for (const [key, node] of Object.entries(pages)) {
+    if (typeof key !== 'string' || !key.startsWith('/')) {
+      continue;
+    }
+    walk(key, node);
+  }
+
+  return [...out].sort();
 };
 
 const run = async () => {

@@ -183,7 +183,9 @@ URLs matching patterns in `.invrt/exclude-paths.txt` are skipped.
 
 As pages are discovered, `crawl` updates `.invrt/plan.yaml`:
 
-- Adds missing page paths under `pages` (flat path keys).
+- Adds or merges pages into the `pages` tree shape.
+- Groups nested paths under common branch prefixes.
+- Adds stable page `id` values for discovered testable pages.
 - Adds the active profile to each discovered page's `profiles` array.
 - Preserves existing user-defined metadata fields.
 

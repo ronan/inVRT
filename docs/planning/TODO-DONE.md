@@ -93,6 +93,14 @@ Completed tasks moved from TODO.md.
 
 ### Advanced flow
 
+- [x] Generate page ids during crawl and add them to plan.yaml
+  - Crawl now writes stable `id` values to discovered page entries in `plan.yaml`
+
+- [x] Improve the crawler to build a tree-like structure for nested pages.
+  - Nested paths are grouped under shared branch prefixes in `pages`
+  - Query pages are stored as `?query` children under their path branch
+  - Navigable branch pages are represented with landing child keys (`''` or `/`) where applicable
+
 - [x] Rebuild `invrt generate-playwright` to use plan.yaml to create tests
   - `Runner::generatePlaywright()` now pipes `INVRT_PLAN_FILE` to `generate-playwright.js`
   - `generate-playwright.js` parses plan YAML and generates tests from `pages` path keys

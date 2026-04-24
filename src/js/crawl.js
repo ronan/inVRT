@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const crypto = require('crypto');
 const { chromium } = require('playwright');
 const log = require('./logger');
 
@@ -15,7 +16,35 @@ const {
   INVRT_USER_AGENT,
   INVRT_PROFILE,
   INVRT_ENVIRONMENT,
+  INVRT_ID,
 } = process.env;
+
+const ENCODE_ALPHABET = 'swxdyktzhgjfblrpmcqvn';
+
+/** Stable short ID from value + seed, mirroring Runner::encodeId in PHP. */
+const encodeId = (value, seed = 0) => {
+  const hashHex = crypto.createHash('sha1').update(value).digest('hex').slice(0, 8);
+  const hash = parseInt(hashHex, 16) >>> 0;
+  let number = (BigInt(hash) << 16n) | BigInt(seed & 0xFFFF);
+  const base = BigInt(ENCODE_ALPHABET.length);
+
+  if (number === 0n) return ENCODE_ALPHABET[0];
+
+  let encoded = '';
+  while (number > 0n) {
+    encoded = ENCODE_ALPHABET[Number(number % base)] + encoded;
+    number /= base;
+  }
+
+  return encoded;
+};
+
+const deriveProjectSeed = () => {
+  if (!INVRT_ID) {
+    return 0;
+  }
+  return parseInt(crypto.createHash('sha1').update(INVRT_ID).digest('hex').slice(0, 4), 16) & 0xFFFF;
+};
 
 /** Resolve excluded path matchers from file or defaults. */
 const resolveExcludeMatchers = () => {
@@ -53,6 +82,111 @@ const isExcludedPath = (urlPath, rules) => rules.some((rule) => {
   return urlPath === rule || urlPath.startsWith(`${rule}/`);
 });
 
+const isChildKey = (k) => k === '' || k === '/' || k.startsWith('/') || k.startsWith('?');
+
+const ensureObjectNode = (value) => {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    return { title: value };
+  }
+
+  return {};
+};
+
+const moveMetadataToLanding = (node, marker) => {
+  const metadataKeys = Object.keys(node).filter((k) => !isChildKey(k));
+  if (metadataKeys.length === 0) {
+    return;
+  }
+
+  const landing = ensureObjectNode(node[marker]);
+  for (const key of metadataKeys) {
+    if (!(key in landing)) {
+      landing[key] = node[key];
+    }
+    delete node[key];
+  }
+  node[marker] = landing;
+};
+
+const mergePageMeta = (node, pagePath, profile, projectSeed) => {
+  if (!Array.isArray(node.profiles)) {
+    node.profiles = [];
+  }
+
+  if (!node.profiles.includes(profile)) {
+    node.profiles.push(profile);
+  }
+
+  if (!node.id) {
+    node.id = encodeId(pagePath, projectSeed);
+  }
+};
+
+const insertPathIntoTree = (pages, urlPath, profile, projectSeed) => {
+  if (urlPath === '/') {
+    const root = ensureObjectNode(pages['/']);
+    mergePageMeta(root, '/', profile, projectSeed);
+    pages['/'] = root;
+    return;
+  }
+
+  const parsed = new URL(urlPath, 'http://invrt.local');
+  const pathname = parsed.pathname || '/';
+  const search = parsed.search || '';
+  const trailingSlash = pathname.endsWith('/');
+  const segments = pathname.split('/').filter(Boolean);
+
+  if (segments.length === 0) {
+    const root = ensureObjectNode(pages['/']);
+    pages['/'] = root;
+
+    if (search !== '') {
+      const queryNode = ensureObjectNode(root[search]);
+      mergePageMeta(queryNode, urlPath, profile, projectSeed);
+      root[search] = queryNode;
+      return;
+    }
+
+    mergePageMeta(root, '/', profile, projectSeed);
+    return;
+  }
+
+  let container = pages;
+  let currentPath = '';
+  let node = null;
+
+  for (const segment of segments) {
+    const key = `/${segment}`;
+    currentPath = currentPath === '' ? key : `${currentPath}${key}`;
+
+    node = ensureObjectNode(container[key]);
+    container[key] = node;
+    container = node;
+  }
+
+  if (!node) {
+    return;
+  }
+
+  if (search !== '') {
+    const queryNode = ensureObjectNode(node[search]);
+    mergePageMeta(queryNode, `${currentPath}${search}`, profile, projectSeed);
+    node[search] = queryNode;
+    return;
+  }
+
+  const marker = trailingSlash ? '/' : '';
+  moveMetadataToLanding(node, marker);
+
+  const landing = ensureObjectNode(node[marker]);
+  mergePageMeta(landing, currentPath + (trailingSlash ? '/' : ''), profile, projectSeed);
+  node[marker] = landing;
+};
+
 const readPlan = () => {
   if (!INVRT_PLAN_FILE || !fs.existsSync(INVRT_PLAN_FILE)) {
     return { project: {}, pages: { '/': {} } };
@@ -78,33 +212,6 @@ const writePlan = (plan) => {
   const dir = path.dirname(INVRT_PLAN_FILE);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(INVRT_PLAN_FILE, yaml.dump(plan, { lineWidth: -1 }));
-};
-
-const ensurePageProfile = (pages, pagePath, profile) => {
-  const existing = pages[pagePath];
-
-  if (existing === undefined || existing === null) {
-    pages[pagePath] = { profiles: [profile] };
-    return;
-  }
-
-  if (typeof existing === 'string') {
-    pages[pagePath] = { title: existing, profiles: [profile] };
-    return;
-  }
-
-  if (typeof existing !== 'object' || Array.isArray(existing)) {
-    pages[pagePath] = { profiles: [profile] };
-    return;
-  }
-
-  if (!Array.isArray(existing.profiles)) {
-    existing.profiles = [];
-  }
-
-  if (!existing.profiles.includes(profile)) {
-    existing.profiles.push(profile);
-  }
 };
 
 const seedPathsFromPlan = (plan) => {
@@ -196,8 +303,10 @@ const crawl = async () => {
   await context.close();
   await browser.close();
 
+  const projectSeed = deriveProjectSeed();
+
   for (const discoveredPath of discovered) {
-    ensurePageProfile(plan.pages, discoveredPath, INVRT_PROFILE || 'anonymous');
+    insertPathIntoTree(plan.pages, discoveredPath, INVRT_PROFILE || 'anonymous', projectSeed);
   }
   writePlan(plan);
 

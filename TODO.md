@@ -11,6 +11,9 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Bugs
 
+- [ ] Init throws an error "[error] INVRT_URL must be set" even when a url is passed as an argument
+
+
 ## Tech Debt
 
 ## Tests
@@ -19,12 +22,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
  
 ## Rebuild the Crawler
 
-- [ ] Generate page ids during crawl and add them to plan.yaml
-- [ ] Improve the crawler to build a tree-like structure for nested pages.
-    - When multiple paths begin with the same prefix and that prefix ends in '/' or '?' they should
-    be combined under a parent item whose path is that prefix. 
-    - The separating character (/?) should be added to the child items and removed from the parent
-    - If the prefix represents a navigable page, add a child with the key `?`, `/` or `` depending on the actual resolved path of the parent page.
 
 ## User Scripting
 
@@ -68,7 +65,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 - [ ] New flags
   - [ ] remove (rm) -- Delete the .invrt directory
-  - [ ] init --force -- Re-init the project even if an .invrt directory exists
+  - [ ] init --force -- Re-init the project even if an .invrt directory exists. If an INVRT_URL is already defined, use that and don't require a url to be passed.
   - [ ] init --unhide
   - [ ] --skip-<step>
     - Make the invrt directory visible (`invrt` not `.invrt`)

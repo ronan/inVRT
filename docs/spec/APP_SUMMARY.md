@@ -73,7 +73,9 @@ Crawls `INVRT_URL` with Playwright Chromium, scoped to the current environment/p
 - respects `INVRT_MAX_CRAWL_DEPTH`, `INVRT_MAX_PAGES`, and `INVRT_EXCLUDE_FILE`
 - writes crawl progress/errors to `INVRT_CRAWL_LOG`
 - writes sorted unique paths to `INVRT_CRAWL_FILE`
-- merges discovered paths into `INVRT_PLAN_FILE` and updates each page's `profiles` array with the active profile while preserving existing page metadata
+- merges discovered paths into `INVRT_PLAN_FILE` using a tree-style `pages` structure
+- generates stable page IDs and updates each discovered page with active-profile access in `profiles`
+- preserves existing page metadata where possible while updating managed crawl fields
 - generates BackstopJS config to `INVRT_BACKSTOP_CONFIG_FILE` after a successful crawl
 
 If no usable URLs are found, it fails and prints the tail of the crawl log.

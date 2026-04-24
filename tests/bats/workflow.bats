@@ -84,6 +84,10 @@ EOF
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/about.html:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "profiles:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "- anonymous"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "id:"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/blog:"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/2026:"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/post.html:"
 }
 
 @test "crawl: scenario labels in backstop config are short lowercase ids" {
