@@ -11,9 +11,28 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Bugs
 
+
 ## Tech Debt
 
+- [ ] Refactor runner to only contain public functions.
+    - Move all helpers to external includes
+    - Abstract directory and file handling to a helper
+- [ ] Use INVRT_PLAN_FILE instead of INVRT_CRAWL_FILE where appropriate
+- [ ] Remove `array $env` from runPlaywright and use `$this->config` directly.
+- [ ] Remove config validation and defaults from runner. All config options should be validated by the config handler which will provide sane defaults. The Runner should assume that any necesary config is correct and present.
+- [ ] Remove more business logic from Runner.php and move to the individual ts scripts.
+    - Implement `info` as js/info.js
+        - Remove the tail of the crawl log
+    - Implemenmt configurePlaywright as js/configure-playwright.js
+    - 
+
 ## Features
+
+### Authentication
+
+- [ ] Replace cookies.json with session.json
+    - Add test.use({ storageState: sessin.json })
+    - Have playwright wright the session directly to the file during login
  
 ### User Scripting
 
@@ -59,6 +78,10 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - Create in-depth end user documentation for config
 
 ## Tests
+
+### Test Cleanup
+- [ ] Remove unit tests. Add or update e2e tests for any edge cases that are missing
+- [ ] Remove phpstan, phpunit and rector
 
 ### End to End Testing
     - [ ] Create a 99 page website which goes 4 levels deep
