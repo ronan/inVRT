@@ -283,8 +283,20 @@ seed_crawled_urls() {
 
   if [ "$#" -eq 0 ]; then
     : > "$crawl_dir/crawled-paths.text"
+    cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+project: {}
+pages: {}
+EOF
     return
   fi
 
   printf '%s\n' "$@" > "$crawl_dir/crawled-paths.text"
+
+  {
+    printf 'project: {}\n'
+    printf 'pages:\n'
+    for p in "$@"; do
+      printf '  %s: {}\n' "$p"
+    done
+  } > "$TEST_DIR/.invrt/plan.yaml"
 }

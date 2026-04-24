@@ -82,7 +82,7 @@ If no usable URLs are found, it fails and prints the tail of the crawl log.
 
 Captures reference screenshots using Playwright for the current environment/profile/device. If the crawl file is missing, it runs `crawl` first. It fails when the crawl file exists but contains no usable URLs.
 
-Before capturing, it runs `generate-playwright` (which in turn runs `configure-playwright`) to write `playwright.config.ts` and the device spec to `INVRT_CRAWL_DIR`. It then runs `npx playwright test --update-snapshots`.
+Before capturing, it runs `generate-playwright` (which in turn runs `configure-playwright`) to write `playwright.config.ts` and the device spec to `INVRT_CRAWL_DIR`. `generate-playwright` derives scenarios from `INVRT_PLAN_FILE` (`plan.yaml` `pages` keys). It then runs `npx playwright test --update-snapshots`.
 
 Artifacts are written to `INVRT_CRAWL_DIR`:
 

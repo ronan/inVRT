@@ -226,7 +226,7 @@ Capture reference (baseline) screenshots for the current profile/device/environm
 invrt reference [--profile=<name>] [--device=<name>] [--environment=<name>]
 ```
 
-Reads the URL list produced by `crawl` and captures a screenshot of each page using Playwright (Chromium). The Playwright config and spec are generated into `.invrt/data/<profile>/` before running. Screenshots are stored in `.invrt/data/<profile>/<environment>/bitmaps/reference/`.
+Captures a screenshot of each page using Playwright (Chromium). The Playwright config and spec are generated into `.invrt/data/<profile>/` before running, with page tests derived from `.invrt/plan.yaml` (`pages` keys). Screenshots are stored in `.invrt/data/<profile>/<environment>/bitmaps/reference/`.
 
 If no `crawled_urls.txt` file exists for the current profile/device/environment combination, `crawl` is run automatically before capturing screenshots.
 

@@ -253,7 +253,7 @@ EOF
   assert_output_contains "Approving latest results"
 }
 
-@test "generate-playwright: generates spec from crawled urls" {
+@test "generate-playwright: generates spec from plan pages" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
   seed_crawled_urls anonymous / /about.html

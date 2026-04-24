@@ -380,14 +380,14 @@ TS;
         return 0;
     }
 
-    /** Generate a Playwright TypeScript spec from the crawled URL list. */
+    /** Generate a Playwright TypeScript spec from plan.yaml pages. */
     public function generatePlaywright(): int
     {
         if (($result = $this->configurePlaywright()) !== 0) {
             return $result;
         }
 
-        $inputFile  = $this->config->get('INVRT_CRAWL_FILE', '') ?: null;
+        $inputFile  = $this->config->get('INVRT_PLAN_FILE', '') ?: null;
         $outputFile = $this->config->get('INVRT_PLAYWRIGHT_SPEC_FILE', '') ?: null;
         return $this->runNode('generate-playwright.js', $inputFile, $outputFile);
     }

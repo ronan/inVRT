@@ -1,5 +1,6 @@
 const path = require('path');
 const crypto = require('crypto');
+const yaml = require('js-yaml');
 const log = require('./logger');
 
 const ENCODE_ALPHABET = 'swxdyktzhgjfblrpmcqvn';
@@ -27,6 +28,27 @@ const readStdin = () => new Promise((resolve) => {
   process.stdin.on('data', (chunk) => chunks.push(chunk));
   process.stdin.on('end', () => resolve(Buffer.concat(chunks).toString()));
 });
+
+/** Extract flat testable URL paths from plan.yaml pages map. */
+const extractPathsFromPlan = (content) => {
+  if (!content.trim()) {
+    return [];
+  }
+
+  const parsed = yaml.load(content);
+  if (!parsed || typeof parsed !== 'object') {
+    return [];
+  }
+
+  const pages = parsed.pages;
+  if (!pages || typeof pages !== 'object' || Array.isArray(pages)) {
+    return [];
+  }
+
+  return Object.keys(pages)
+    .filter((k) => typeof k === 'string' && k.startsWith('/'))
+    .sort();
+};
 
 const run = async () => {
   const {
@@ -56,10 +78,12 @@ const run = async () => {
 
   try {
     const input = await readStdin();
-    const paths = input
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean);
+    const paths = extractPathsFromPlan(input);
+
+    if (paths.length === 0) {
+      log.error('No testable page paths found in plan.yaml');
+      process.exit(1);
+    }
 
     const scoped = Number.isFinite(maxPages) && maxPages > 0 ? paths.slice(0, maxPages) : paths;
 
