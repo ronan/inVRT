@@ -9,7 +9,7 @@ You can also apply test settings to entire branches of the tree as well as to a 
 
 ## Project
 
-The `project` section contains basic information about the project being tested:
+The `project` section contains basic information and configuration for the project being tested:
 
 ```
 project:
@@ -17,6 +17,35 @@ project:
     id: zzytgghxc
     title: inVRT — Visual Regression Testing for CMS Websites
     login_url: /user/login
+```
+
+## Variant Section
+
+The `device`, `environment` and `profile` sections contain a set of configuration overrides:
+
+```
+project:
+  name: My Test Project
+  id: sampleprojectid
+
+environments:
+  local:
+    url: https://local.example.com
+  staging:
+    url: https://staging.example.com
+
+profiles:
+  anonymous:
+  admin:
+    username: admin
+    password: secret
+
+devices:
+  desktop:
+  mobile:
+    viewport_width: 375
+    viewport_height: 667
+
 ```
 
 ## Exclude

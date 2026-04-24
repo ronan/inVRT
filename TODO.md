@@ -16,6 +16,37 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Features
 
+- [ ] Load config from other directories
+    - Use plan.yaml to handle config.
+            Expand the plan.yaml definition to include what is currently in config.yaml
+            Add `profiles`, `devices` and `environments` to plan.yaml as described in /workspaces/invrt/docs/planning/proposals/Plan.yaml.specification.md
+            Have init write defaults to plan.yaml and have the config reader read from it.
+    - Update the config loader reader to look in all of the following locations when looking for the plan.yaml:
+            - `invrt`
+            - `.invrt`
+            - `.ddev/.invrt`
+            - `.ddev/invrt`
+
+### Future Features
+
+- [ ] `invrt remove` (rm) 
+    - Delete the .invrt directory. 
+    - Ask for confirmation unless the -f/--force flag is passed.
+- [ ] `init --force/-f`
+    - Re-init the project even if an .invrt directory exists.
+    - If an INVRT_URL is defined in the current .invrt config, read that value and don't require the url argument
+    - If the url argument is passed in, use that instead of the old value.
+    - Delete the contents of .invrt
+    - Run the init with the old url or the passed in parameter
+- [ ] `init --unhide`
+    - When this flag is passed, make the invrt directory visible (`invrt` not `.invrt`)
+    - If the command is run when the `.invrt` directory exists, rename the directory but don't change the contents.
+- [ ] `init --hide`
+    - When this flag is passed, make the invrt directory invisible (`.invrt` not `invrt`)
+
+- [ ] --[config-option] override any config option at runtime
+- [ ] eg: invrt test --viewport-width=1600
+
 ### Authentication
 
  
@@ -44,17 +75,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - [ ] Allow differences to be approved
     - [ ] Allow comparison of different environments
     - [ ] Allow comparison of different profiles
-
-### Future Features
-
-- [ ] remove (rm) -- Delete the .invrt directory
-- [ ] init --force -
-    - Re-init the project even if an .invrt directory exists. 
-    - If an INVRT_URL is already defined, use that and don't require a url to be passed.
-- [ ] init --unhide
-    - Make the invrt directory visible (`invrt` not `.invrt`)
-- [ ] --[config-option] override any config option at runtime
-- [ ] eg: invrt test --viewport-width=1600
 
 ## Documentation
 - [ ] Clean up docs
