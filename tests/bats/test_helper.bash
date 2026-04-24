@@ -149,11 +149,11 @@ assert_dir_not_exists() {
 }
 
 assert_file_contains() {
-  grep -Fq "$2" "$1"
+  grep -Fq -- "$2" "$1"
 }
 
 assert_file_not_contains() {
-  ! grep -Fq "$2" "$1"
+  ! grep -Fq -- "$2" "$1"
 }
 
 yaml_get() {

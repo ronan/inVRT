@@ -172,13 +172,20 @@ Crawl the site and build a list of URLs to screenshot.
 invrt crawl [--profile=<name>] [--device=<name>] [--environment=<name>]
 ```
 
-Uses `wget` to recursively follow links from `INVRT_URL`, respecting `max_crawl_depth` and `max_pages`. The resulting URL list is written to `.invrt/data/<profile>/<environment>/crawled_urls.txt`.
+Uses Playwright (Chromium) to load pages from `.invrt/plan.yaml`, extract links, and recursively crawl in-scope HTML pages, respecting `max_crawl_depth` and `max_pages`. The resulting URL list is written to `.invrt/data/<profile>/crawled-paths.text`.
 
 If no config exists yet, `crawl` initializes the project first. When no URL argument or `INVRT_URL` environment variable is available, it prompts for the URL interactively.
 
 If the selected profile has credentials, inVRT logs in first and crawls as the authenticated user (using session cookies).
 
 URLs matching patterns in `.invrt/exclude_urls.txt` are skipped. Default exclusions (used when the file doesn't exist): `/files`, `/sites`, `/user/logout`.
+URLs matching patterns in `.invrt/exclude-paths.txt` are skipped.
+
+As pages are discovered, `crawl` updates `.invrt/plan.yaml`:
+
+- Adds missing page paths under `pages` (flat path keys).
+- Adds the active profile to each discovered page's `profiles` array.
+- Preserves existing user-defined metadata fields.
 
 **Examples:**
 
@@ -197,8 +204,7 @@ invrt crawl --profile=anonymous --device=mobile --environment=prod
 
 ```
 🕸️ Crawling 'local' environment (https://example.com) with profile: 'anonymous' to depth: 3, max pages: 100
-No cookie provided. Crawling without authentication.
-Crawling completed. Found 5 unique paths. Results saved to .invrt/data/anonymous/local/crawled_urls.txt
+Crawling completed. Found 5 unique paths.
 ```
 
 **Failure output (no usable URLs):**

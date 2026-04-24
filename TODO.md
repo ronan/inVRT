@@ -16,23 +16,8 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 ## Tests
 
 ## Features
-
-### Advanced flow
-
-## Move to Playwright
-
-## Create plan.yaml
  
 ## Rebuild the Crawler
-
-- [ ] Rewrite the crawler
-    - Use the playwright library to:
-        - Goto the first page in plan.yaml (initially just the base url of the project)
-        - Scrape all links on the page
-        - If the page is of type text/html and is not an excluded path add it to plan.yaml
-        - Repeat with the next item in plan.yaml
-    - [ ] Update the document when new paths are found when crawling with different profiles
-        - Add a `profiles:` section as an array of strings indicating which profiles can access the page
 
 - [ ] Rebuild `invrt generate-playwright` and `generate-backstop` to use plan.yaml to create tests
 

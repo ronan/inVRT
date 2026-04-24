@@ -65,21 +65,16 @@ The written YAML may include:
 
 ### `crawl`
 
-Crawls `INVRT_URL` with `wget`, scoped to the current environment/profile. It:
+Crawls `INVRT_URL` with Playwright Chromium, scoped to the current environment/profile. It:
 
 - runs `check` first if `check.yaml` does not exist
-- writes wget stderr output to `INVRT_CRAWL_LOG`
-- parses discovered paths from the crawl log
+- starts from paths in `INVRT_PLAN_FILE` (falls back to `/`)
+- visits same-origin pages, accepts `text/html` responses, and extracts `a[href]` links
+- respects `INVRT_MAX_CRAWL_DEPTH`, `INVRT_MAX_PAGES`, and `INVRT_EXCLUDE_FILE`
+- writes crawl progress/errors to `INVRT_CRAWL_LOG`
 - writes sorted unique paths to `INVRT_CRAWL_FILE`
+- merges discovered paths into `INVRT_PLAN_FILE` and updates each page's `profiles` array with the active profile while preserving existing page metadata
 - generates BackstopJS config to `INVRT_BACKSTOP_CONFIG_FILE` after a successful crawl
-- optionally authenticates first when the selected profile has credentials
-
-Crawling uses:
-
-- `INVRT_MAX_CRAWL_DEPTH`
-- `INVRT_MAX_PAGES`
-- `INVRT_EXCLUDE_FILE`
-- either `INVRT_COOKIE` as a raw `Cookie:` header or `INVRT_COOKIES_FILE.txt` as a Netscape cookie jar
 
 If no usable URLs are found, it fails and prints the tail of the crawl log.
 

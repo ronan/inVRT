@@ -93,6 +93,12 @@ Completed tasks moved from TODO.md.
 
 ### Advanced flow
 
+- [x] Rewrite the crawler
+  - Uses Playwright to crawl from plan.yaml seed paths
+  - Scrapes links and adds in-scope HTML pages back into plan.yaml
+  - Repeats through discovered paths up to depth/page limits
+  - Updates each discovered page with `profiles` array entries for access by profile
+
 - [x] Create a plan.yaml file (at `.invrt/plan.yaml`) during init.
   - Uses the format in [Plan Yaml Spec](docs/planning/proposals/Plan.yaml.specification.md)
   - `plan.yaml` is auto-generated and updated but remains user-editable
