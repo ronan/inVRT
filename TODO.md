@@ -17,8 +17,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
  
 ### User Scripting
 
-- [ ] Generate the playwright test file from plan.yaml before running reference or test
-
 #### No-code Testing
 
 - [ ] Create a yaml shorthand for often used testing steps

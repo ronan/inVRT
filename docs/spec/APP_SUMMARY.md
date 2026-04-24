@@ -96,7 +96,7 @@ Artifacts are written to `INVRT_CRAWL_DIR`:
 
 ### `test`
 
-Runs visual regression comparison with Playwright. If `INVRT_REFERENCE_FILE` is missing, it runs `reference` first. Runs `npx playwright test` (no `--update-snapshots`). Test output is written to `INVRT_CRAWL_DIR/results/` and `report/`, and `test_results.txt`.
+Runs visual regression comparison with Playwright. If `INVRT_REFERENCE_FILE` is missing, it runs `reference` first. Otherwise it regenerates the Playwright spec from `INVRT_PLAN_FILE` before execution so page and hook updates are always current. Runs `npx playwright test` (no `--update-snapshots`). Test output is written to `INVRT_CRAWL_DIR/results/` and `report/`, and `test_results.txt`.
 
 Exit code is Playwright's exit code: `0` on pass, non-zero on failure.
 

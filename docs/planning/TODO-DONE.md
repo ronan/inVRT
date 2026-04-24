@@ -279,6 +279,8 @@ Completed tasks moved from TODO.md.
   - Any string that does not end in `.ts` or `.js` is treated as raw inline code
 - [x] Generate an empty onready.ts script during `init` that applies at the root path. Add a single line comment to describe what the file is used for.
   - `init` now scaffolds `.invrt/scripts/onready.ts` with a descriptive comment
+- [x] Generate the playwright test file from plan.yaml before running reference or test
+  - `reference` and `test` now ensure the Playwright spec is regenerated from `plan.yaml` before execution
 
 ### Baseline/Test/Report flow
 

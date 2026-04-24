@@ -291,6 +291,8 @@ invrt test [--profile=<name>] [--device=<name>] [--environment=<name>]
 
 Captures fresh screenshots of all crawled URLs and compares them against the reference images using Playwright's snapshot comparison. Generates an HTML report in `.invrt/data/<profile>/report/`.
 
+Before each test run, inVRT regenerates the Playwright spec from `.invrt/plan.yaml` so updated page paths and user hooks are applied even when references already exist.
+
 If no reference screenshots exist for the current profile/device/environment combination, the
 reference step is run automatically before the test. If crawled URLs are also missing, `reference`
 automatically runs `crawl` first.

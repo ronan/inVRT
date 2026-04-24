@@ -293,6 +293,9 @@ EOF;
             if (($result = $this->reference()) !== 0) {
                 return $result;
             }
+        } elseif (($result = $this->generatePlaywright()) !== 0) {
+            // Keep the Playwright spec in sync with plan.yaml even when references already exist.
+            return $result;
         }
 
         return $this->runPlaywright('test', $env);

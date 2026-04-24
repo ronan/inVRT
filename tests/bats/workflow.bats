@@ -244,6 +244,36 @@ EOF
   assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
 }
 
+@test "test: regenerates playwright spec from plan.yaml when references already exist" {
+  start_fixture_server
+  seed_basic_config "$SERVER_URL"
+
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+project: {}
+pages:
+  /:
+    /about.html: {}
+EOF
+
+  run_invrt reference
+  [ "$status" -eq 0 ]
+  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts"
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "/about.html"
+
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+project: {}
+pages:
+  /:
+    /contact.html: {}
+EOF
+
+  run_invrt test
+
+  [ "$status" -eq 0 ]
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "/contact.html"
+  assert_file_not_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "/about.html"
+}
+
 @test "approve: succeeds after a test run" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
