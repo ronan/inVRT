@@ -57,6 +57,8 @@ Completed tasks moved from TODO.md.
 
 ## Bugs
 
+- [x] Exclud path file is not being read.
+
 - [x] The path of playwright-onbefore.js and playwright-onload.js are incorrect
 
         We're looking in the user-scripts directory but it's in the app source code directory.
@@ -66,6 +68,15 @@ Completed tasks moved from TODO.md.
 - [x] Backstop fails when urls (and therefore file paths) are too long
 
 ## Tech Debt
+
+- [x] reduce unnecessary code from php to make test run steps more self contained
+
+- [x] move file generation to js/ts
+
+- [x] Clean up config and get schema generation working again.
+  - [x] Remove unnecessary file path config
+  - [x] Clean up the schema generator
+  - [x] Teach the ai agents how to edit the schema instead of altering the generated code.
 
 - [x] Remove the `settings` section and replace it with `project`
 
@@ -79,6 +90,27 @@ Completed tasks moved from TODO.md.
     - Logs at `data/PROFILE/logs/` with simple names (`crawl.log`, `reference.log`, `test.log`)
 
 ## Features
+
+### Advanced flow
+
+- [x] Implement `invrt check` to load the homepage and retrieve the site title
+  - Have the check function run automatically after init and before crawl if it hasn't been run yet.
+  - Add cms_detector binary to dockerfile to check the cms version/platform.
+  - Create a check.yml file with info from the check including:
+    - Site Title
+    - URL (if the specified url leads to a permament redirect)
+    - Supports https?
+    - CMS/Platform (eg: drupal, backdrop, wordpress) via cms_detector
+    - Last check date
+    - Any other information that may be useful for crawling or capturing screenshots
+- [x] Save reference output to 'INVRT_CAPTURE_DIR/reference_results.txt', save test results to 'INVRT_CAPTURE_DIR/test_results.txt'
+- [x] Use generated config files to determine which steps have been run at least once
+  - Init has run if a 'check.yaml' file exists
+  - Crawl has run if a 'crawled_urls.txt' file exists
+  - Reference has run if a 'reference_results.txt' file exists
+  - Test has run if a 'test_results.txt' file exists
+- [x] Improve `approve` to make the last results of the last test the new baseline
+  - If no tests have been run, run `crawl`, `reference` then `test` and then approve the capture
 
 - [x] Implement `baseline`
     - Runs full pipeline: check → crawl → configure-backstop → reference → test → approve

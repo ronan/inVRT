@@ -11,18 +11,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Bugs
 
-- [x] Exclud path file is not being read.
-
 ## Tech Debt
-
-- [x] reduce unnecessary code from php to make test run steps more self contained
-- [x] move file generation to js/ts
-- [x] Clean up config and get schema generation working again.
-  - [x] Remove unnecessary file path config
-  - [x] Clean up the schema generator 
-  - [x] Teach the ai agents how to edit the schema instead of altering the generated code.
-
-- [x] Standardize output from js/node
 
 ## Tests
 
@@ -40,39 +29,29 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Advanced flow
 
-- [x] Implement `invrt check` to load the homepage and retrieve the site title
-    - Have the check function run automatically after init and before crawl if it hasn't been run yet.
-    - Add cms_detector binary to dockerfile to check the cms version/platform.
-    - Create a check.yml file with info from the check including:
-        - Site Title
-        - URL (if the specified url leads to a permament redirect)
-        - Supports https?
-        - CMS/Platform (eg: drupal, backdrop, wordpress) via cms_detector
-        - Last check date
-        - Any other information that may be useful for crawling or capturing screenshots
-- [x] Save reference output to 'INVRT_CAPTURE_DIR/reference_results.txt', save test results to 'INVRT_CAPTURE_DIR/test_results.txt'
-- [x] Use generated config files to determine which steps have been run at least once
-    - Init has run if a 'check.yaml' file exists
-    - Crawl has run if a 'crawled_urls.txt' file exists
-    - Reference has run if a 'reference_results.txt' file exists
-    - Test has run if a 'test_results.txt' file exists
-
-- [x] Improve `approve` to make the last results of the last test the new baseline
-  - If no tests have been run, run `crawl`, `reference` then `test` and then approve the capture
-
-### Move to Playwright
-
-- [x] Put the contents of `tooling/config/playwright.config.ts` to the CRAWL_DIR before running `generate-playwright`
-    Create a hidden `configure-playwright` command that saves the contetns of that file to the crawl directory
-    Trigger the `configure-playright` command when `generate-playwright` is run
-    Use the INVRT_PLAYWRIGHT_CONFIG_FILE option to determine the path for the config file.
-- [x] Run references and test capture by running the playwright test script
-    Use the `--config=` option to point to the playwright.config.ts file in the crawl directory
+## Move to Playwright
 
 ## Create plan.yaml
 
-- [ ] The crawl command should create a structured yaml file in the format specified in [Plan Yaml Spec](docs/planning/proposals/Plan.yaml.specification.md)
-  - [ ] The generate backstop/playwright commands should read paths from the Plan rather than `crawled-paths.txt`
+- [ ] Create a plan.yaml (at .invrt/plan.yaml) file during init.
+    - The format should be the format specified in [Plan Yaml Spec](docs/planning/proposals/Plan.yaml.specification.md)
+    - `plan.yaml` is automatically generated and updated but can be edited by the end user.
+    - Modify the following commands to update the Plans.yaml file
+        - `invrt init` Adds the base url to the `Project` section
+        - `invrt check` Adds the site title and any other discovered information
+            - It also adds the base url to the Pages section (as `/: {Home Page Title}`)
+ 
+## Rebuild the Crawler
+
+- [ ] Rewrite the crawler
+    - Use the playwright library to:
+        - Goto the first page in plan.yaml (initially just the base url of the project)
+        - Scrape all links on the page
+        - If the page is of type text/html and is not an excluded path add it to plan.yaml
+        - Repeat with the next item in plan.yaml
+    - [ ] Update the document when new paths are found when crawling with different profiles
+- [ ] Rebuild `invrt generate-playwright` and `generate-backstop` to use plan.yaml to create tests
+
 
 ## User Scripting (requires Move to Playwright and Create plan.yaml)
 
@@ -113,6 +92,14 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Future Features
 
+- [ ] Better debug output during crawl
+- [ ] Rewrite the crawler
+    - Make exclude_paths work and provide defaults for drupal/backdrop
+    - add a max_width to go with max_depth
+  - [ ] Convert crawled-paths.txt to the format in [Plan.md](docs/planning/proposals/Plan.yaml.specification.md)
+    - [ ] Name the file 'plan.yaml' and put it at the top of the .invrt directory
+    - [ ] Update the document when new paths are found when crawling with different profiles
+    - [ ] Turn 'plan.yaml' into 'backstop.json' with backstop test config in it.
 - [ ] New flags
   - [ ] --skip-<step>
   - [ ] init --redo (or init --force)
@@ -120,15 +107,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - Make the invrt directory visible (`invrt` not `.invrt`)
   - [ ] --[config-option] override any config option at runtime
     - [ ] eg: invrt test --viewport-width=1600
-- [ ] Advanced playwright integration
-- [ ] Better debug output during crawl
-- [ ] Rewrite the crawler
-    - Make exclude_paths work and provide defaults for drupal/backdrop
-    - add a max_width to go with max_depth
-  - [ ] Create a function that converts crawled_urls.txt to the format in SITE_TREE_FILE_SPEC.md
-    - [ ] Name the file 'plan.yaml' and put it at the top of the .invrt directory
-    - [ ] Update the document when new paths are found when crawling with different profiles
-    - [ ] Turn 'plan.yaml' into 'backstop.json' with backstop test config in it.
 
 ## Documentation
  - [ ] Clean up docs
