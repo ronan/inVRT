@@ -11,31 +11,15 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Bugs
 
-
 ## Tech Debt
-
-## Tests
 
 ## Features
  
-## Rebuild the Crawler
+### User Scripting
 
+- [ ] Generate the playwright test file from plan.yaml before running reference or test
 
-## User Scripting
-
-- [ ] Optionally read the onload/onready playwright event script from `INVRT_SCRIPTS_DIR`
-- [ ] Allow specification of per-path scripts in plan.yaml
-- [ ] Scripts can be a code block on the yaml in typescript or javascript.
-- [ ] Allow the user to specify setup/teardown scripts per project
-  - [ ] Allow setup/teardown per site section (configured in config.yaml)
-  - [ ] " per profile
-  - [ ] " per device
-  - [ ] " per environment
-- [ ] Scripts can be paths to a script in `INVRT_SCRIPTS_DIR`
-- [ ] Scripts can be literal codeblock in plan.yaml in javascript or typescript
-- [ ] Allow some 'pages' to be functional tests which are not necessarily a URL
-
-## No-code Testing
+#### No-code Testing
 
 - [ ] Create a yaml shorthand for often used testing steps
 
@@ -76,6 +60,8 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
     - Regenerate simple human readable usage documentation.
     - Create in-depth end user documentation for config
 
+## Tests
+
 ### End to End Testing
     - [ ] Create a 99 page website which goes 4 levels deep
         Make it look like nice but generic business page. Add Lorum Ipsem test content.
@@ -87,3 +73,4 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
     - [#] Test backdrop support
     - [#] Test drupal auth support
+

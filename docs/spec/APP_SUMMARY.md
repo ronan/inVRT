@@ -41,8 +41,9 @@ It writes a minimal config with the currently selected environment/profile/devic
 - `project.url` from the initialized URL
 - `project.id` from resolved project ID when available
 - `pages['/']` as the initial homepage entry
+- `.invrt/scripts/onready.ts` as the default page-ready user script scaffold
 
-During init, inVRT also generates a stable project identifier and stores it at `settings.id`. The ID is derived from the URL hostname plus a random seed so projects with the same URL still get distinct report IDs.
+During init, inVRT also generates a stable project identifier and stores it at `project.id`. The ID is derived from the URL hostname plus a random seed so projects with the same URL still get distinct report IDs.
 
 ### `check`
 
@@ -84,7 +85,7 @@ If no usable URLs are found, it fails and prints the tail of the crawl log.
 
 Captures reference screenshots using Playwright for the current environment/profile/device. If the crawl file is missing, it runs `crawl` first. It fails when the crawl file exists but contains no usable URLs.
 
-Before capturing, it runs `generate-playwright` (which in turn runs `configure-playwright`) to write `playwright.config.ts` and the device spec to `INVRT_CRAWL_DIR`. `generate-playwright` derives scenarios from `INVRT_PLAN_FILE` (`plan.yaml` `pages` keys). It then runs `npx playwright test --update-snapshots`.
+Before capturing, it runs `generate-playwright` (which in turn runs `configure-playwright`) to write `playwright.config.ts` and the device spec to `INVRT_CRAWL_DIR`. `generate-playwright` derives scenarios from `INVRT_PLAN_FILE` (`plan.yaml` `pages` keys) and embeds any resolved page hooks from `setup`/`onready`/`teardown` metadata. Page hook values may be inline code or `.js`/`.ts` files, parent-page hooks are inherited by descendants, and `before`/`ready`/`after` are accepted as aliases. It then runs `npx playwright test --update-snapshots`.
 
 Artifacts are written to `INVRT_CRAWL_DIR`:
 

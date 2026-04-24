@@ -260,7 +260,26 @@ EOF
 @test "generate-playwright: generates spec from plan pages" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
-  seed_crawled_urls anonymous / /about.html
+
+  mkdir -p "$TEST_DIR/.invrt/scripts"
+  cat > "$TEST_DIR/.invrt/scripts/root-setup.ts" <<'EOF'
+console.log('root setup hook');
+EOF
+  cat > "$TEST_DIR/.invrt/scripts/child-ready.js" <<'EOF'
+console.log('child ready hook');
+EOF
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+project: {}
+pages:
+  /:
+    setup: root-setup.ts
+    onready: |
+      console.log('root ready hook');
+    teardown: |
+      console.log('shared teardown hook');
+    /about.html:
+      onready: child-ready.js
+EOF
 
   run_invrt generate-playwright
 
@@ -270,6 +289,37 @@ EOF
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/playwright.config.ts"
   assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "import { test"
   assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "networkidle"
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "try {"
+  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "finally"
+  run bash -c "grep -c \"root setup hook\" '$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts'"
+  [ "$status" -eq 0 ]
+  [ "$output" -eq 2 ]
+  run bash -c "grep -c \"shared teardown hook\" '$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts'"
+  [ "$status" -eq 0 ]
+  [ "$output" -eq 2 ]
+  run bash -c "grep -c \"root ready hook\" '$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts'"
+  [ "$status" -eq 0 ]
+  [ "$output" -eq 1 ]
+  run bash -c "grep -c \"child ready hook\" '$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts'"
+  [ "$status" -eq 0 ]
+  [ "$output" -eq 1 ]
+}
+
+@test "generate-playwright: fails when a referenced script file is missing" {
+  start_fixture_server
+  seed_basic_config "$SERVER_URL"
+
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+project: {}
+pages:
+  /:
+    setup: missing.ts
+EOF
+
+  run_invrt generate-playwright
+
+  [ "$status" -ne 0 ]
+  assert_output_contains "Script file not found: missing.ts"
 }
 
 @test "baseline: runs full pipeline and produces approved screenshots" {

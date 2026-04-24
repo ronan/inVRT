@@ -259,6 +259,27 @@ Completed tasks moved from TODO.md.
 
 ## Features
 
+### User Scripting
+
+- [x] Allow specification of per-path test scripts in plan.yaml
+  - `generate-playwright` now reads `setup`, `onready`, and `teardown` hooks from page metadata
+- [x] Scripts can be written in javascript or typescript
+  - `.js` and `.ts` hook files are both supported
+- [x] Scripts on a parent path apply to all children
+  - Hook metadata is inherited down the `pages` tree unless a child overrides a hook
+- [x] User scripts get added to the .spec.ts file by `generate-playwright`
+  - Generated Playwright specs embed resolved user hook code for each page test
+- [x] Scripts will be run by `playwright test` during one of the following events:
+  - `setup`, `teardown`, `onready`
+- [x] The script or script path should be added to plan.yml under a key that represents its event
+  - `before`, `ready`, and `after` are also accepted as aliases for compatibility
+- [x] Scripts can be the name of a script in `INVRT_SCRIPTS_DIR`
+  - Bare filenames resolve relative to `.invrt/scripts/`
+- [x] Scripts can be literal codeblock in the plan.yaml
+  - Any string that does not end in `.ts` or `.js` is treated as raw inline code
+- [x] Generate an empty onready.ts script during `init` that applies at the root path. Add a single line comment to describe what the file is used for.
+  - `init` now scaffolds `.invrt/scripts/onready.ts` with a descriptive comment
+
 ### Baseline/Test/Report flow
 
 - [x] Auto trigger `invrt reference` when `invrt test` is run for first time

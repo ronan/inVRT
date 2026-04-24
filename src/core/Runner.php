@@ -72,7 +72,14 @@ class Runner
             $this->logger->error('Failed to create scripts directory');
             return 1;
         }
-        file_put_contents(Path::join($directory, 'scripts', 'onready.js'), '');
+
+        $onreadyScript = Path::join($directory, 'scripts', 'onready.ts');
+        $onreadyContent = "// Runs after the page is ready and before the screenshot is captured.\n";
+        if (file_put_contents($onreadyScript, $onreadyContent) === false) {
+            $this->logger->error('Failed to create default onready.ts script');
+            return 1;
+        }
+
         $this->logger->info('✓ Created data directories for generated data, and user scripts.');
 
         $projectId = self::generateProjectId($url);

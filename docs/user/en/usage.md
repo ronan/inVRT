@@ -73,6 +73,8 @@ The generated `config.yaml` is intentionally minimal. It writes the URL to `envi
 
 `init` also creates `.invrt/plan.yaml` and seeds `project.url` (and `project.id` when available), plus an initial homepage entry in `pages`.
 
+`init` also creates `.invrt/scripts/onready.ts` with a comment stub. Use that file for root-level page-ready actions that should run before screenshots are captured.
+
 If you omit the URL argument in an interactive terminal, inVRT prompts for it.
 
 **Output:**
@@ -229,6 +231,27 @@ invrt reference [--profile=<name>] [--device=<name>] [--environment=<name>]
 ```
 
 Captures a screenshot of each page using Playwright (Chromium). The Playwright config and spec are generated into `.invrt/data/<profile>/` before running, with page tests derived from `.invrt/plan.yaml` (`pages` keys). Screenshots are stored in `.invrt/data/<profile>/<environment>/bitmaps/reference/`.
+
+Each page in `.invrt/plan.yaml` may define optional user hooks that are emitted into the generated Playwright spec:
+
+```yaml
+pages:
+  /:
+    setup: setup.ts
+    onready: |
+      await page.locator('body').click();
+    teardown: |
+      console.log('Finished with test');
+    /about.html:
+      onready: child-ready.js
+```
+
+- `setup` runs before `page.goto(...)`.
+- `onready` runs after the page reaches `networkidle` and before the screenshot assertion.
+- `teardown` runs in a `finally` block after the screenshot step, even if the test fails.
+- Hooks defined on a parent page apply to child pages unless the child overrides that hook.
+- Values ending in `.js` or `.ts` are loaded from disk. Bare filenames resolve relative to `.invrt/scripts/`. Any other string is treated as inline code.
+- `before`, `ready`, and `after` are accepted as aliases for `setup`, `onready`, and `teardown`.
 
 If no `crawled_urls.txt` file exists for the current profile/device/environment combination, `crawl` is run automatically before capturing screenshots.
 
