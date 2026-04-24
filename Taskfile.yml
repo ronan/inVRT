@@ -155,7 +155,6 @@ tasks:
     sources:
       - 'src/core/**/*.php'
       - 'src/cli/**/*.php'
-      - 'tests/**/*.php'
     cmds:
       - php ./vendor/bin/php-cs-fixer fix --config=tooling/config/.php-cs-fixer.php
 

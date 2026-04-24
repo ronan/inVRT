@@ -9,6 +9,10 @@ Completed tasks moved from TODO.md.
 
 ## Tech Debt
 
+- [x] More Runner.php cleanup
+  - Moved `planHasPages` to `PlanService::hasPages`
+  - Extracted `runNode` / `runNodeCapturing` to `Service\NodeRunner`
+
 - [x] Refactor Runner to only contain public command methods
   - Extracted `Service\PlaywrightRunner`, `Service\ProjectId`, `Service\UrlNormalizer`, `Service\Filesystem`
   - Runner now holds only public command methods + one private `runNode()` dispatcher

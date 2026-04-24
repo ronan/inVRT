@@ -61,6 +61,24 @@ class PlanService
         return file_put_contents($planFile, Yaml::dump($data, 6, 2)) !== false;
     }
 
+    /** Does plan.yaml contain at least one testable page path? */
+    public static function hasPages(string $planFile): bool
+    {
+        if ($planFile === '' || !is_readable($planFile)) {
+            return false;
+        }
+        $pages = self::read($planFile)['pages'] ?? [];
+        if (!is_array($pages)) {
+            return false;
+        }
+        foreach (array_keys($pages) as $key) {
+            if (is_string($key) && str_starts_with($key, '/')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return array<string, mixed>
      */

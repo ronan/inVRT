@@ -4,14 +4,13 @@ namespace InVRT\Core;
 
 use InVRT\Core\Service\Filesystem;
 use InVRT\Core\Service\LoginService;
-use InVRT\Core\Service\NodeOutputParser;
+use InVRT\Core\Service\NodeRunner;
 use InVRT\Core\Service\PlanService;
 use InVRT\Core\Service\PlaywrightRunner;
 use InVRT\Core\Service\ProjectId;
 use InVRT\Core\Service\UrlNormalizer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Path;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -25,11 +24,15 @@ use Symfony\Component\Yaml\Yaml;
  */
 class Runner
 {
+    private readonly NodeRunner $node;
+
     public function __construct(
         private readonly Configuration $config,
         private readonly string $appDir,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+        $this->node = new NodeRunner($this->config, $this->appDir, $this->logger);
+    }
 
     /** Initialize a new inVRT project directory with default config. */
     public function init(?string $url = null): int
@@ -115,7 +118,7 @@ class Runner
     /** Returns a project status summary by delegating to js/info.js. */
     public function info(): array
     {
-        [$exit, $stdout] = $this->runNodeCapturing('info.js');
+        [$exit, $stdout] = $this->node->runCapturing('info.js');
         if ($exit !== 0) {
             return [];
         }
@@ -133,7 +136,7 @@ class Runner
     public function check(): int
     {
         $outputFile = $this->config->get('INVRT_CHECK_FILE');
-        $result = $this->runNode('check.js', null, $outputFile);
+        $result = $this->node->run('check.js', null, $outputFile);
         if ($result !== 0) {
             return $result;
         }
@@ -166,7 +169,7 @@ class Runner
     /** Crawl the target URL and write unique paths to the crawl file. */
     public function crawl(): int
     {
-        return $this->runNode('crawl.js', null, $this->config->get('INVRT_CRAWL_FILE'));
+        return $this->node->run('crawl.js', null, $this->config->get('INVRT_CRAWL_FILE'));
     }
 
     /** Capture reference screenshots, running a crawl first if needed. */
@@ -179,12 +182,12 @@ class Runner
 
         $this->logger->info("📸 Capturing references from '$environment' environment ($url) with profile: '$profile' and device: '$device'");
 
-        if (!$this->planHasPages()) {
+        if (!PlanService::hasPages((string) $this->config->get('INVRT_PLAN_FILE'))) {
             $this->logger->notice('🕸️ No planned pages found — running crawl first.');
             if (($result = $this->crawl()) !== 0) {
                 return $result;
             }
-            if (!$this->planHasPages()) {
+            if (!PlanService::hasPages((string) $this->config->get('INVRT_PLAN_FILE'))) {
                 $this->logger->notice('No pages are available. Crawl has run but found no usable URLs.');
                 return 1;
             }
@@ -259,7 +262,7 @@ class Runner
     /** Generate or regenerate the BackstopJS configuration from plan.yaml. */
     public function configureBackstop(): int
     {
-        return $this->runNode(
+        return $this->node->run(
             'backstop-config.js',
             $this->config->get('INVRT_PLAN_FILE'),
             $this->config->get('INVRT_BACKSTOP_CONFIG_FILE'),
@@ -269,7 +272,7 @@ class Runner
     /** Write the bundled playwright.config.ts via js/configure-playwright.js. */
     public function configurePlaywright(): int
     {
-        return $this->runNode('configure-playwright.js');
+        return $this->node->run('configure-playwright.js');
     }
 
     /** Generate a Playwright TypeScript spec from plan.yaml pages. */
@@ -279,7 +282,7 @@ class Runner
             return $result;
         }
 
-        return $this->runNode(
+        return $this->node->run(
             'generate-playwright.js',
             $this->config->get('INVRT_PLAN_FILE'),
             $this->config->get('INVRT_PLAYWRIGHT_SPEC_FILE'),
@@ -307,79 +310,4 @@ class Runner
     }
 
     // -------------------------------------------------------------------------
-
-    /**
-     * Run a Node.js script from the app's JS directory.
-     *
-     * Streams $inputFile content to stdin if provided. Captures stdout and
-     * writes it to $outputFile if provided. Log messages arrive on stderr as
-     * pino NDJSON and are routed to the PSR-3 logger.
-     */
-    private function runNode(string $script, ?string $inputFile = null, ?string $outputFile = null): int
-    {
-        [$exit, $stdout] = $this->runNodeCapturing($script, $inputFile);
-
-        if ($outputFile !== null && $outputFile !== '') {
-            $this->logger->debug("Writing output to $outputFile");
-            Filesystem::writeFile($outputFile, $stdout);
-        }
-
-        return $exit;
-    }
-
-    /**
-     * Run a Node.js script and return [exitCode, stdout].
-     *
-     * @return array{0: int, 1: string}
-     */
-    private function runNodeCapturing(string $script, ?string $inputFile = null): array
-    {
-        $file = rtrim($this->appDir, '/') . '/' . $script;
-        $cmd  = 'node ' . escapeshellarg($file);
-        $this->logger->debug("Running Node script: $cmd");
-
-        $process = Process::fromShellCommandline($cmd, null, $this->config->all());
-        $process->setTimeout(null);
-
-        if ($inputFile !== null && is_readable($inputFile)) {
-            $process->setInput(file_get_contents($inputFile));
-        }
-
-        $parser = new NodeOutputParser($this->logger);
-        $stdout = '';
-        $process->run(function (mixed $type, mixed $buffer) use ($parser, &$stdout): void {
-            if ($type === Process::ERR) {
-                $parser->write($buffer);
-            } else {
-                $stdout .= $buffer;
-            }
-        });
-        $parser->flush();
-
-        return [$process->getExitCode() ?? 0, $stdout];
-    }
-
-    /**
-     * Does plan.yaml contain at least one testable page path?
-     *
-     * @phpstan-impure
-     */
-    private function planHasPages(): bool
-    {
-        $planFile = $this->config->get('INVRT_PLAN_FILE');
-        if (!$planFile || !is_readable($planFile)) {
-            return false;
-        }
-        $parsed = Yaml::parseFile($planFile);
-        $pages  = is_array($parsed) ? ($parsed['pages'] ?? []) : [];
-        if (!is_array($pages)) {
-            return false;
-        }
-        foreach (array_keys($pages) as $key) {
-            if (is_string($key) && str_starts_with($key, '/')) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

@@ -20,7 +20,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 ### Authentication
 
 - [ ] Replace cookies.json with session.json
-    - Add test.use({ storageState: sessin.json })
+    - Add test.use({ storageState: session.json })
     - Have playwright wright the session directly to the file during login
  
 ### User Scripting
