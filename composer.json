@@ -1,7 +1,7 @@
 {
     "name": "invrt/php-cli",
     "description": "An auth-enabled VRT for Drupal and Backdrop web sites and apps (PHP version)",
-    "version": "0.1.4",
+    "version": "0.2.0",
     "type": "application",
     "license": "MIT",
     "authors": [
