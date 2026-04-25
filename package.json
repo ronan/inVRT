@@ -32,10 +32,7 @@
     "@types/node": "^25.6.0"
   },
   "devDependencies": {
-    "@apidevtools/json-schema-ref-parser": "^15.3.4",
     "@release-it/bumper": "^7.0.5",
-    "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
     "bats": "^1.13.0",
     "handlebars": "^4.7.9",
     "release-it": "^19.2.4"
