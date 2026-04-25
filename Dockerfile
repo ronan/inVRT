@@ -39,7 +39,7 @@ ENTRYPOINT ["node_modules/.bin/bats", "tests/bats"]
 
 FROM base AS runtime
 COPY --from=composer-prod /app/vendor /app/vendor
-RUN npm install --loglevel error --omit=dev
+RUN npm install --loglevel error
 
 WORKDIR /dir
 ENTRYPOINT [ "/app/bin/invrt" ]
