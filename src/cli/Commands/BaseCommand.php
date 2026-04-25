@@ -18,6 +18,12 @@ abstract class BaseCommand
     /** Directory containing playwright-login.js and other Node helper scripts. */
     private const APP_DIR = __DIR__ . '/../../js';
 
+    /** Directories (relative to cwd) searched for an existing plan.yaml, in priority order. */
+    public const PLAN_DIRS = ['invrt', '.invrt', '.ddev/.invrt', '.ddev/invrt'];
+
+    /** Default plan directory used when no existing plan.yaml is found. */
+    public const DEFAULT_PLAN_DIR = '.invrt';
+
     /** When true, boot() attempts login before returning. */
     protected bool $requiresLogin = true;
 
@@ -56,6 +62,10 @@ abstract class BaseCommand
 
         $filepath = $this->resolveConfigFilepath($env + $processEnv);
 
+        // Make sure the resolved INVRT_DIRECTORY (used for default path interpolation)
+        // matches the discovered plan file's directory.
+        $env['INVRT_DIRECTORY'] = dirname($filepath);
+
         try {
             $config = new Configuration($filepath, $env + $processEnv);
         } catch (\Exception $e) {
@@ -79,7 +89,7 @@ abstract class BaseCommand
         $io->writeln(
             sprintf(
                 '[debug] Resolved config (config: %s, url: %s)',
-                $config->get('INVRT_CONFIG_FILE', '(not set)'),
+                $config->get('INVRT_PLAN_FILE', '(not set)'),
                 $config->get('INVRT_URL', '(not set)'),
             ),
             OutputInterface::VERBOSITY_DEBUG,
@@ -108,18 +118,27 @@ abstract class BaseCommand
 
     private function resolveConfigFilepath(array $env): string
     {
-        // Check for an explicit INVRT_CONFIG_FILE override first
-        if (!empty($env['INVRT_CONFIG_FILE'])) {
-            return $env['INVRT_CONFIG_FILE'];
+        // Explicit overrides win.
+        if (!empty($env['INVRT_PLAN_FILE'])) {
+            return $env['INVRT_PLAN_FILE'];
         }
 
-        // Derive the default path: <cwd>/.invrt/config.yaml
         $cwd = $env['INVRT_CWD'] ?? getcwd() ?: '';
+
         if (!empty($env['INVRT_DIRECTORY'])) {
-            return rtrim($env['INVRT_DIRECTORY'], '/') . '/config.yaml';
+            return rtrim($env['INVRT_DIRECTORY'], '/') . '/plan.yaml';
         }
 
-        return rtrim($cwd, '/') . '/.invrt/config.yaml';
+        // Search known invrt directories under cwd for an existing plan.yaml.
+        foreach (self::PLAN_DIRS as $dir) {
+            $candidate = rtrim($cwd, '/') . '/' . $dir . '/plan.yaml';
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        // Fallback used when nothing exists yet (e.g. fresh `invrt init`).
+        return rtrim($cwd, '/') . '/' . self::DEFAULT_PLAN_DIR . '/plan.yaml';
     }
 
     protected function bootOrInitialize(InputInterface $input, InvrtInput $opts, SymfonyStyle $io, ?string $url = null): int

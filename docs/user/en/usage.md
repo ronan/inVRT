@@ -62,16 +62,13 @@ Creates the following structure:
 
 ```
 .invrt/
-├── config.yaml           # Main configuration — edit this
-├── plan.yaml             # Auto-generated site plan; safe to edit
+├── plan.yaml             # Project plan and configuration — edit this
 ├── exclude_urls.txt      # URL path patterns to skip during crawl
 ├── data/                 # Generated screenshots, reports, logs (gitignore this)
 └── scripts/              # Optional user-defined hook scripts
 ```
 
-The generated `config.yaml` is intentionally minimal. It writes the URL to `environments.<selected-environment>.url` and creates the selected environment, profile, and device keys.
-
-`init` also creates `.invrt/plan.yaml` and seeds `project.url` (and `project.id` when available), plus an initial homepage entry in `pages`.
+The generated `plan.yaml` is intentionally minimal. It writes the URL to `environments.<selected-environment>.url` and creates the selected environment, profile, and device keys, plus an initial homepage entry in `pages`.
 
 `init` also creates `.invrt/scripts/onready.ts` with a comment stub. Use that file for root-level page-ready actions that should run before screenshots are captured.
 
@@ -83,7 +80,7 @@ If you omit the URL argument in an interactive terminal, inVRT prompts for it.
 🚀 Initializing InVRT for the project at /my/project
 ✓ Created invrt directory at /my/project/.invrt
 ✓ Created data directories for generated data, and user scripts.
-✓ Initialized InVRT configuration file at /my/project/.invrt/config.yaml
+✓ Initialized InVRT configuration file at /my/project/.invrt/plan.yaml
 🚀 InVRT successfully initialized!
 ```
 
@@ -406,7 +403,7 @@ Shows the project name, config file path, the active environment/profile/device,
 
 ```
 My Project
-/path/to/.invrt/config.yaml
+/path/to/.invrt/plan.yaml
 
  Active
  Environment  local

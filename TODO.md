@@ -16,17 +16,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Features
 
-- [ ] Load config from other directories
-    - Use plan.yaml to handle config.
-            Expand the plan.yaml definition to include what is currently in config.yaml
-            Add `profiles`, `devices` and `environments` to plan.yaml as described in /workspaces/invrt/docs/planning/proposals/Plan.yaml.specification.md
-            Have init write defaults to plan.yaml and have the config reader read from it.
-    - Update the config loader reader to look in all of the following locations when looking for the plan.yaml:
-            - `invrt`
-            - `.invrt`
-            - `.ddev/.invrt`
-            - `.ddev/invrt`
-
 ### Future Features
 
 - [ ] `invrt remove` (rm) 

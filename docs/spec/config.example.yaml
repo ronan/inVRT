@@ -9,7 +9,7 @@ project:
   user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
 
   directory: 'INVRT_CWD/.invrt'
-  config_file: 'INVRT_DIRECTORY/config.yaml'
+  plan_file: 'INVRT_DIRECTORY/plan.yaml'
   scripts_dir: 'INVRT_DIRECTORY/scripts'
 
   environment_dir: 'INVRT_DIRECTORY/data/INVRT_ENVIRONMENT'

@@ -1,10 +1,10 @@
-# JSON Schema for .invrt/config.yaml
+# JSON Schema for .invrt/plan.yaml
 # https://json-schema.org/draft/2020-12
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "https://github.com/ronan/invrt/docs/config.schema.yaml"
 title: inVRT Configuration
-description: Configuration file for an inVRT Visual Regression Testing project (.invrt/config.yaml)
+description: Configuration file for an inVRT Visual Regression Testing project (.invrt/plan.yaml)
 type: object
 
 properties:
@@ -122,10 +122,10 @@ $defs:
         type: string
         description: Directory where inVRT stores runtime state, outputs, and configuration.
         default: INVRT_CWD/.invrt
-      config_file:
+      plan_file:
         type: string
-        description: Path to the inVRT config file. Usually '.invrt/config.yaml'.
-        default: INVRT_DIRECTORY/config.yaml
+        description: Path to the inVRT plan file. Usually '.invrt/plan.yaml'.
+        default: INVRT_DIRECTORY/plan.yaml
       scripts_dir:
         type: string
         description: Directory where inVRT looks for user-defined scripts.

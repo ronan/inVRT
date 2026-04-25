@@ -30,7 +30,7 @@ clear_invrt_runtime_env() {
 
   while IFS='=' read -r name _; do
     case "$name" in
-      INVRT_CWD|INVRT_DIRECTORY|INVRT_CONFIG_FILE|INVRT_URL|INVRT_ENVIRONMENT|INVRT_PROFILE|INVRT_DEVICE|INVRT_*)
+      INVRT_CWD|INVRT_DIRECTORY|INVRT_PLAN_FILE|INVRT_URL|INVRT_ENVIRONMENT|INVRT_PROFILE|INVRT_DEVICE|INVRT_*)
         unset "$name"
         ;;
     esac
@@ -261,7 +261,7 @@ seed_basic_config() {
 
   mkdir -p "$TEST_DIR/.invrt"
 
-  cat > "$TEST_DIR/.invrt/config.yaml" <<EOF
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<EOF
 project:
   name: Test Project
 environments:
@@ -281,22 +281,23 @@ seed_crawled_urls() {
   local crawl_dir="$TEST_DIR/.invrt/data/$profile"
   mkdir -p "$crawl_dir"
 
+  local plan_file="$TEST_DIR/.invrt/plan.yaml"
+  if [ ! -f "$plan_file" ]; then
+    printf 'project: {}\n' > "$plan_file"
+  fi
+
   if [ "$#" -eq 0 ]; then
     : > "$crawl_dir/crawled-paths.text"
-    cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
-project: {}
-pages: {}
-EOF
+    printf 'pages: {}\n' >> "$plan_file"
     return
   fi
 
   printf '%s\n' "$@" > "$crawl_dir/crawled-paths.text"
 
   {
-    printf 'project: {}\n'
     printf 'pages:\n'
     for p in "$@"; do
       printf '  %s: {}\n' "$p"
     done
-  } > "$TEST_DIR/.invrt/plan.yaml"
+  } >> "$plan_file"
 }

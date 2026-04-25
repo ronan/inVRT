@@ -51,9 +51,6 @@ Settings:
     description: Browser viewport height for screenshot capture.
 
 Files:
-  config_file:
-    default: INVRT_DIRECTORY/config.yaml
-    description: Path to the main inVRT configuration file.
   crawl_file:
     default: INVRT_CRAWL_DIR/crawled-paths.text
     description: Path to the file storing the list of crawled URLs.
@@ -97,7 +94,7 @@ Commands:
     help: Initializes a new inVRT project, saving the provided URL into a fresh config file.
     success: InVRT successfully initialized!
     triggers: [ approve ]
-    output: config_file
+    output: plan_file
     output_fields: [ url ]
     directories:
       directory:

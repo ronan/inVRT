@@ -148,6 +148,14 @@ Completed tasks moved from TODO.md.
 
 ### Advanced flow
 
+- [x] Load config from other directories
+  - Replaced `.invrt/config.yaml` with a unified `.invrt/plan.yaml` containing `project`, `environments`, `profiles`, `devices`, `exclude`, and `pages`
+  - Plan loader searches `invrt/`, `.invrt/`, `.ddev/.invrt/`, `.ddev/invrt/` (in that order) and honors `INVRT_PLAN_FILE` overrides
+  - `InVRT\Core\Configuration` reads/writes through `PlanService`; removed the legacy `YamlLoader` and the `symfony/config` schema validator (and dependency)
+  - Stripped `ConfigSchema` to plain defaults; updated `init` to write defaults straight to `plan.yaml`
+  - Updated bats helpers, fixtures (`tests/fixtures/plan*.yaml`), and added new tests covering multi-directory plan discovery
+  - Updated docs in `docs/user/en/` and `docs/spec/` to drop `config.yaml` in favor of `plan.yaml`
+
 - [x] Generate page ids during crawl and add them to plan.yaml
   - Crawl now writes stable `id` values to discovered page entries in `plan.yaml`
 

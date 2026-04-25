@@ -32,9 +32,12 @@ teardown() {
   start_fixture_server
   seed_basic_config "$SERVER_URL"
 
-  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<EOF
 project:
   custom_key: keep-me
+environments:
+  local:
+    url: $SERVER_URL
 pages:
   /:
     onready: scripts/home.onready.js
@@ -82,7 +85,7 @@ EOF
   assert_file_exists "$TEST_DIR/.invrt/plan.yaml"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/about.html:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "profiles:"
-  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "- anonymous"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "anonymous:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "id:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/blog:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/2026:"
@@ -98,7 +101,7 @@ EOF
   assert_output_contains "No configuration file found. Initializing inVRT first."
   assert_output_contains "What URL should inVRT use?"
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
-  assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "environments.local.url" "$SERVER_URL"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "environments.local.url" "$SERVER_URL"
 }
 
 @test "crawl: fails with no usable urls and preserves an empty crawl file" {
@@ -218,8 +221,11 @@ EOF
   start_fixture_server
   seed_basic_config "$SERVER_URL"
 
-  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<EOF
 project: {}
+environments:
+  local:
+    url: $SERVER_URL
 pages:
   /about.html: {}
   /contact.html: {}
@@ -230,8 +236,11 @@ EOF
   assert_file_exists "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts"
   assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "/about.html"
 
-  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<EOF
 project: {}
+environments:
+  local:
+    url: $SERVER_URL
 pages:
   /contact.html: {}
 EOF
@@ -267,8 +276,11 @@ EOF
   cat > "$TEST_DIR/.invrt/scripts/child-ready.js" <<'EOF'
 console.log('child ready hook');
 EOF
-  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<EOF
 project: {}
+environments:
+  local:
+    url: $SERVER_URL
 pages:
   /:
     setup: root-setup.ts
@@ -308,8 +320,11 @@ EOF
   start_fixture_server
   seed_basic_config "$SERVER_URL"
 
-  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<EOF
 project: {}
+environments:
+  local:
+    url: $SERVER_URL
 pages:
   /:
     setup: missing.ts

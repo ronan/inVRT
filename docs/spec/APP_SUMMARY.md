@@ -19,7 +19,7 @@ invrt info        # Show current project status for the selected context
 invrt config      # Print the resolved INVRT_* configuration
 ```
 
-`crawl`, `reference`, `test`, and `baseline` auto-initialize the project when `.invrt/config.yaml` is missing. `reference` runs `crawl` first when no crawl file exists. `test` runs `reference` first when no approved reference exists. `baseline` runs whichever prerequisite steps are still missing before approving.
+`crawl`, `reference`, `test`, and `baseline` auto-initialize the project when no `plan.yaml` is found. `reference` runs `crawl` first when no crawl file exists. `test` runs `reference` first when no approved reference exists. `baseline` runs whichever prerequisite steps are still missing before approving.
 
 ---
 
@@ -29,7 +29,7 @@ invrt config      # Print the resolved INVRT_* configuration
 
 Initializes a new inVRT project in the current working directory. Creates:
 
-- `.invrt/config.yaml`
+- `.invrt/plan.yaml`
 - `.invrt/data/`
 - `.invrt/scripts/`
 - `.invrt/exclude_paths.txt`
@@ -145,23 +145,22 @@ All commands use the same selection options. `init` adds an optional positional 
 | `--profile` | `-p` | `anonymous` | Key in `profiles:` |
 | `--device` | `-d` | `desktop` | Key in `devices:` |
 
-The command boot layer also honors existing `INVRT_*` process environment variables. `INVRT_CONFIG_FILE` overrides config file discovery completely. Otherwise the default config path is:
+The command boot layer also honors existing `INVRT_*` process environment variables. `INVRT_PLAN_FILE` overrides plan file discovery completely. Otherwise inVRT searches the working directory for the first existing match in:
 
 ```text
-<INVRT_DIRECTORY>/config.yaml
+<INVRT_CWD>/invrt/plan.yaml
+<INVRT_CWD>/.invrt/plan.yaml
+<INVRT_CWD>/.ddev/.invrt/plan.yaml
+<INVRT_CWD>/.ddev/invrt/plan.yaml
 ```
 
-or, when `INVRT_DIRECTORY` is unset:
-
-```text
-<INVRT_CWD>/.invrt/config.yaml
-```
+If none exist, the default write location is `<INVRT_CWD>/.invrt/plan.yaml`.
 
 ---
 
 ## Configuration
 
-Config file: `.invrt/config.yaml`
+Plan file: `.invrt/plan.yaml`
 
 Typical shape:
 
@@ -238,7 +237,7 @@ These keys are accepted in `settings`, `environments.*`, `profiles.*`, and `devi
 | `viewport_width` | `INVRT_VIEWPORT_WIDTH` | `1024` |
 | `viewport_height` | `INVRT_VIEWPORT_HEIGHT` | `768` |
 | `directory` | `INVRT_DIRECTORY` | `INVRT_CWD/.invrt` |
-| `config_file` | `INVRT_CONFIG_FILE` | `INVRT_DIRECTORY/config.yaml` |
+| `config_file` | `INVRT_PLAN_FILE` | `INVRT_DIRECTORY/plan.yaml` |
 | `scripts_dir` | `INVRT_SCRIPTS_DIR` | `INVRT_DIRECTORY/scripts` |
 | `crawl_dir` | `INVRT_CRAWL_DIR` | `INVRT_DIRECTORY/data/INVRT_ENVIRONMENT/INVRT_PROFILE` |
 | `session_file` | `INVRT_SESSION_FILE` | `INVRT_CRAWL_DIR/session.json` |
@@ -303,7 +302,7 @@ The built-in hooks:
 
 ```text
 .invrt/
-├── config.yaml
+├── plan.yaml
 ├── plan.yaml
 ├── exclude_paths.txt
 ├── scripts/

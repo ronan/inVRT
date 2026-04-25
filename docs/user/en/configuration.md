@@ -1,15 +1,24 @@
 # InVRT Configuration
 
-## Config File
+## Plan File
 
-Configuration for a given project is stored in a yaml file the INVRT_DIRECTORY:
+Configuration for a given project is stored in a single `plan.yaml` file. By default it is created at:
 
-    `{CWD}/.invrt/config.yaml`
+    `{CWD}/.invrt/plan.yaml`
 
-### Example config.yaml File
+When reading the plan, inVRT searches the current working directory in the following order and uses the first match:
+
+1. `invrt/plan.yaml`
+2. `.invrt/plan.yaml`
+3. `.ddev/.invrt/plan.yaml`
+4. `.ddev/invrt/plan.yaml`
+
+Set `INVRT_PLAN_FILE` to override discovery and point to an explicit file.
+
+### Example plan.yaml File
 
 ```yaml
-# .invrt/config.yaml
+# .invrt/plan.yaml
 
 project:
   name: My inVRT Project
@@ -56,9 +65,9 @@ devices:
 
 ```
 
-## Config Sections
+## Plan Sections
 
-The config file contains the following named sections:
+The plan file contains the following named sections:
 
 | Name        | Yaml Section   | Option                | Default   | Represents                                        |
 | ----------- | -------------- | --------------------- | --------- | ------------------------------------------------- |
@@ -183,7 +192,7 @@ max_pages: 90
 | ------------------------- | -------------------------------- | ------------------------------- | -------- | ---------------------- | ------------------------------------------ |
 | `cwd`                     | `$INIT_CWD`                      | './'                            | -        | all                    | Working directory where invrt was invoked  |
 | `directory`               | `$INVRT_DIRECTORY`               | `{INIT_CWD}/.invrt`             | -        | all                    | Path to `.invrt/` directory                |
-| `config_file`             | `$INVRT_CONFIG_FILE`             | `{INVRT_DIRECTORY}/config.yaml` | -        | all                    | Path to `config.yaml`                      |
+| `config_file`             | `$INVRT_PLAN_FILE`               | `{INVRT_DIRECTORY}/plan.yaml`   | -        | all                    | Path to `plan.yaml`                        |
 | `data_dir`                | `$INVRT_DATA_DIR`                | _(varies)_                      | -        | all                    | `.invrt/data/<profile>/<env>/`             |
 | `session_file`            | `$INVRT_SESSION_FILE`            | _(varies)_                      | -        | all                    | `.invrt/data/<profile>/<env>/session.json` |
 | `scripts_dir`             | `$INVRT_SCRIPTS_DIR`             | _(varies)_                      | -        | all                    | Path to the user scripts                   |

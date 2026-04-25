@@ -45,18 +45,18 @@ teardown() {
   assert_dir_exists "$TEST_DIR/.invrt/scripts"
   assert_file_exists "$TEST_DIR/.invrt/scripts/onready.ts"
   assert_file_exists "$TEST_DIR/.invrt/plan.yaml"
+  [ ! -f "$TEST_DIR/.invrt/config.yaml" ]
   assert_file_contains "$TEST_DIR/.invrt/scripts/onready.ts" "Runs after the page is ready"
-  assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "environments.stage.url" "https://example.test"
-  assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "profiles.editor" "[]"
-  assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "devices.tablet" "[]"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "environments.stage.url" "https://example.test"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "profiles.editor" "[]"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "devices.tablet" "[]"
   assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.url" "https://example.test"
   assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "pages./" "[]"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "exclude:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/logout"
-  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "profiles.0" "editor"
 
   local project_id
-  project_id="$(yaml_get "$TEST_DIR/.invrt/config.yaml" "project.id")"
+  project_id="$(yaml_get "$TEST_DIR/.invrt/plan.yaml" "project.id")"
   [[ -n "$project_id" ]]
   [[ "$project_id" =~ ^[a-z]+$ ]]
 }
@@ -66,9 +66,9 @@ teardown() {
 
   [ "$status" -eq 0 ]
   assert_output_contains "What URL should inVRT use?"
-  assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "environments.review.url" "https://prompted.example"
-  assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "profiles.editor" "[]"
-  assert_yaml_equals "$TEST_DIR/.invrt/config.yaml" "devices.tablet" "[]"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "environments.review.url" "https://prompted.example"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "profiles.editor" "[]"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "devices.tablet" "[]"
 }
 
 @test "init: fails when already initialized" {
@@ -103,7 +103,7 @@ teardown() {
 
 @test "config: fails on invalid yaml" {
   mkdir -p "$TEST_DIR/.invrt"
-  printf ': invalid: yaml: [[[\n' > "$TEST_DIR/.invrt/config.yaml"
+  printf ': invalid: yaml: [[[\n' > "$TEST_DIR/.invrt/plan.yaml"
 
   run_invrt config
 
@@ -111,28 +111,9 @@ teardown() {
   assert_output_contains "Error reading config file"
 }
 
-@test "config: shows warning but succeeds when config has unexpected keys" {
-  mkdir -p "$TEST_DIR/.invrt"
-  cat > "$TEST_DIR/.invrt/config.yaml" <<'EOF'
-project:
-  url: https://example.test
-  unknown_key: some_value
-environments:
-  local:
-    url: https://example.test
-EOF
-
-  run_invrt config
-
-  [ "$status" -eq 0 ]
-  assert_output_contains "warning"
-  assert_output_contains "unexpected"
-  assert_output_contains "INVRT_URL: https://example.test"
-}
-
 @test "info: shows project summary and crawled page count" {
   mkdir -p "$TEST_DIR/.invrt/data/anonymous"
-  cat > "$TEST_DIR/.invrt/config.yaml" <<'EOF'
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
 project:
   name: My Test Project
   id: sampleprojectid
@@ -168,4 +149,79 @@ EOF
   assert_output_contains "mobile"
   assert_output_contains "Planned pages"
   assert_output_contains "3"
+}
+
+@test "config: discovers plan.yaml in invrt/" {
+  mkdir -p "$TEST_DIR/invrt"
+  cat > "$TEST_DIR/invrt/plan.yaml" <<'EOF'
+project:
+  url: https://discovered.example
+environments:
+  local:
+    url: https://discovered.example
+EOF
+
+  run_invrt config
+
+  [ "$status" -eq 0 ]
+  assert_output_contains "INVRT_PLAN_FILE"
+  assert_output_contains "invrt/plan.yaml"
+  assert_output_contains "INVRT_URL: https://discovered.example"
+}
+
+@test "config: discovers plan.yaml in .ddev/.invrt/" {
+  mkdir -p "$TEST_DIR/.ddev/.invrt"
+  cat > "$TEST_DIR/.ddev/.invrt/plan.yaml" <<'EOF'
+project:
+  url: https://ddev-dot.example
+environments:
+  local:
+    url: https://ddev-dot.example
+EOF
+
+  run_invrt config
+
+  [ "$status" -eq 0 ]
+  assert_output_contains ".ddev/.invrt/plan.yaml"
+  assert_output_contains "INVRT_URL: https://ddev-dot.example"
+}
+
+@test "config: discovers plan.yaml in .ddev/invrt/" {
+  mkdir -p "$TEST_DIR/.ddev/invrt"
+  cat > "$TEST_DIR/.ddev/invrt/plan.yaml" <<'EOF'
+project:
+  url: https://ddev.example
+environments:
+  local:
+    url: https://ddev.example
+EOF
+
+  run_invrt config
+
+  [ "$status" -eq 0 ]
+  assert_output_contains ".ddev/invrt/plan.yaml"
+  assert_output_contains "INVRT_URL: https://ddev.example"
+}
+
+@test "config: prefers invrt/ over .invrt/" {
+  mkdir -p "$TEST_DIR/.invrt" "$TEST_DIR/invrt"
+  cat > "$TEST_DIR/invrt/plan.yaml" <<'EOF'
+project:
+  url: https://primary.example
+environments:
+  local:
+    url: https://primary.example
+EOF
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<'EOF'
+project:
+  url: https://secondary.example
+environments:
+  local:
+    url: https://secondary.example
+EOF
+
+  run_invrt config
+
+  [ "$status" -eq 0 ]
+  assert_output_contains "INVRT_URL: https://primary.example"
 }

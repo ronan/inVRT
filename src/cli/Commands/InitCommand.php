@@ -42,7 +42,7 @@ class InitCommand extends BaseCommand
             return Command::SUCCESS;
         }
 
-        // Re-boot now that config.yaml has been written so the runner has INVRT_URL.
+        // Re-boot now that plan.yaml has been written so the runner has INVRT_URL.
         if (($result = $this->boot($opts, $io)) !== Command::SUCCESS) {
             return $result;
         }

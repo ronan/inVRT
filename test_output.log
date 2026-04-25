@@ -1,0 +1,36 @@
+1..35
+ok 1 version: shows version string matching package.json
+ok 2 help: lists all core commands
+ok 3 init: writes selected url environment profile and device
+ok 4 init: prompts for url in a tty when the argument is missing
+ok 5 init: fails when already initialized
+ok 6 config: fails without a config file
+ok 7 config: shows resolved configuration after init
+ok 8 config: fails on invalid yaml
+ok 9 info: shows project summary and crawled page count
+ok 10 config: discovers plan.yaml in invrt/
+ok 11 config: discovers plan.yaml in .ddev/.invrt/
+ok 12 config: discovers plan.yaml in .ddev/invrt/
+ok 13 config: prefers invrt/ over .invrt/
+ok 14 check: enriches plan.yaml with site metadata
+ok 15 check: preserves user-defined plan keys while updating metadata
+ok 16 check: fails when the site is unreachable
+ok 17 crawl: fails without config when no url is available
+ok 18 crawl: crawls the fixture site and writes discovered urls
+ok 19 crawl: auto initializes from an interactive prompt when config is missing
+ok 20 crawl: fails with no usable urls and preserves an empty crawl file
+ok 21 reference: fails without config when no url is available
+ok 22 reference: captures screenshots from the crawled urls file
+ok 23 reference: auto triggers crawl when crawled urls are missing
+ok 24 reference: shows debug output at vvv
+ok 25 test: fails without config when no url is available
+ok 26 test: captures references on first run and skips that step on the second run
+ok 27 test: auto triggers reference and crawl on first run
+ok 28 test: handles very long crawled url paths
+ok 29 test: regenerates playwright spec from plan.yaml when references already exist
+ok 30 approve: succeeds after a test run
+ok 31 generate-playwright: generates spec from plan pages
+ok 32 generate-playwright: fails when a referenced script file is missing
+ok 33 baseline: runs full pipeline and produces approved screenshots
+ok 34 init: automatically runs baseline after init
+ok 35 init: skips baseline with --skip-baseline

@@ -43,7 +43,7 @@ class Runner
         $this->node = new NodeRunner($this->config, $this->appDir, $this->logger);
     }
 
-    /** Configured profile names from config.yaml (may be empty). */
+    /** Configured profile names from plan.yaml (may be empty). */
     private function configuredProfiles(): array
     {
         $profiles = $this->config->getSection('profiles');
@@ -55,7 +55,6 @@ class Runner
     {
         $cwd         = $this->config->get('INVRT_CWD');
         $directory   = $this->config->get('INVRT_DIRECTORY');
-        $configFile  = $this->config->get('INVRT_CONFIG_FILE');
         $environment = $this->config->get('INVRT_ENVIRONMENT');
         $profile     = $this->config->get('INVRT_PROFILE');
         $device      = $this->config->get('INVRT_DEVICE');
@@ -92,25 +91,14 @@ class Runner
         $projectId   = ProjectId::generate($url);
         $projectName = basename($cwd) ?: 'My InVRT Project';
 
-        $configContent = Yaml::dump([
-            'project' => [
-                'name' => $projectName,
-                'id'   => $projectId,
-            ],
+        if (!PlanService::update($planFile, [
+            'url'          => $url,
+            'id'           => $projectId,
+            'name'         => $projectName,
             'environments' => [$environment => ['url' => $url]],
             'profiles'     => [$profile     => []],
             'devices'      => [$device      => []],
-        ], 4, 2);
-
-        Filesystem::writeFile($configFile, $configContent);
-        $this->logger->info('✓ Initialized InVRT configuration file at ' . $configFile);
-
-        if (!PlanService::update($planFile, [
-            'url'      => $url,
-            'id'       => $projectId,
-            'name'     => $projectName,
-            'profiles' => [$profile],
-            'exclude'  => self::DEFAULT_EXCLUDE_PATHS,
+            'exclude'      => self::DEFAULT_EXCLUDE_PATHS,
         ])) {
             $this->logger->error('Failed to create or update plan.yaml at ' . $planFile);
             return 1;

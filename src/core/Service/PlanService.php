@@ -40,7 +40,31 @@ class PlanService
         }
 
         if (!empty($data['profiles']) && is_array($data['profiles'])) {
-            $plan['profiles'] = array_values(array_unique(array_map('strval', $data['profiles'])));
+            $existing = is_array($plan['profiles'] ?? null) ? $plan['profiles'] : [];
+            if (self::isList($data['profiles'])) {
+                if ($existing === [] || self::isList($existing)) {
+                    $plan['profiles'] = array_values(array_unique(array_merge(
+                        array_map('strval', $existing),
+                        array_map('strval', $data['profiles']),
+                    )));
+                } else {
+                    foreach ($data['profiles'] as $name) {
+                        $existing[(string) $name] ??= [];
+                    }
+                    $plan['profiles'] = $existing;
+                }
+            } else {
+                $plan['profiles'] = (is_array($existing) && !self::isList($existing))
+                    ? $existing + $data['profiles']
+                    : $data['profiles'];
+            }
+        }
+
+        foreach (['environments', 'devices'] as $section) {
+            if (!empty($data[$section]) && is_array($data[$section])) {
+                $existing = is_array($plan[$section] ?? null) ? $plan[$section] : [];
+                $plan[$section] = $existing + $data[$section];
+            }
         }
 
         if (!empty($data['exclude']) && is_array($data['exclude'])) {
@@ -92,9 +116,12 @@ class PlanService
     }
 
     /**
+     * Read a plan file as a raw associative array. Returns an empty array when
+     * the file is missing, unreadable, or empty. Yaml parse errors propagate.
+     *
      * @return array<string, mixed>
      */
-    private static function read(string $planFile): array
+    public static function read(string $planFile): array
     {
         if (!is_file($planFile) || !is_readable($planFile) || filesize($planFile) === 0) {
             return [];
@@ -104,13 +131,19 @@ class PlanService
         return is_array($parsed) ? $parsed : [];
     }
 
+    /** Detect whether an array is a list (sequential 0-indexed) vs a keyed map. */
+    private static function isList(array $value): bool
+    {
+        return $value === [] || array_is_list($value);
+    }
+
     /**
      * @param array<string, mixed> $plan
      * @return array<string, mixed>
      */
     private static function orderTopLevel(array $plan): array
     {
-        $order  = ['project', 'profiles', 'exclude', 'pages'];
+        $order  = ['project', 'environments', 'profiles', 'devices', 'exclude', 'pages'];
         $sorted = [];
         foreach ($order as $key) {
             if (array_key_exists($key, $plan)) {

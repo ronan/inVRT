@@ -2,21 +2,22 @@
 
 namespace InVRT\Core;
 
+use InVRT\Core\Service\PlanService;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Resolves, holds, and persists inVRT configuration.
  *
- * Accepts a config filepath and an env-var override array. Merges defaults,
- * the YAML file's project/environments/profiles/devices sections, and the
- * env overrides into a flat INVRT_* array with all placeholder tokens resolved.
+ * Reads the project's plan.yaml via PlanService and merges defaults, the
+ * file's project/environments/profiles/devices sections, and env-var
+ * overrides into a flat INVRT_* array with placeholder tokens resolved.
  */
 class Configuration
 {
     /** Flat resolved INVRT_* config. */
     private array $resolved;
 
-    /** Raw parsed YAML structure (preserved for write-back). */
+    /** Raw parsed plan.yaml structure (preserved for write-back). */
     private array $parsed = [];
 
     /** Keys mutated via set() that need to be persisted on write(). */
@@ -24,11 +25,8 @@ class Configuration
 
     private bool $fileExists;
 
-    /** Non-fatal warnings accumulated during load (e.g. schema validation issues). */
-    private array $warnings = [];
-
     /**
-     * @param string  $filepath  Absolute path to config.yaml (need not exist yet).
+     * @param string  $filepath  Absolute path to plan.yaml (need not exist yet).
      * @param array   $env       Env-var overrides (e.g. from getenv() or test fixtures).
      *                           Must include INVRT_PROFILE, INVRT_ENVIRONMENT, INVRT_DEVICE
      *                           when non-default selection is needed.
@@ -40,12 +38,7 @@ class Configuration
         $this->fileExists = file_exists($filepath);
 
         if ($this->fileExists) {
-            $result          = YamlLoader::fromFile($filepath);
-            $this->parsed    = $result['data'];
-
-            if ($result['warning'] !== null) {
-                $this->warnings[] = $result['warning'];
-            }
+            $this->parsed = PlanService::read($filepath);
         }
 
         $this->resolved = $this->resolve();
@@ -87,10 +80,10 @@ class Configuration
         return $this->fileExists;
     }
 
-    /** Returns any non-fatal warnings accumulated during config load. */
+    /** No-op; retained for compatibility with callers expecting warnings. */
     public function getWarnings(): array
     {
-        return $this->warnings;
+        return [];
     }
 
     public function getFilepath(): string
@@ -99,7 +92,7 @@ class Configuration
     }
 
     /**
-     * Persists any set() changes back to the YAML config file.
+     * Persists any set() changes back to the plan.yaml file.
      * Updates the project section with the changed keys.
      */
     public function write(): void
@@ -118,7 +111,7 @@ class Configuration
             mkdir($dir, 0755, true);
         }
 
-        file_put_contents($this->filepath, Yaml::dump($data, 4, 2));
+        file_put_contents($this->filepath, Yaml::dump($data, 6, 2));
     }
 
     // -------------------------------------------------------------------------
@@ -151,8 +144,8 @@ class Configuration
 
         $result = $this->interpolate($cleaned);
 
-        // Ensure INVRT_CONFIG_FILE always reflects the actual filepath used
-        $result['INVRT_CONFIG_FILE'] = $this->filepath;
+        // Ensure INVRT_PLAN_FILE always reflects the actual filepath used.
+        $result['INVRT_PLAN_FILE'] = $this->filepath;
 
         return $result;
     }

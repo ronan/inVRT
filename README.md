@@ -31,7 +31,7 @@ cd ~/my-project
 # 2. Initialise a project in the current directory
 docker run -it --volume .:/dir ronan4000/invrt init
 
-# 2. Edit .invrt/config.yaml — set your URL and any credentials
+# 2. Edit .invrt/plan.yaml — set your URL and any credentials
 
 # 3. Crawl the site, generate the reference images and run a test
 docker run -it --volume .:/dir ronan4000/invrt test --profile=authenticated
@@ -43,7 +43,7 @@ docker run -it --volume .:/dir ronan4000/invrt test --profile=authenticated
 
 | Command | Description |
 |---|---|
-| `invrt init` | Scaffold `.invrt/` directory and `config.yaml` |
+| `invrt init` | Scaffold `.invrt/` directory and `plan.yaml` |
 | `invrt crawl` | Crawl the site and build a URL list |
 | `invrt reference` | Capture baseline screenshots |
 | `invrt test` | Compare current screenshots against the baseline |

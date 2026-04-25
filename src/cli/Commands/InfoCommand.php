@@ -26,7 +26,7 @@ class InfoCommand extends BaseCommand
         $data = $this->runner->info();
 
         $io->title($data['name'] ?: 'inVRT Project');
-        $io->text($data['config_file']);
+        $io->text($data['plan_file'] ?? '');
         $io->newLine();
 
         $io->definitionList(

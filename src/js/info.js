@@ -4,7 +4,6 @@ const yaml = require('js-yaml');
 const log = require('./logger');
 
 const {
-  INVRT_CONFIG_FILE,
   INVRT_PLAN_FILE,
   INVRT_CAPTURE_DIR,
   INVRT_ENVIRONMENT,
@@ -56,13 +55,13 @@ const readYaml = (file) => {
 };
 
 const run = () => {
-  const config = readYaml(INVRT_CONFIG_FILE);
   const plan   = readYaml(INVRT_PLAN_FILE);
+  const config = plan;
 
   const info = {
     name: (config.project && config.project.name) || '',
     id: INVRT_ID || '',
-    config_file: INVRT_CONFIG_FILE || '',
+    plan_file: INVRT_PLAN_FILE || '',
     environment: INVRT_ENVIRONMENT || '',
     profile: INVRT_PROFILE || '',
     device: INVRT_DEVICE || '',
