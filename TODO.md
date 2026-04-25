@@ -14,6 +14,19 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Tech Debt
 
+- [ ] Separate crawling from tree-building
+    - The crawler should return a flat list with the full checked url and the title read from the page
+    - A post crawl step should build the tree from the list of paths and add it to the plan
+
+- [ ] Tidy up plan.yaml
+    - Add a space between each top level section
+    - Don't add `profiles:` to the pages tree unless it is needed. Assume `[ anonymous ]`
+    - Remove uneeded single children from the tree
+        - If a path only has one child and that child is "" or "/" you can remove the child and 
+            add that childs attributes directly to the parent. Only add a child record for "" and "/" if 
+            the parent has other children.
+    
+
 ## Features
 
 ### Future Features
