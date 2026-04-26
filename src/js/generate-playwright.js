@@ -228,6 +228,7 @@ const run = async () => {
       return acc;
     }, new Map());
 
+  // Assertion-specific templates
     const tests = scoped.map(({ path: urlPath, hooks, title }) => {
       const id = encodeId(urlPath, projectSeed);
       const fullUrl = `${INVRT_URL}${urlPath}`;
@@ -240,10 +241,10 @@ const run = async () => {
       const onready = renderHookBlock('onready', hooks.onready, INVRT_SCRIPTS_DIR);
       const teardown = renderHookBlock('teardown', hooks.teardown, INVRT_SCRIPTS_DIR);
       return `
-test(${JSON.stringify(testName)}, async ({ page }) => {
+test(${JSON.stringify(testName)}, async ({ page }, testInfo) => {
   try {
 ${setup}    await page.goto(${JSON.stringify(fullUrl)}, { waitUntil: 'networkidle' });
-${onready}    const screenshot = await page.screenshot();
+${onready}    const screenshot = await page.screenshot({ path: testInfo.outputPath(${JSON.stringify(`${id}.png`)}), fullPage: true });
     expect(screenshot).toMatchSnapshot(${JSON.stringify(`${id}.png`)});
   } finally {
 ${teardown}  }

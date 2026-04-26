@@ -135,8 +135,8 @@ EOF
   run_invrt reference
 
   [ "$status" -eq 0 ]
-  assert_dir_exists "$TEST_DIR/.invrt/reference"
-  assert_png_count_at_least "$TEST_DIR/.invrt/reference" 2
+  assert_dir_exists "$TEST_DIR/.invrt/approved"
+  assert_png_count_at_least "$TEST_DIR/.invrt/approved" 2
   assert_file_exists "$TEST_DIR/.invrt/logs/reference-local-anonymous.log"
 }
 
@@ -149,7 +149,7 @@ EOF
   [ "$status" -eq 0 ]
   assert_output_contains "No planned pages found"
   assert_file_exists "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml"
-  assert_png_count_at_least "$TEST_DIR/.invrt/reference" 1
+  assert_png_count_at_least "$TEST_DIR/.invrt/approved" 1
 }
 
 @test "reference: shows debug output at vvv" {
@@ -181,7 +181,7 @@ EOF
 
   [ "$status" -eq 0 ]
   assert_output_contains "No reference screenshots found"
-  assert_dir_exists "$TEST_DIR/.invrt/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/approved"
   assert_dir_exists "$TEST_DIR/.invrt/results"
   assert_file_exists "$TEST_DIR/.invrt/logs/reference-local-anonymous.log"
   assert_file_exists "$TEST_DIR/.invrt/logs/test-local-anonymous.log"
@@ -202,7 +202,7 @@ EOF
   [ "$status" -eq 0 ]
   assert_output_contains "No reference screenshots found"
   assert_output_contains "No planned pages found"
-  assert_png_count_at_least "$TEST_DIR/.invrt/reference" 1
+  assert_png_count_at_least "$TEST_DIR/.invrt/approved" 1
   assert_dir_exists "$TEST_DIR/.invrt/results"
 }
 
@@ -378,7 +378,7 @@ EOF
   assert_output_contains "Crawling completed"
   assert_output_contains "Generated playwright spec"
   assert_output_contains "Approving latest results"
-  assert_dir_exists "$TEST_DIR/.invrt/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/approved"
   assert_dir_exists "$TEST_DIR/.invrt/results"
   assert_file_exists "$TEST_DIR/.invrt/logs/reference-local-anonymous.log"
   assert_file_exists "$TEST_DIR/.invrt/logs/test-local-anonymous.log"
@@ -392,7 +392,7 @@ EOF
   [ "$status" -eq 0 ]
   assert_output_contains "InVRT successfully initialized!"
   assert_output_contains "Running baseline"
-  assert_dir_exists "$TEST_DIR/.invrt/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/approved"
   assert_dir_exists "$TEST_DIR/.invrt/results"
 }
 
