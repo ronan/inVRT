@@ -86,6 +86,9 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 ### Reporting
 
 - [ ] Create a 1 page html report for all existing test results
+    - see docs/planning/proposals/astro-shadcn-report.md for details
+
+
 - [ ] Create an "Interactive" report
     - [ ] Allow tests to be re-run
     - [ ] Allow differences to be approved
