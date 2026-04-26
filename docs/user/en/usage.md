@@ -19,6 +19,7 @@ inVRT is a CLI tool for running Visual Regression Testing (VRT) against CMS-driv
     - [`test`](#test)
     - [`config`](#config)
     - [`info`](#info)
+    - [`report`](#report)
   - [Options](#options)
   - [Authentication](#authentication)
   - [Data Layout](#data-layout)
@@ -423,6 +424,37 @@ My Project
  Crawl log (last 5 lines)
  ...
 ```
+
+---
+
+### `report`
+
+Generate a single self-contained HTML report summarising the latest VRT results.
+
+```
+invrt report [--output=<file>] [--open] [--profile=<name>] [--device=<name>] [--environment=<name>]
+```
+
+Reads `plan.yaml`, the reference images, and the Playwright results, then writes a standalone HTML file with all screenshots embedded as data URIs. The report is shareable via Slack or email — no server needed.
+
+**Options:**
+
+| Option         | Shortcut | Default                | Description                                  |
+| -------------- | -------- | ---------------------- | -------------------------------------------- |
+| `--output`     |          | `.invrt/report.html`   | Path to write the report file                |
+| `--open`       | `-o`     | off                    | Open the report in the default browser       |
+
+**Output:**
+
+```
+📝 Report written to /path/to/.invrt/report.html
+```
+
+The report shows:
+
+- Project name, URL, environment / profile / device.
+- Stats cards (total / unchanged / changed / missing).
+- A filterable, searchable list of every page in the plan with its status badge, reference thumbnail, and (when the test failed) reference + actual + diff side-by-side.
 
 ---
 

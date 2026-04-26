@@ -84,6 +84,13 @@ Completed tasks moved from TODO.md.
 
 ## Reporting
 
+- [x] Create a 1 page html report for all existing test results
+    - New `invrt report` command writes a single self-contained HTML file (default `.invrt/report.html`) summarising VRT results for the active environment/profile/device.
+    - Reads `plan.yaml` plus `<INVRT_DIRECTORY>/reference/` and `<INVRT_DIRECTORY>/results/`; classifies each plan page as `unchanged`, `changed`, `missing-reference`, or `untested`.
+    - Screenshots are embedded as base64 data URIs; CSS/JS via Tailwind + daisyUI CDN. Filter buttons + text search are inline JS.
+    - `--output` overrides the path; `--open`/`-o` opens the file in the default browser.
+    - Implementation: [src/cli/Commands/ReportCommand.php](../../src/cli/Commands/ReportCommand.php), [Runner::report()](../../src/core/Runner.php), [src/js/generate-report.js](../../src/js/generate-report.js).
+
   - [x] Add a project id to distinguish final reports.
     - [x] The project id should be saved to the config.yml file as 'id' in settings
 
