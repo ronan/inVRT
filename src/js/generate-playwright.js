@@ -76,21 +76,22 @@ const extractPagesFromPlan = (content) => {
 
   const out = new Map();
 
-  const registerPage = (pagePath, hooks) => {
+  const registerPage = (pagePath, hooks, title) => {
     out.set(pagePath, {
       path: pagePath,
       hooks: { ...hooks },
+      title: typeof title === 'string' ? title : '',
     });
   };
 
   const walk = (pagePath, node, inheritedHooks = {}) => {
     if (typeof node === 'string') {
-      registerPage(pagePath, inheritedHooks);
+      registerPage(pagePath, inheritedHooks, '');
       return;
     }
 
     if (!node || typeof node !== 'object' || Array.isArray(node)) {
-      registerPage(pagePath, inheritedHooks);
+      registerPage(pagePath, inheritedHooks, '');
       return;
     }
 
@@ -98,14 +99,15 @@ const extractPagesFromPlan = (content) => {
       ...inheritedHooks,
       ...normalizeHookMap(node),
     };
+    const title = typeof node.title === 'string' ? node.title : '';
 
     if (hasMetadata(node)) {
-      registerPage(pagePath, effectiveHooks);
+      registerPage(pagePath, effectiveHooks, title);
     }
 
     if (!hasMetadata(node) && !hasChildren(node)) {
       // Empty object shorthand means this path is testable.
-      registerPage(pagePath, effectiveHooks);
+      registerPage(pagePath, effectiveHooks, title);
     }
 
     for (const [key, child] of Object.entries(node)) {
@@ -220,14 +222,25 @@ const run = async () => {
       ? `\ntest.use({ storageState: ${JSON.stringify(relSessionFile)} });`
       : '';
 
-    const tests = scoped.map(({ path: urlPath, hooks }) => {
+    const titleCounts = scoped.reduce((acc, { title }) => {
+      const t = (title || '').trim();
+      if (t !== '') acc.set(t, (acc.get(t) || 0) + 1);
+      return acc;
+    }, new Map());
+
+    const tests = scoped.map(({ path: urlPath, hooks, title }) => {
       const id = encodeId(urlPath, projectSeed);
       const fullUrl = `${INVRT_URL}${urlPath}`;
+      const trimmedTitle = (title || '').trim();
+      const isDuplicate = trimmedTitle !== '' && titleCounts.get(trimmedTitle) > 1;
+      const testName = trimmedTitle === ''
+        ? id
+        : (isDuplicate ? `${trimmedTitle} (${id})` : trimmedTitle);
       const setup = renderHookBlock('setup', hooks.setup, INVRT_SCRIPTS_DIR);
       const onready = renderHookBlock('onready', hooks.onready, INVRT_SCRIPTS_DIR);
       const teardown = renderHookBlock('teardown', hooks.teardown, INVRT_SCRIPTS_DIR);
       return `
-test(${JSON.stringify(id)}, async ({ page }) => {
+test(${JSON.stringify(testName)}, async ({ page }) => {
   try {
 ${setup}    await page.goto(${JSON.stringify(fullUrl)}, { waitUntil: 'networkidle' });
 ${onready}    const screenshot = await page.screenshot();

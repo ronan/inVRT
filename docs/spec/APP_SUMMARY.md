@@ -9,7 +9,7 @@ inVRT is a Symfony Console CLI for visual regression testing of CMS-driven sites
 ```bash
 invrt init <url>  # Create .invrt/ and seed config for the selected env/profile/device
                  # Also create .invrt/plan.yaml
-invrt check       # Fetch homepage metadata and write check.yaml
+invrt check       # Fetch homepage metadata and w newline-delimited JSONrite check.yaml
 invrt crawl       # Crawl the configured site and save discovered paths
 invrt reference   # Capture reference screenshots from the crawled paths
 invrt test        # Capture fresh screenshots and compare against reference
@@ -66,19 +66,23 @@ The written YAML may include:
 
 ### `crawl`
 
-Crawls `INVRT_URL` with Playwright Chromium, scoped to the current environment/profile. It:
+Crawls `INVRT_URL` with Playwright Chromium, scoped to the current environment/profile. It runs in two phases:
 
-- runs `check` first if `check.yaml` does not exist
-- starts from paths in `INVRT_PLAN_FILE` (falls back to `/`)
-- visits same-origin pages, accepts `text/html` responses, and extracts `a[href]` links
-- respects `INVRT_MAX_CRAWL_DEPTH`, `INVRT_MAX_PAGES`, and `INVRT_EXCLUDE_FILE`
-- writes crawl progress/errors to `INVRT_CRAWL_LOG`
-- writes sorted unique paths to `INVRT_CRAWL_FILE`
-- merges discovered paths into `INVRT_PLAN_FILE` using a tree-style `pages` structure
-- generates stable page IDs and updates each discovered page with active-profile access in `profiles`
-- preserves existing page metadata where possible while updating managed crawl fields
+1. **Discovery** (`crawl.js`):
+    - runs `check` first if `check.yaml` does not exist
+    - starts from paths in `INVRT_PLAN_FILE` (falls back to `/`)
+    - visits same-origin pages, accepts `text/html` responses, and extracts `a[href]` links
+    - respects `INVRT_MAX_CRAWL_DEPTH`, `INVRT_MAX_PAGES`, and `INVRT_EXCLUDE_FILE`
+    - writes crawl progress/errors to `INVRT_CRAWL_LOG`
+    - emits a sorted YAML map of `path: title` (page titles read from each crawled page) to `INVRT_CRAWL_FILE`
+2. **Tree build** (`build-plan-tree.js`, fed from the discovery output):
+    - merges discovered paths into `INVRT_PLAN_FILE` using a tree-style `pages` structure
+    - sets `project.title` from the home (`/`) page title when not already defined
+    - cleans each non-home page title by stripping the site title and trimming non-alphanumeric edges; stores the result as `title:` on the leaf node (existing user-defined titles are preserved)
+    - generates stable page IDs and updates each discovered page with active-profile access in `profiles`
+    - preserves existing page metadata where possible while updating managed crawl fields
 
-If no usable URLs are found, it fails and prints the tail of the crawl log.
+If no usable URLs are found, the crawl fails and prints the tail of the crawl log.
 
 ### `reference`
 
@@ -282,7 +286,7 @@ For crawling, `INVRT_COOKIE` takes precedence over the session file and is sent 
 
 Reference, test, and approve all run via Playwright. The PHP `Runner` delegates to `PlaywrightRunner`, which runs `npx playwright test` (with `--update-snapshots` for `reference` and `approve`).
 
-`generate-playwright` writes a TypeScript spec from `INVRT_PLAN_FILE` and a `playwright.config.ts` into `INVRT_CRAWL_DIR`. When `INVRT_SESSION_FILE` exists the spec emits `test.use({ storageState: <path> })` so authenticated runs reuse the saved session. Each scenario navigates to `INVRT_URL + <path>`, applies any resolved page hooks (`setup`/`onready`/`teardown`), and captures a screenshot.
+`generate-playwright` writes a TypeScript spec from `INVRT_PLAN_FILE` and a `playwright.config.ts` into `INVRT_CRAWL_DIR`. When `INVRT_SESSION_FILE` exists the spec emits `test.use({ storageState: <path> })` so authenticated runs reuse the saved session. Each scenario navigates to `INVRT_URL + <path>`, applies any resolved page hooks (`setup`/`onready`/`teardown`), and captures a screenshot. The Playwright `test(name, ...)` name is the page's cleaned `title:` from `plan.yaml` (falling back to the page id); duplicate titles are disambiguated by appending the id. Snapshot filenames remain id-based.
 
 Hook scripts are resolved from `INVRT_SCRIPTS_DIR` when these files exist there:
 

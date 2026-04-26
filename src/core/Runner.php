@@ -164,10 +164,26 @@ class Runner
         return 0;
     }
 
-    /** Crawl the target URL and write unique paths to the crawl file. */
+    /** Crawl the target URL and write the discovered paths into plan.yaml via build-plan-tree. */
     public function crawl(): int
     {
-        return $this->node->run('crawl.js', null, $this->config->get('INVRT_CRAWL_FILE'));
+        [$exit, $stdout] = $this->node->runCapturing('crawl.js');
+
+        $crawlFile = $this->config->get('INVRT_CRAWL_FILE');
+        if ($crawlFile !== null && $crawlFile !== '') {
+            Filesystem::writeFile($crawlFile, $stdout);
+        }
+
+        if ($exit !== 0) {
+            return $exit;
+        }
+
+        if (trim($stdout) === '') {
+            return 0;
+        }
+
+        [$buildExit] = $this->node->runCapturing('build-plan-tree.js', null, $stdout);
+        return $buildExit;
     }
 
     /** Capture reference screenshots, running a crawl first if needed. */

@@ -39,7 +39,7 @@ class NodeRunner
      *
      * @return array{0: int, 1: string}
      */
-    public function runCapturing(string $script, ?string $inputFile = null): array
+    public function runCapturing(string $script, ?string $inputFile = null, ?string $stdin = null): array
     {
         $file = rtrim($this->appDir, '/') . '/' . $script;
         $cmd  = 'node ' . escapeshellarg($file);
@@ -48,7 +48,9 @@ class NodeRunner
         $process = Process::fromShellCommandline($cmd, null, $this->config->all());
         $process->setTimeout(null);
 
-        if ($inputFile !== null && is_readable($inputFile)) {
+        if ($stdin !== null) {
+            $process->setInput($stdin);
+        } elseif ($inputFile !== null && is_readable($inputFile)) {
             $process->setInput(file_get_contents($inputFile));
         }
 

@@ -20,6 +20,13 @@ Completed tasks moved from TODO.md.
 
 ## Tech Debt
 
+- [x] Separate crawling from tree-building
+  - `src/js/crawl.js` now emits a flat YAML map of `path: title` (raw page titles) to stdout; no longer writes `plan.yaml`
+  - New `src/js/build-plan-tree.js` reads that map, derives `project.title` from the home page when not already set, strips the site title from each non-home page title, trims non-alphanumeric edges, and inserts each path into `plan.pages` with a `title:` on the leaf node (preserving any user-defined title)
+  - `Runner::crawl()` chains the two scripts and still writes the crawl YAML to `INVRT_CRAWL_FILE`
+  - `src/js/generate-playwright.js` uses the cleaned page title as the Playwright `test(name, ...)` name; duplicates are disambiguated with the id; snapshot filenames stay id-based
+  - Workflow tests assert site title, per-page titles, and that titles drive Playwright test names
+
 - [x] Remove backstop.js as a requirement
   - Playwright already drives reference/test/approve via `PlaywrightRunner`
   - Deleted `ConfigureBackstopCommand`, `Runner::configureBackstop()`, `src/js/backstop.js`, `src/js/backstop-config.js`

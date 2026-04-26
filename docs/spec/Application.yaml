@@ -72,19 +72,19 @@ Directories:
 
 Files:
   crawl_file:
-    default: INVRT_CRAWL_DIR/crawled-paths.text
+    default: INVRT_DIRECTORY/logs/crawled-paths-INVRT_ENVIRONMENT-INVRT_PROFILE.yaml
     description: Path to the file storing the list of crawled URLs.
   crawl_log:
-    default: INVRT_CRAWL_DIR/logs/crawl.log
+    default: INVRT_DIRECTORY/logs/crawl-INVRT_ENVIRONMENT-INVRT_PROFILE.log
     description: Log file capturing the output of the crawl process.
   plan_file:
     default: INVRT_DIRECTORY/plan.yaml
     description: Path to the generated and user-editable site plan file.
   reference_file:
-    default: INVRT_CRAWL_DIR/logs/reference.log
+    default: INVRT_DIRECTORY/logs/reference-INVRT_ENVIRONMENT-INVRT_PROFILE.log
     description: Path to the file storing the reference output for visual regression testing.
   test_file:
-    default: INVRT_CRAWL_DIR/logs/test.log
+    default: INVRT_DIRECTORY/logs/test-INVRT_ENVIRONMENT-INVRT_PROFILE.log
     description: Path to the file storing the test output for visual regression testing.
   session_file:
     default: INVRT_CRAWL_DIR/session.json

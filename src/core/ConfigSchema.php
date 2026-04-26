@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Auto generated. Do not edit.
  *
@@ -35,11 +36,11 @@ class ConfigSchema
         'crawl_dir'                => 'INVRT_DIRECTORY/data/INVRT_PROFILE',
         'clone_dir'                => 'INVRT_CRAWL_DIR/clone',
         'capture_dir'                => 'INVRT_CRAWL_DIR/bitmaps',
-        'crawl_file'                => 'INVRT_CRAWL_DIR/crawled-paths.text',
-        'crawl_log'                => 'INVRT_CRAWL_DIR/logs/crawl.log',
+        'crawl_file'                => 'INVRT_DIRECTORY/logs/crawled-paths-INVRT_ENVIRONMENT-INVRT_PROFILE.yaml',
+        'crawl_log'                => 'INVRT_DIRECTORY/logs/crawl-INVRT_ENVIRONMENT-INVRT_PROFILE.log',
         'plan_file'                => 'INVRT_DIRECTORY/plan.yaml',
-        'reference_file'                => 'INVRT_CRAWL_DIR/logs/reference.log',
-        'test_file'                => 'INVRT_CRAWL_DIR/logs/test.log',
+        'reference_file'                => 'INVRT_DIRECTORY/logs/reference-INVRT_ENVIRONMENT-INVRT_PROFILE.log',
+        'test_file'                => 'INVRT_DIRECTORY/logs/test-INVRT_ENVIRONMENT-INVRT_PROFILE.log',
         'session_file'                => 'INVRT_CRAWL_DIR/session.json',
         'playwright_spec_file'                => 'INVRT_DIRECTORY/INVRT_ENVIRONMENT.spec.ts',
         'playwright_config_file'                => 'INVRT_DIRECTORY/playwright.config.ts',

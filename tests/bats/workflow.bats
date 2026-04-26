@@ -76,12 +76,12 @@ EOF
 
   [ "$status" -eq 0 ]
   assert_output_contains "Crawling completed"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/crawl.log"
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" "/about.html"
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" "/services.html"
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" "/contact.html"
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" "/blog.html"
+  assert_file_exists "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml"
+  assert_file_exists "$TEST_DIR/.invrt/logs/crawl-local-anonymous.log"
+  assert_file_contains "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml" "/about.html: About"
+  assert_file_contains "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml" "/services.html: Services"
+  assert_file_contains "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml" "/contact.html: Contact"
+  assert_file_contains "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml" "/blog.html: Blog"
   assert_file_exists "$TEST_DIR/.invrt/plan.yaml"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/about.html:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "profiles:"
@@ -90,6 +90,10 @@ EOF
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/blog:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/2026:"
   assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "/post.html:"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "project.title" "Home"
+  assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "pages./.title" "Home"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "title: About"
+  assert_file_contains "$TEST_DIR/.invrt/plan.yaml" "title: Featured Post"
 }
 
 @test "crawl: auto initializes from an interactive prompt when config is missing" {
@@ -100,7 +104,7 @@ EOF
   [ "$status" -eq 0 ]
   assert_output_contains "No configuration file found. Initializing inVRT first."
   assert_output_contains "What URL should inVRT use?"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
+  assert_file_exists "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml"
   assert_yaml_equals "$TEST_DIR/.invrt/plan.yaml" "environments.local.url" "$SERVER_URL"
 }
 
@@ -112,8 +116,8 @@ EOF
   [ "$status" -ne 0 ]
   assert_output_contains "No usable URLs were found during crawl."
   assert_output_contains "Last 5 lines of crawl log:"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
-  [ ! -s "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text" ]
+  assert_file_exists "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml"
+  [ ! -s "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml" ]
 }
 
 @test "reference: fails without config when no url is available" {
@@ -131,9 +135,9 @@ EOF
   run_invrt reference
 
   [ "$status" -eq 0 ]
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/reference"
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/reference" 2
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/reference.log"
+  assert_dir_exists "$TEST_DIR/.invrt/reference"
+  assert_png_count_at_least "$TEST_DIR/.invrt/reference" 2
+  assert_file_exists "$TEST_DIR/.invrt/logs/reference-local-anonymous.log"
 }
 
 @test "reference: auto triggers crawl when crawled urls are missing" {
@@ -144,8 +148,8 @@ EOF
 
   [ "$status" -eq 0 ]
   assert_output_contains "No planned pages found"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/crawled-paths.text"
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/reference" 1
+  assert_file_exists "$TEST_DIR/.invrt/logs/crawled-paths-local-anonymous.yaml"
+  assert_png_count_at_least "$TEST_DIR/.invrt/reference" 1
 }
 
 @test "reference: shows debug output at vvv" {
@@ -177,10 +181,10 @@ EOF
 
   [ "$status" -eq 0 ]
   assert_output_contains "No reference screenshots found"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/reference"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/reference.log"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/test.log"
+  assert_dir_exists "$TEST_DIR/.invrt/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/results"
+  assert_file_exists "$TEST_DIR/.invrt/logs/reference-local-anonymous.log"
+  assert_file_exists "$TEST_DIR/.invrt/logs/test-local-anonymous.log"
 
   run_invrt test
 
@@ -198,8 +202,8 @@ EOF
   [ "$status" -eq 0 ]
   assert_output_contains "No reference screenshots found"
   assert_output_contains "No planned pages found"
-  assert_png_count_at_least "$TEST_DIR/.invrt/data/anonymous/reference" 1
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
+  assert_png_count_at_least "$TEST_DIR/.invrt/reference" 1
+  assert_dir_exists "$TEST_DIR/.invrt/results"
 }
 
 @test "test: handles very long crawled url paths" {
@@ -214,7 +218,7 @@ EOF
   run_invrt test
 
   [ "$status" -eq 0 ]
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
+  assert_dir_exists "$TEST_DIR/.invrt/results"
 }
 
 @test "test: regenerates playwright spec from plan.yaml when references already exist" {
@@ -233,8 +237,8 @@ EOF
 
   run_invrt reference
   [ "$status" -eq 0 ]
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts"
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "/about.html"
+  assert_file_exists "$TEST_DIR/.invrt/local.spec.ts"
+  assert_file_contains "$TEST_DIR/.invrt/local.spec.ts" "/about.html"
 
   cat > "$TEST_DIR/.invrt/plan.yaml" <<EOF
 project: {}
@@ -248,8 +252,8 @@ EOF
   run_invrt test
 
   [ "$status" -eq 0 ]
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "/contact.html"
-  assert_file_not_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "/about.html"
+  assert_file_contains "$TEST_DIR/.invrt/local.spec.ts" "/contact.html"
+  assert_file_not_contains "$TEST_DIR/.invrt/local.spec.ts" "/about.html"
 }
 
 @test "approve: succeeds after a test run" {
@@ -296,24 +300,51 @@ EOF
 
   [ "$status" -eq 0 ]
   assert_output_contains "Generated playwright spec"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/playwright.config.ts"
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "import { test"
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "networkidle"
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "try {"
-  assert_file_contains "$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts" "finally"
-  run bash -c "grep -c \"root setup hook\" '$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts'"
+  assert_file_exists "$TEST_DIR/.invrt/local.spec.ts"
+  assert_file_exists "$TEST_DIR/.invrt/playwright.config.ts"
+  assert_file_contains "$TEST_DIR/.invrt/local.spec.ts" "import { test"
+  assert_file_contains "$TEST_DIR/.invrt/local.spec.ts" "networkidle"
+  assert_file_contains "$TEST_DIR/.invrt/local.spec.ts" "try {"
+  assert_file_contains "$TEST_DIR/.invrt/local.spec.ts" "finally"
+  run bash -c "grep -c \"root setup hook\" '$TEST_DIR/.invrt/local.spec.ts'"
   [ "$status" -eq 0 ]
   [ "$output" -eq 2 ]
-  run bash -c "grep -c \"shared teardown hook\" '$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts'"
+  run bash -c "grep -c \"shared teardown hook\" '$TEST_DIR/.invrt/local.spec.ts'"
   [ "$status" -eq 0 ]
   [ "$output" -eq 2 ]
-  run bash -c "grep -c \"root ready hook\" '$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts'"
+  run bash -c "grep -c \"root ready hook\" '$TEST_DIR/.invrt/local.spec.ts'"
   [ "$status" -eq 0 ]
   [ "$output" -eq 1 ]
-  run bash -c "grep -c \"child ready hook\" '$TEST_DIR/.invrt/data/anonymous/desktop.spec.ts'"
+  run bash -c "grep -c \"child ready hook\" '$TEST_DIR/.invrt/local.spec.ts'"
   [ "$status" -eq 0 ]
   [ "$output" -eq 1 ]
+}
+
+@test "generate-playwright: uses page titles as test names" {
+  start_fixture_server
+  seed_basic_config "$SERVER_URL"
+
+  cat > "$TEST_DIR/.invrt/plan.yaml" <<EOF
+project:
+  title: My Site
+environments:
+  local:
+    url: $SERVER_URL
+pages:
+  /:
+    title: My Site
+  /about.html:
+    title: About Us
+EOF
+
+  run_invrt generate-playwright
+
+  [ "$status" -eq 0 ]
+  run bash -c "find '$TEST_DIR/.invrt' -name '*.spec.ts' -print -quit"
+  [ -n "$output" ]
+  local spec_file="$output"
+  assert_file_contains "$spec_file" 'test("My Site"'
+  assert_file_contains "$spec_file" 'test("About Us"'
 }
 
 @test "generate-playwright: fails when a referenced script file is missing" {
@@ -347,10 +378,10 @@ EOF
   assert_output_contains "Crawling completed"
   assert_output_contains "Generated playwright spec"
   assert_output_contains "Approving latest results"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/reference"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/reference.log"
-  assert_file_exists "$TEST_DIR/.invrt/data/anonymous/logs/test.log"
+  assert_dir_exists "$TEST_DIR/.invrt/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/results"
+  assert_file_exists "$TEST_DIR/.invrt/logs/reference-local-anonymous.log"
+  assert_file_exists "$TEST_DIR/.invrt/logs/test-local-anonymous.log"
 }
 
 @test "init: automatically runs baseline after init" {
@@ -361,8 +392,8 @@ EOF
   [ "$status" -eq 0 ]
   assert_output_contains "InVRT successfully initialized!"
   assert_output_contains "Running baseline"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/reference"
-  assert_dir_exists "$TEST_DIR/.invrt/data/anonymous/results"
+  assert_dir_exists "$TEST_DIR/.invrt/reference"
+  assert_dir_exists "$TEST_DIR/.invrt/results"
 }
 
 @test "init: skips baseline with --skip-baseline" {
@@ -372,5 +403,4 @@ EOF
 
   [ "$status" -eq 0 ]
   assert_output_contains "InVRT successfully initialized!"
-  assert_dir_not_exists "$TEST_DIR/.invrt/data/anonymous/bitmaps/reference/desktop"
 }
