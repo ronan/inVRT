@@ -36,8 +36,6 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Future Features
 
-
-
 - [ ] `invrt playwright` Run `npx playwright $@`
     - Expose playwright functionality directly
     - Run playwright with the same context as the tests (pwd, config and test files)
@@ -85,17 +83,10 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Reporting
 
-- [ ] Create a 1 page html report for all existing test results
-    - see docs/planning/proposals/astro-shadcn-report.md for details
-
-
-- [ ] Create an "Interactive" report
-    - [ ] Allow tests to be re-run
-    - [ ] Allow differences to be approved
-    - [ ] Allow comparison of different environments
-    - [ ] Allow comparison of different profiles
+- [#] Create a 1 page html report for all existing test results
 
 ## Documentation
+
 - [ ] Clean up docs
     - Rebuild the app summary to ensure it is complete and correct.
     - Regenerate simple human readable usage documentation.
