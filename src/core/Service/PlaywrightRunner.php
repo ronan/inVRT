@@ -18,15 +18,19 @@ class PlaywrightRunner
     {
         $configFile = $this->config->get('INVRT_PLAYWRIGHT_CONFIG_FILE', '');
         $specFile   = $this->config->get('INVRT_PLAYWRIGHT_SPEC_FILE', '');
-        $configDir  = $configFile !== '' ? dirname($configFile) : null;
 
-        $cmd = 'npx playwright test';
+        $configDir  = $configFile !== '' ? dirname($configFile) : null;
+        $app_root = dirname(__DIR__, 3);
+
+        $env = $this->config->all();
+        $cmd = "NODE_PATH={$app_root}/node_modules npx -y playwright test";
+
         if ($configFile !== '') {
             $cmd .= ' --config=' . escapeshellarg($configFile);
         }
-        if ($specFile !== '') {
-            $cmd .= ' ' . escapeshellarg($specFile);
-        }
+        // if ($specFile !== '') {
+        //     $cmd .= ' ' . escapeshellarg($specFile);
+        // }
         if ($mode === 'reference') {
             $cmd .= ' --update-snapshots';
         }
@@ -34,7 +38,7 @@ class PlaywrightRunner
         $this->logger->debug('Running Playwright command: ' . $cmd);
         $this->logger->notice('Running playwright test' . ($mode === 'reference' ? ' --update-snapshots' : ''));
 
-        $process = Process::fromShellCommandline($cmd, $configDir, $this->config->all());
+        $process = Process::fromShellCommandline($cmd, $app_root, $env);
         $process->setTimeout(null);
 
         $parser = new NodeOutputParser($this->logger);

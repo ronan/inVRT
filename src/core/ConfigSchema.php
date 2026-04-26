@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Auto generated. Do not edit.
  *
@@ -42,7 +41,7 @@ class ConfigSchema
         'reference_file'                => 'INVRT_CRAWL_DIR/logs/reference.log',
         'test_file'                => 'INVRT_CRAWL_DIR/logs/test.log',
         'session_file'                => 'INVRT_CRAWL_DIR/session.json',
-        'playwright_spec_file'                => 'INVRT_CRAWL_DIR/INVRT_DEVICE.spec.ts',
-        'playwright_config_file'                => 'INVRT_CRAWL_DIR/playwright.config.ts',
+        'playwright_spec_file'                => 'INVRT_DIRECTORY/INVRT_ENVIRONMENT.spec.ts',
+        'playwright_config_file'                => 'INVRT_DIRECTORY/playwright.config.ts',
     ];
 }

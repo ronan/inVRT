@@ -1,3 +1,6 @@
 #!/bin/bash
 
-docker run --rm -v $(pwd):/dir ronan4000/invrt:latest $@
+APP_DIR=$(readlink -f "$(dirname "$0")/../")
+
+echo "Running invrt in Docker with arguments: $APP_DIR $@"
+docker run --rm -v $(pwd):/dir -v $APP_DIR:/app ronan4000/invrt:latest $@

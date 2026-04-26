@@ -11,6 +11,11 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ## Bugs
 
+- [ ] Do not regenerate playright.config.ts if it already exists.
+    -- unless the user calls `invrt configure-playwright --force`
+
+- [ ] Approve should not rerun the tests
+        it should move the test files into the reference directory
 
 ## Tech Debt
 
@@ -31,6 +36,13 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Future Features
 
+- [ ] `invrt playwright` Run `npx playwright $@`
+    - Expose playwright functionality directly
+    - Run playwright with the same context as the tests (pwd, config and test files)
+- [ ] `invrt report` to launch the playwright report in a browser.
+    Run `playwright report` to start the playwright report server
+    Print the url of the server to the terminal
+    Open the url in the user's default browser
 - [ ] `invrt remove` (rm) 
     - Delete the .invrt directory. 
     - Ask for confirmation unless the -f/--force flag is passed.

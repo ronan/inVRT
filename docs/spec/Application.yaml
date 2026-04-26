@@ -50,6 +50,26 @@ Settings:
     type: int
     description: Browser viewport height for screenshot capture.
 
+Directories:
+  directory:
+    default: INVRT_CWD/.invrt
+    description: Root inVRT project directory.
+  scripts_dir:
+    default: INVRT_DIRECTORY/scripts
+    description: Directory for optional user-defined scripts.
+  data_dir:
+    default: INVRT_DIRECTORY/data
+    description: Directory for data artifacts.
+  crawl_dir:
+    default: INVRT_DIRECTORY/data/INVRT_PROFILE
+    description: Directory holding crawl artifacts for the selected profile.
+  clone_dir:
+    default: INVRT_CRAWL_DIR/clone
+    description: Temporary wget mirror output directory.
+  capture_dir:
+    default: INVRT_CRAWL_DIR/bitmaps
+    description: Root directory for capture and report artifacts.
+
 Files:
   crawl_file:
     default: INVRT_CRAWL_DIR/crawled-paths.text
@@ -70,10 +90,10 @@ Files:
     default: INVRT_CRAWL_DIR/session.json
     description: Playwright storageState file written by login and consumed by tests.
   playwright_spec_file:
-    default: INVRT_CRAWL_DIR/INVRT_DEVICE.spec.ts
+    default: INVRT_DIRECTORY/INVRT_ENVIRONMENT.spec.ts
     description: Generated Playwright TypeScript spec file for screenshot capture.
   playwright_config_file:
-    default: INVRT_CRAWL_DIR/playwright.config.ts
+    default: INVRT_DIRECTORY/playwright.config.ts
     description: Generated Playwright TypeScript configuration file for screenshot capture.
 
 Commands:
@@ -96,16 +116,6 @@ Commands:
     triggers: [ approve ]
     output: plan_file
     output_fields: [ url ]
-    directories:
-      directory:
-        default: INVRT_CWD/.invrt
-        description: Root inVRT project directory.
-      scripts_dir:
-        default: INVRT_DIRECTORY/scripts
-        description: Directory for optional user-defined scripts.
-      data_dir:
-        default: INVRT_DIRECTORY/data
-        description: Directory for data artifacts.
     creates:
       - .invrt/scripts/
     arguments:
@@ -129,13 +139,6 @@ Commands:
     success: InVRT successfully crawled the site!
     login: true
     requires: [ check ]
-    directories: 
-      crawl_dir:
-        default: INVRT_DIRECTORY/data/INVRT_PROFILE
-        description: Directory holding crawl artifacts for the selected profile.
-      clone_dir:
-        default: INVRT_CRAWL_DIR/clone
-        description: Temporary wget mirror output directory.
     log: INVRT_CRAWL_DIR/crawl.log
 
   reference:
@@ -143,10 +146,6 @@ Commands:
     help: Creates reference screenshots for the specified profile, device, and environment to use as baseline for comparison.
     login: true
     requires: [ crawl ]
-    directories:
-      capture_dir:
-        default: INVRT_CRAWL_DIR/bitmaps
-        description: Root directory for capture and report artifacts.
     writes:
       - INVRT_CAPTURE_DIR/reference/INVRT_DEVICE
 

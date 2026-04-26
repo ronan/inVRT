@@ -22,12 +22,9 @@ class ConfigSchema
       #{{else}}
         '{{@key}}'                => '{{this.default}}',
       #{{/if}}
-      
       #{{/each}}
-      #{{#each app.Commands}}
-      #{{#each this.directories}}
+      #{{#each app.Directories}}
         '{{@key}}'                => '{{this.default}}',
-      #{{/each}}
       #{{/each}}
       #{{#each app.Files}}
         '{{@key}}'                => '{{this.default}}',

@@ -1,13 +1,8 @@
 # Composer install
-FROM composer:latest AS composer-prod
+FROM composer:latest AS composer-build
 WORKDIR /app
 COPY composer.json composer.lock /app/
 RUN composer install --no-dev --prefer-dist --optimize-autoloader
-
-FROM composer:latest AS composer-dev
-WORKDIR /app
-COPY composer.json composer.lock /app/
-RUN composer install --prefer-dist --optimize-autoloader
 
 # FROM debian:bookworm AS build
 
@@ -28,18 +23,13 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY . /app
-
-FROM base AS test
-COPY --from=composer-dev /app/vendor /app/vendor
-RUN npm install --loglevel error
-RUN mkdir -p /scratch/tests
-ENV INVRT_TEST_ROOT=/scratch/tests
-ENTRYPOINT ["node_modules/.bin/bats", "tests/bats"]
 
 FROM base AS runtime
-COPY --from=composer-prod /app/vendor /app/vendor
-RUN npm install --loglevel error
+COPY --from=composer-build /app/vendor /app/vendor
+COPY package.json package-lock.json /app/
+RUN npm install --loglevel verbose --no-audit --no-fund --no-update-notifier
+
+COPY . .
 
 WORKDIR /dir
 ENTRYPOINT [ "/app/bin/invrt" ]

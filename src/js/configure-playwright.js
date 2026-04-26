@@ -15,6 +15,7 @@ export default defineConfig({
   reporter: [['html', { outputFolder: 'report' }]],
   use: {
     screenshot: 'on',
+    ignoreHTTPSErrors: true,
   }
 });
 `;
