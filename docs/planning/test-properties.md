@@ -1,5 +1,7 @@
 # Test Sites
 
+https://quotes.toscrape.com/
+https://crawler-test.com/
 https://practice.expandtesting.com/
 https://automationexercise.com
 https://the-internet.herokuapp.com
