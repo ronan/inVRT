@@ -1,17 +1,10 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [
-    ".astro/types.d.ts",
-    "**/*"
-, "scratch/bluesky/.invrt/astro.config.mjs"  ],
-  "exclude": [
-    "dist"
-  ],
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"],
   "compilerOptions": {
     "paths": {
-      "@/*": [
-        "/workspace/invrt/src/js/invrt-reporter/src/*"
-      ],
+      "@/*": ["./src/*"]
     }
   }
 }
