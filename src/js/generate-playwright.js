@@ -241,7 +241,7 @@ const run = async () => {
       const onready = renderHookBlock('onready', hooks.onready, INVRT_SCRIPTS_DIR);
       const teardown = renderHookBlock('teardown', hooks.teardown, INVRT_SCRIPTS_DIR);
       return `
-test(${JSON.stringify(testName)}, async ({ page }, testInfo) => {
+test(${JSON.stringify(testName)}, { tag: '@id-${id}' }, async ({ page }, testInfo) => {
   try {
 ${setup}    await page.goto(${JSON.stringify(fullUrl)}, { waitUntil: 'networkidle' });
 ${onready}    const screenshot = await page.screenshot({ path: testInfo.outputPath(${JSON.stringify(`${id}.png`)}), fullPage: true });
