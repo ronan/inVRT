@@ -1,5 +1,5 @@
 {
-  "name": "@invrt/invrt-reporter",
+  "name": "@invrt/report-builder",
   "type": "module",
   "version": "0.0.1",
   "engines": {
