@@ -23,6 +23,7 @@ class PlaywrightRunner
         $app_root = dirname(__DIR__, 3);
 
         $env = $this->config->all();
+        $env['INVRT_RESULTS_FILE'] = $env['INVRT_DIRECTORY'] . '/report.json';
         $cmd = "NODE_PATH={$app_root}/node_modules npx -y playwright test";
 
         if ($configFile !== '') {

@@ -1,0 +1,73 @@
+---
+/**
+ * Self-contained theme toggle. Uses inline SVG icons so the produced
+ * report has zero external asset dependencies.
+ */
+---
+
+<button
+  type="button"
+  class="invrt-theme-toggle inline-flex items-center justify-center size-9 rounded-md border border-border bg-transparent hover:bg-muted transition-colors"
+  aria-label="Toggle color theme"
+  data-invrt-theme-toggle
+>
+  <svg
+    class="invrt-theme-toggle__sun size-5"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2"></path>
+    <path d="M12 20v2"></path>
+    <path d="m4.93 4.93 1.41 1.41"></path>
+    <path d="m17.66 17.66 1.41 1.41"></path>
+    <path d="M2 12h2"></path>
+    <path d="M20 12h2"></path>
+    <path d="m6.34 17.66-1.41 1.41"></path>
+    <path d="m19.07 4.93-1.41 1.41"></path>
+  </svg>
+  <svg
+    class="invrt-theme-toggle__moon size-5 hidden"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+  </svg>
+</button>
+
+<script is:inline>
+  (function () {
+    function syncIcons(btn) {
+      var dark = document.documentElement.classList.contains("dark");
+      var sun = btn.querySelector(".invrt-theme-toggle__sun");
+      var moon = btn.querySelector(".invrt-theme-toggle__moon");
+      if (sun) sun.classList.toggle("hidden", dark);
+      if (moon) moon.classList.toggle("hidden", !dark);
+      btn.setAttribute("aria-pressed", String(dark));
+    }
+    var buttons = document.querySelectorAll("[data-invrt-theme-toggle]");
+    buttons.forEach(function (btn) {
+      syncIcons(btn);
+      btn.addEventListener("click", function () {
+        var nowDark = !document.documentElement.classList.contains("dark");
+        document.documentElement.classList.toggle("dark", nowDark);
+        try {
+          localStorage.setItem("colorTheme", nowDark ? "dark" : "light");
+        } catch (_) {}
+        document.querySelectorAll("[data-invrt-theme-toggle]").forEach(syncIcons);
+      });
+    });
+  })();
+</script>

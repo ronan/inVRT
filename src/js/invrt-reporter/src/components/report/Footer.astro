@@ -1,0 +1,18 @@
+---
+import type { ReportData } from "@/lib/types";
+
+interface Props {
+  report: ReportData;
+}
+
+const { report } = Astro.props;
+const version = process.env.INVRT_VERSION ?? new Date().toISOString().split('T')[0].replaceAll('-', '.');
+---
+
+<footer class="border-t border-border bg-card">
+  <div class="mx-auto flex flex-wrap py-3 text-sm text-muted-foreground">
+    <span>Generated at</span>
+    <time datetime={report.generatedAt} data-local-time>{report.generatedAt}</time>
+    <span>by InVRT v.{version}</span>
+  </div>
+</footer>

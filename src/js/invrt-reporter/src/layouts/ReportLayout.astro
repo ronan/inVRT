@@ -1,0 +1,49 @@
+---
+import "@/styles/starwind.css";
+import Header from "@/components/report/Header.astro";
+import Footer from "@/components/report/Footer.astro";
+import type { ReportData } from "@/lib/types";
+
+interface Props {
+  title: string;
+  report: ReportData;
+}
+
+const { title, report } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <script is:inline>
+      // Apply theme as early as possible to avoid flash.
+      (function () {
+        try {
+          const colorTheme = localStorage.getItem("colorTheme");
+          if (!colorTheme) {
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.classList.toggle("dark", prefersDark);
+            localStorage.setItem("colorTheme", prefersDark ? "dark" : "light");
+          } else {
+            document.documentElement.classList.toggle("dark", colorTheme === "dark");
+          }
+        } catch (_) {
+          /* ignore */
+        }
+      })();
+    </script>
+  <link rel="icon" type="image/x-icon" href="iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAABjUlEQVRYCWPU0DH5zzCAgGkA7QZbPeoAFuQoYGdjY2BhZWWQlZFmYGFhBku9efOW4cXLV8jKqMpGcYCUlDiDmKgoQ293O4OwsBDYojlzFzL0TphCVUuRDRtNA4zI5cBApAEUByDHDb3YA54GUHIBLy8PAycHB4OlpTkDBzs7OBAePnrMcO/efQZDQ30GAX5+kgLm2/cfDJu3bMOrB8UBIsKC4GxYWpQHz4Zbt+1kWL1mHUNWRgqDmqoKXsPQJV++ek3QAYMrCtB9gIv///9/BhDGBRgZGRkgmIGBiZkZrPb/v39YlaNEAVYVWAR37NzDUFJRi0WGgUFWWpJBUlKCobG+mkFOVobh8rljDKtWr2dobOnAqp4sB4B8/+/vX6wG/vv7jwHsW2gIMTExMTAyMWJVCxIc8DQw6oDREBgNgdEQGA0BlLrg0+evwNKZkWHj5q0M3Nzc4PL7ypVrDK9ev2HYuWsvw/kLlyBiV6+BaWzEl2/fwOq37djFICgoCFZy9uwFbErBYqNtwgFPhADDlnLM/J8FxwAAAABJRU5ErkJggg==">
+  </head>
+  <body class="bg-background text-foreground min-h-screen flex flex-col">
+    <div class="*:lg:px-10">
+      <Header report={report} />
+      <main class="flex-1 mx-auto px-4 py-6 w-full">
+        <slot />
+      </main>
+      <Footer report={report} />
+    </div>
+  </body>
+</html>
