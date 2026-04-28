@@ -1,3 +1,4 @@
 [tools]
 node = "latest"
 "npm:http-server" = "latest"
+task = "latest"
