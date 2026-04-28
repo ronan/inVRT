@@ -26,23 +26,21 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
         - If a path only has one child and that child is "" or "/" you can remove the child and 
             add that childs attributes directly to the parent. Only add a child record for "" and "/" if 
             the parent has other children.
-    
+ 
 
 ## Features
 
 ### Test Plan
 
-
-
 ### Future Features
 
-- [ ] `invrt playwright` Run `npx playwright $@`
-    - Expose playwright functionality directly
-    - Run playwright with the same context as the tests (pwd, config and test files)
-- [ ] `invrt report` to launch the playwright report in a browser.
+- [ ] `invrt report open` to launch the playwright report in a browser.
     Run `playwright report` to start the playwright report server
     Print the url of the server to the terminal
     Open the url in the user's default browser
+- [ ] `invrt playwright` Run `npx playwright $@`
+    - Expose playwright functionality directly
+    - Run playwright with the same context as the tests (pwd, config and test files)
 - [ ] `invrt remove` (rm) 
     - Delete the .invrt directory. 
     - Ask for confirmation unless the -f/--force flag is passed.
@@ -83,7 +81,7 @@ Completed items are moved to [docs/planning/TODO-DONE.md](docs/planning/TODO-DON
 
 ### Reporting
 
-- [#] Create a 1 page html report for all existing test results
+- [x] Create a 1 page html report for all existing test results
 
 ## Documentation
 

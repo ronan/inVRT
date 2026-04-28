@@ -10,7 +10,9 @@ use InVRT\Core\Service\PlaywrightRunner;
 use InVRT\Core\Service\ProjectId;
 use InVRT\Core\Service\UrlNormalizer;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Filesystem\Filesystem as SymfonyFilesystem;
 use Symfony\Component\Filesystem\Path;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -311,6 +313,59 @@ class Runner
             $this->appDir,
             $this->logger,
         );
+    }
+
+    /**
+     * Build the Astro report from the latest test results and copy it
+     * to <INVRT_DIRECTORY>/index.html.
+     */
+    public function report(): int
+    {
+        $directory = (string) $this->config->get('INVRT_DIRECTORY');
+        if ($directory === '') {
+            $this->logger->error('INVRT_DIRECTORY is not set; cannot write report.');
+            return 1;
+        }
+
+        $builderDir = Path::join($this->appDir, 'report-builder');
+        if (!is_dir($builderDir)) {
+            $this->logger->error("Report builder directory not found: $builderDir");
+            return 1;
+        }
+
+        $this->logger->notice('📝 Building report…');
+        $this->logger->debug("Running 'npx astro build' in $builderDir");
+
+        $process = Process::fromShellCommandline('npx astro build', $builderDir, $this->config->all());
+        $process->setTimeout(null);
+        $process->run(function (string $type, string $buffer): void {
+            foreach (explode("\n", rtrim($buffer)) as $line) {
+                if ($line === '') {
+                    continue;
+                }
+                $type === Process::ERR
+                    ? $this->logger->info($line)
+                    : $this->logger->info($line);
+            }
+        });
+
+        $exit = $process->getExitCode() ?? 0;
+        if ($exit !== 0) {
+            $this->logger->error("astro build failed with exit code $exit");
+            return $exit;
+        }
+
+        $source = Path::join($builderDir, 'dist', 'index.html');
+        if (!is_file($source)) {
+            $this->logger->error("Expected build output not found: $source");
+            return 1;
+        }
+
+        $target = Path::join($directory, 'index.html');
+        (new SymfonyFilesystem())->copy($source, $target, true);
+
+        $this->logger->notice("📝 Report written to $target");
+        return 0;
     }
 
     // -------------------------------------------------------------------------

@@ -336,6 +336,12 @@ Completed tasks moved from TODO.md.
 
 ## Features
 
+### Reporting
+
+- [x] `invrt report` builds a report from the latest test results.
+    - Runs `npx astro build` in `src/js/report-builder/` with `INVRT_DIRECTORY` exported.
+    - Copies `dist/index.html` into `<INVRT_DIRECTORY>/index.html`.
+
 ### User Scripting
 
 - [x] Allow specification of per-path test scripts in plan.yaml

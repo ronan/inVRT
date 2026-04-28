@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { loadReport } from "@/lib/loadReport";
 import type { ReportData } from "@/lib/types";
 
@@ -11,8 +12,9 @@ let cached: ReportData | undefined;
 
 export function getReport(): ReportData {
   if (cached) return cached;
-  const planPath = process.env.INVRT_DIRECTORY + "./plan.yaml";
-  const resultsPath = process.env.INVRT_DIRECTORY + "./report.json";
+  const dir = process.env.INVRT_DIRECTORY ?? "";
+  const planPath = join(dir, "plan.yaml");
+  const resultsPath = join(dir, "report.json");
   cached = loadReport({ planPath, resultsPath });
   return cached;
 }

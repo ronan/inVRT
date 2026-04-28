@@ -15,7 +15,7 @@ invrt reference   # Capture reference screenshots from the crawled paths
 invrt test        # Capture fresh screenshots and compare against reference
 invrt approve     # Re-run Playwright with --update-snapshots to promote latest screenshots
 invrt baseline    # Ensure reference + test artifacts exist, then approve
-invrt report      # Generate a single-page HTML report from existing results
+invrt report      # Build the Astro HTML report into INVRT_DIRECTORY/index.html
 invrt info        # Show current project status for the selected context
 invrt config      # Print the resolved INVRT_* configuration
 ```
@@ -140,9 +140,7 @@ Prints the resolved flat `INVRT_*` configuration for the selected environment/pr
 
 ### `report`
 
-Generates a single self-contained HTML file summarising the latest VRT results for the selected environment/profile/device. Reads `INVRT_PLAN_FILE`, scans `<INVRT_DIRECTORY>/reference/` for baselines and `<INVRT_DIRECTORY>/results/` for Playwright failure artifacts. Each plan page is matched to a stable id (same `encodeId` algorithm used by `generate-playwright`) and classified as `unchanged`, `changed`, `missing-reference`, or `untested`.
-
-The output file defaults to `<INVRT_DIRECTORY>/report.html` and can be overridden with `--output`. All screenshots are embedded as base64 data URIs so the file is self-contained and shareable. CSS/JS use the Tailwind + daisyUI CDN. The page provides per-status filter buttons and a text search across page titles + paths. `--open`/`-o` opens the report in the user's default browser after writing it. Does not attempt login.
+Builds the bundled Astro report site (`src/js/report-builder/`) against the project's `INVRT_DIRECTORY` and copies the generated `dist/index.html` into `<INVRT_DIRECTORY>/index.html`. The build runs `npx astro build` with `INVRT_DIRECTORY` exported in the environment so the Astro pages can read `plan.yaml`, references, and Playwright results at build time. Does not attempt login.
 
 ---
 

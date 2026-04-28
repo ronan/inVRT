@@ -269,6 +269,19 @@ EOF
   assert_output_contains "Approving latest results"
 }
 
+@test "report: builds an Astro report into INVRT_DIRECTORY/index.html" {
+  seed_basic_config "http://example.test"
+  printf '\npages: {}\n' >> "$TEST_DIR/.invrt/plan.yaml"
+  printf '{"suites":[]}\n' > "$TEST_DIR/.invrt/report.json"
+
+  run_invrt report
+
+  [ "$status" -eq 0 ]
+  assert_output_contains "Report written to"
+  assert_file_exists "$TEST_DIR/.invrt/index.html"
+  [ -s "$TEST_DIR/.invrt/index.html" ]
+}
+
 @test "generate-playwright: generates spec from plan pages" {
   start_fixture_server
   seed_basic_config "$SERVER_URL"

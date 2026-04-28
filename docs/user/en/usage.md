@@ -429,32 +429,19 @@ My Project
 
 ### `report`
 
-Generate a single self-contained HTML report summarising the latest VRT results.
+Build the HTML report from the latest test results.
 
 ```
-invrt report [--output=<file>] [--open] [--profile=<name>] [--device=<name>] [--environment=<name>]
+invrt report [--profile=<name>] [--device=<name>] [--environment=<name>]
 ```
 
-Reads `plan.yaml`, the reference images, and the Playwright results, then writes a standalone HTML file with all screenshots embedded as data URIs. The report is shareable via Slack or email — no server needed.
-
-**Options:**
-
-| Option         | Shortcut | Default                | Description                                  |
-| -------------- | -------- | ---------------------- | -------------------------------------------- |
-| `--output`     |          | `.invrt/report.html`   | Path to write the report file                |
-| `--open`       | `-o`     | off                    | Open the report in the default browser       |
+Runs `npx astro build` against the bundled report site (`src/js/report-builder/`) with `INVRT_DIRECTORY` set to the active plan directory, then copies the generated `dist/index.html` into `<INVRT_DIRECTORY>/index.html`. Open that file in a browser to view the report.
 
 **Output:**
 
 ```
-📝 Report written to /path/to/.invrt/report.html
+📝 Report written to /path/to/.invrt/index.html
 ```
-
-The report shows:
-
-- Project name, URL, environment / profile / device.
-- Stats cards (total / unchanged / changed / missing).
-- A filterable, searchable list of every page in the plan with its status badge, reference thumbnail, and (when the test failed) reference + actual + diff side-by-side.
 
 ---
 

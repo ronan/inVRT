@@ -172,3 +172,11 @@ Commands:
     help: Ensures reference and test artifacts exist, then approves the latest visual results.
     success: Site has been baselined successfully.
     requires: [ test ]
+
+  report:
+    description: Build the HTML report from the latest test results.
+    help: Builds the bundled Astro report against the current INVRT_DIRECTORY and writes the resulting index.html into that directory.
+    success: Report written.
+    requires: [ test ]
+    writes:
+      - INVRT_DIRECTORY/index.html
