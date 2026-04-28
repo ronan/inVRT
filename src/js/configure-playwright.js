@@ -14,10 +14,8 @@ export default defineConfig({
   preserveOutput: 'always',
   snapshotPathTemplate: 'approved/{arg}{ext}',
   reporter: [
-    ['/workspaces/invrt/src/js/invrt-astro-reporter.ts'],
     ['line'],
-    ['json', { outputFile: 'report.json' }],
-    ['html', { outputFolder: 'report' }]]
+    ['json', { outputFile: 'report.json' }]
   ],
   use: {
     screenshot: 'on',
