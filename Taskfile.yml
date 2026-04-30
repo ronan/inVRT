@@ -81,6 +81,15 @@ tasks:
     cmds:
       - docker build --progress=plain -t ronan4000/invrt:{{.VERSION}} -t ronan4000/invrt:latest .
 
+  build:report:
+    env:
+      INVRT_PLAN_FILE: /dir/invrt/plan.yaml
+      INVRT_DIRECTORY: /dir/invrt
+    sources:
+      - 'src/js/**/*'
+    cmds:
+      - node /app/src/js/generate-report.js
+
   publish:
     desc: Publish Docker image and ddev addon for current version
     sources:

@@ -19,17 +19,44 @@ RUN apt-get update \
  && add-apt-repository ppa:ondrej/php -y \
  && apt-get update \
  && apt-get install -y php8.5 php8.5-cli php8.5-common php8.5-curl php8.5-dom php8.5-mbstring php8.5-xml \
+ WORKDIR /app
+
+# Xdebug
+RUN add-apt-repository ppa:ondrej/php -y \
+ && apt-get update \
+ && apt-get install -y php8.5-xdebug \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+FROM base AS dev
+RUN apt-get update \
+ && apt-get install -y \
+    fish \
+    vim \
+    git
 
-WORKDIR /app
+
+# taskfile and mise (todo: remove taskfile)
+RUN curl https://mise.run | sh
+RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
+
+# Composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+COPY . .
+
+ENV PATH="/app/bin:${PATH}"
+
+CMD ["fish"]
 
 FROM base AS runtime
+
 COPY --from=composer-build /app/vendor /app/vendor
 COPY package.json package-lock.json /app/
 RUN npm install --loglevel verbose --no-audit --no-fund --no-update-notifier
 
 COPY . .
+
+ENV PATH="/app/bin:${PATH}"
 
 WORKDIR /dir
 ENTRYPOINT [ "/app/bin/invrt" ]

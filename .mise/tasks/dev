@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#MISE description="Start invrt-dev with port 3000, mounts, and fish shell"
+
+BASE_NAME="invrt-dev"
+IMAGE="ronan4000/invrt:dev"
+OPTIONAL_DIR=$1
+
+# 1. Determine Container Name and Extra Mount
+NAME="$BASE_NAME"
+MOUNT_ARGS="-v $(pwd):/app"
+
+if [ -d "$OPTIONAL_DIR" ]; then
+  # Get just the directory name (e.g., 'data' from './my-data/')
+  DIR_NAME=$(basename "$OPTIONAL_DIR")
+  NAME="${BASE_NAME}-${DIR_NAME}"
+
+  ABS_DIR=$(realpath "$OPTIONAL_DIR")
+  MOUNT_ARGS="$MOUNT_ARGS -v $ABS_DIR:/dir"
+  echo "📁 Mounting $ABS_DIR to /dir"
+fi
+
+echo "🐳 Using container: $NAME"
+
+# 2. Start or Create the container
+if [ "$(docker ps -aq -f name=^/${NAME}$)" ]; then
+  docker start "$NAME" >/dev/null
+else
+  docker run -d \
+    --name "$NAME" \
+    -p 0:3000 \
+    $MOUNT_ARGS \
+    "$IMAGE" tail -f /dev/null
+fi
+
+# 3. Exec into fish
+docker exec -it "$NAME" fish
