@@ -331,10 +331,10 @@ class Runner
         $this->node->runCapturing(
             'generate-report.js',
             $this->config->get('INVRT_PLAN_FILE'),
-            $this->config->get('INVRT_DIRECTORY/report.json'),
+            $this->config->get('/report.json'),
         );
 
-        $this->logger->notice("📝 Report written to $target");
+        $this->logger->notice("📝 Report written to $directory/index.html");
         return 0;
     }
 

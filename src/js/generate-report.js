@@ -24,26 +24,17 @@ const run = async () => {
   const report = JSON.parse(readFileSync(resolve(`${INVRT_DIRECTORY}/report.json`)));
   const template = readFileSync(join(__dirname, 'report.sqrl'), "utf8");
 
-  const tested_at = {
-    iso: new Date().toISOString(),
-    readable: new Intl.DateTimeFormat('en-GB', {
-      dateStyle: 'full',
-      timeStyle: 'short'
-    }).format(Date.now())
-  };
-  const generated_at = {
-    iso: new Date().toISOString(),
-    readable: new Intl.DateTimeFormat('en-GB', {
-      dateStyle: 'full',
-      timeStyle: 'short'
-    }).format(Date.now())
-  };
+  const tested_at = report.stats.startTime;
+
+  const generated_at = new Date().toISOString();
 
   const data = {
     generated_at,
     tested_at,
     project,
     pages,
+    duration_s: (report.stats.duration / 1000).toFixed(1),
+    stats: report.stats,
     counts: {
       untested: 0,
       failed: 0,
