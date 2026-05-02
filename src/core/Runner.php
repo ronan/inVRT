@@ -327,42 +327,12 @@ class Runner
             return 1;
         }
 
-        $builderDir = Path::join($this->appDir, 'report-builder');
-        if (!is_dir($builderDir)) {
-            $this->logger->error("Report builder directory not found: $builderDir");
-            return 1;
-        }
-
         $this->logger->notice('📝 Building report…');
-        $this->logger->debug("Running 'npx astro build' in $builderDir");
-
-        $process = Process::fromShellCommandline('npx astro build', $builderDir, $this->config->all());
-        $process->setTimeout(null);
-        $process->run(function (string $type, string $buffer): void {
-            foreach (explode("\n", rtrim($buffer)) as $line) {
-                if ($line === '') {
-                    continue;
-                }
-                $type === Process::ERR
-                    ? $this->logger->info($line)
-                    : $this->logger->info($line);
-            }
-        });
-
-        $exit = $process->getExitCode() ?? 0;
-        if ($exit !== 0) {
-            $this->logger->error("astro build failed with exit code $exit");
-            return $exit;
-        }
-
-        $source = Path::join($builderDir, 'dist', 'index.html');
-        if (!is_file($source)) {
-            $this->logger->error("Expected build output not found: $source");
-            return 1;
-        }
-
-        $target = Path::join($directory, 'index.html');
-        (new SymfonyFilesystem())->copy($source, $target, true);
+        $this->node->runCapturing(
+            'generate-report.js',
+            $this->config->get('INVRT_PLAN_FILE'),
+            $this->config->get('INVRT_DIRECTORY/report.json'),
+        );
 
         $this->logger->notice("📝 Report written to $target");
         return 0;

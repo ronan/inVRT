@@ -41,11 +41,19 @@ function walkPages(
 
   // Recurse into "/..." children.
   for (const [key, value] of Object.entries(node)) {
-    if (!key.startsWith("/")) continue;
+    
+    if (
+      !key.startsWith("/") && 
+      !key.startsWith(".") && 
+      !key.startsWith("?") && 
+      !key.startsWith("#")
+    ) continue;
+    
+
     if (value && typeof value === "object") {
-      // Combine: prefix + key. Special case: child key "/" means index of parent.
+      // Combine: prefix + key. Special case: child key "/", "" or "." means index of parent.
       let childPrefix: string;
-      if (key === "/") {
+      if (key === "/" || key === '' || key === ".") {
         childPrefix = prefix === "" ? "" : prefix; // index page of parent (path is parent path)
         // For "/" under a parent, the meaningful path *is* the parent prefix
         // but we still want to add a trailing slash to disambiguate the index.
@@ -231,7 +239,6 @@ function specToPage(
   const test = spec.tests[0];
   const result = test?.results[test.results.length - 1];
   if (!result) return { status: "untested" };
-
   const attachments = result.attachments ?? [];
   const findAttachment = (name: string) =>
     attachments.find((attachment) => attachment.name === name)?.path ??
@@ -240,7 +247,6 @@ function specToPage(
   const rawErrorMessage = result.errors?.[0]?.message;
   const changePercent = extractChangePercent(rawErrorMessage);
   const snapshotMismatch = isSnapshotMismatch(rawErrorMessage);
-
   const reference =
     toReportRelativePath(reportRoot, findAttachment("expected")) ??
     toReportRelativePath(reportRoot, findAttachment("reference")) ??
@@ -289,10 +295,11 @@ console.log("Plan and report loaded. Processing data...");
   const assets = buildAssetIndex(reportRoot);
   const flat = walkPages(plan.pages as Record<string, unknown>, "");
   const specsById = indexSpecsById(report);
-
   const pages: PageRecord[] = flat.map((p) => {
     const profiles = p.profiles.length > 0 ? p.profiles : ["anonymous"];
     const s = specToPage(specsById.get(p.id), p.id, reportRoot, assets);
+
+
     return {
       ...p,
       profiles,
@@ -305,6 +312,7 @@ console.log("Plan and report loaded. Processing data...");
       testScreenshot: s.test,
       diffScreenshot: s.diff,
     };
+
   });
 
   // Deduplicate by id (keys can collide e.g. zzcdsbvfzj appears twice in plan)

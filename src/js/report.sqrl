@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{it.project.name}} — InVRT Report</title>
+
+    <link rel="stylesheet" href="report.css">
+  </head>
+
+  <body class="bg-background text-foreground min-h-screen flex flex-col">
+    <header id="report-top" class="border-b border-border bg-card/95">
+      <div class="mx-auto flex w-full flex-col gap-4 px-4 py-4">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
+          <div class="w-full max-w-48 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+            <div class="relative w-full" style="padding-bottom: 75%" data-slot="aspect-ratio-wrapper">
+              <div class="absolute inset-0" data-slot="aspect-ratio">
+                <img src="approved/{{it.pages[0].id}}.png" alt="{{it.project.name}} home page reference" class="h-full w-full object-cover object-top" loading="lazy">
+              </div>
+            </div>
+          </div>
+          <div class="flex min-w-0 flex-1 flex-col gap-3">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
+                <h1 class="truncate text-2xl font-semibold">{{it.project.title}}</h1>
+                <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                  <a href="{{it.project.url}}" target="_blank" rel="noreferrer" class="truncate hover:underline">
+                    {{it.project.url}}
+                  </a>
+                  <span class="font-mono">{{it.project.id}}</span>
+                  <divi class="text-sm muted">
+
+                    Tested At: 
+                    <time datetime="{{it.tested_at.iso}}" data-local-time> {{it.tested_at.readable}}</time>
+                  </div>
+                  <div>
+                    Report Generated: 
+                    <time datetime="{{it.generated_at.iso}}" data-local-time> {{it.generated_at.readable}}</time>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="invrt-theme-toggle inline-flex items-center justify-center size-9 rounded-md border border-border bg-transparent hover:bg-muted transition-colors" aria-label="Toggle color theme" data-invrt-theme-toggle>
+                <svg class="invrt-theme-toggle__sun size-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2"></path>
+                  <path d="M12 20v2"></path>
+                  <path d="m4.93 4.93 1.41 1.41"></path>
+                  <path d="m17.66 17.66 1.41 1.41"></path>
+                  <path d="M2 12h2"></path>
+                  <path d="M20 12h2"></path>
+                  <path d="m6.34 17.66-1.41 1.41"></path>
+                  <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+                <svg class="invrt-theme-toggle__moon size-5 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+              </button>
+            </div>
+
+            <div class="flex gap-2">
+              <div class="bg-card text-card-foreground group/card ring-border flex flex-col rounded-xl ring-1 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl min-w-20 shrink-0" data-size="xs" data-slot="card">
+                <div class="@container/card-header grid auto-rows-min items-start gap-1 group-data-[size=sm]/card:px-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] p-2 pb-0" data-slot="card-header">
+                  <div class="font-heading font-medium group-data-[size=sm]/card:text-base text-xs uppercase tracking-wide text-muted-foreground" data-slot="card-title">
+                    Run time
+                  </div>
+                </div>
+                <div class="group-data-[size=sm]/card:px-4 p-2 pt-0" data-slot="card-content">
+                  <div class="text-sm font-semibold">4m 45s</div>
+                </div>
+              </div>
+              <div class="bg-card text-card-foreground group/card ring-border flex flex-col rounded-xl ring-1 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl min-w-20 shrink-0" data-size="xs" data-slot="card">
+                <div class="@container/card-header grid auto-rows-min items-start gap-1 group-data-[size=sm]/card:px-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] p-2 pb-0" data-slot="card-header">
+                  <div class="font-heading font-medium group-data-[size=sm]/card:text-base text-xs uppercase tracking-wide text-muted-foreground" data-slot="card-title">
+                    Pages
+                  </div>
+                </div>
+                <div class="group-data-[size=sm]/card:px-4 p-2 pt-0" data-slot="card-content">
+                  <div class="text-sm font-semibold">3</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 mx-auto px-4 py-6 w-full">
+      <section class="page-list-root flex flex-col gap-4" data-page-list data-astro-cid-mmpzio3j>
+        <div class="flex flex-wrap items-center gap-3 p-0" data-astro-cid-mmpzio3j>
+          <div class="flex items-center gap-1 rounded-sm border border-border p-1" role="group" data-view-toggle data-astro-cid-mmpzio3j>
+            <button type="button" class="rounded px-2 py-1 text-md data-[active=true]:bg-primary data-[active=true]:text-primary-foreground" data-view="list" data-active="true" data-astro-cid-mmpzio3j>List</button>
+            <button type="button" disabled class="rounded px-2 py-1 text-md data-[active=true]:bg-primary data-[active=true]:text-primary-foreground opacity-50 cursor-not-allowed" data-view="gallery" data-active="false" data-astro-cid-mmpzio3j>Gallery</button>
+          </div>
+
+          <div class="flex items-center gap-2 text-sm bg-card rounded-sm p-2" data-astro-cid-mmpzio3j>
+            <label for="size-slider" class="text-muted-foreground sr-only" data-astro-cid-mmpzio3j>Size</label>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" color="muted" data-astro-cid-mmpzio3j="true">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M15 8h.01" />
+              <path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12" />
+              <path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5" />
+              <path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3" />
+            </svg>
+            <input id="size-slider" type="range" min="100" max="600" step="20" value="100" data-size-slider data-astro-cid-mmpzio3j>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-6" color data-astro-cid-mmpzio3j="true">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M15 8h.01" />
+              <path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12" />
+              <path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5" />
+              <path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3" data-astro-cid-mmpzio3j>
+          <input type="search" placeholder="Filter by title, path, or id..." class="min-w-48 flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40" data-filter-input data-astro-cid-mmpzio3j>
+          <div class="flex flex-wrap gap-2" data-status-filters data-astro-cid-mmpzio3j>
+            <div class="starwind-badge inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap [&#38;_svg]:pointer-events-none [&#38;_svg]:shrink-0 transition-all outline-none focus-visible:ring-3 aria-invalid:border-error aria-invalid:focus-visible:ring-error/40 bg-foreground/10 text-foreground focus-visible:ring-outline/50 px-2.5 py-0.5 [&#38;_svg:not([class*='size-'])]:size-3 cursor-pointer text-xs" data-slot="badge" data-status-filter-badge="true" data-astro-cid-mmpzio3j="true">
+              <div class="starwind-checkbox relative flex items-center space-x-2" data-astro-cid-feyd622a>
+              <input type="checkbox" class="peer border-input bg-background dark:bg-input/30 shrink-0 transform-gpu rounded-sm border transition-all focus-visible:ring-3 outline-0 focus:ring-0 focus:ring-offset-0 not-disabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-error aria-invalid:focus-visible:ring-error/40 size-4 checked:bg-warning checked:border-warning focus-visible:ring-warning/50 focus-visible:border-warning peer" value="changed" disabled data-status-filter="true" data-astro-cid-mmpzio3j="true" data-slot="checkbox-input" data-astro-cid-feyd622a>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute stroke-3 p-0.5 opacity-0 transition-opacity peer-checked:opacity-100 starwind-check-icon size-4 text-warning-foreground" data-astro-cid-feyd622a="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 12l5 5l10 -10" />
+              </svg>
+              <label class="font-medium peer-not-disabled:cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm" data-slot="checkbox-label" data-astro-cid-feyd622a>
+                  Changed ({{it.counts.failed}})
+              </label>
+            </div>
+          </div>
+
+          <div class="starwind-badge inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap [&#38;_svg]:pointer-events-none [&#38;_svg]:shrink-0 transition-all outline-none focus-visible:ring-3 aria-invalid:border-error aria-invalid:focus-visible:ring-error/40 bg-success text-success-foreground focus-visible:ring-success/50 px-2.5 py-0.5 [&#38;_svg:not([class*='size-'])]:size-3 cursor-pointer text-xs" data-slot="badge" data-status-filter-badge="true" data-astro-cid-mmpzio3j="true">
+            <div class="starwind-checkbox relative flex items-center space-x-2" data-astro-cid-feyd622a>
+              <input type="checkbox" class="peer border-input bg-background dark:bg-input/30 shrink-0 transform-gpu rounded-sm border transition-all focus-visible:ring-3 outline-0 focus:ring-0 focus:ring-offset-0 not-disabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-error aria-invalid:focus-visible:ring-error/40 size-4 checked:bg-success checked:border-success focus-visible:ring-success/50 focus-visible:border-success peer" checked value="approved" data-status-filter="true" data-astro-cid-mmpzio3j="true" data-slot="checkbox-input" data-astro-cid-feyd622a>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute stroke-3 p-0.5 opacity-0 transition-opacity peer-checked:opacity-100 starwind-check-icon size-4 text-success-foreground" data-astro-cid-feyd622a="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 12l5 5l10 -10" />
+              </svg>
+              <label class="font-medium peer-not-disabled:cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm" data-slot="checkbox-label" data-astro-cid-feyd622a>
+                  Approved ({{it.counts.passed}})
+              </label>
+            </div>
+          </div>
+
+          <div class="starwind-badge inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap [&#38;_svg]:pointer-events-none [&#38;_svg]:shrink-0 transition-all outline-none focus-visible:ring-3 aria-invalid:border-error aria-invalid:focus-visible:ring-error/40 bg-foreground/10 text-foreground focus-visible:ring-outline/50 px-2.5 py-0.5 [&#38;_svg:not([class*='size-'])]:size-3 cursor-pointer text-xs" data-slot="badge" data-status-filter-badge="true" data-astro-cid-mmpzio3j="true">
+            <div class="starwind-checkbox relative flex items-center space-x-2" data-astro-cid-feyd622a>
+              <input type="checkbox" class="peer border-input bg-background dark:bg-input/30 shrink-0 transform-gpu rounded-sm border transition-all focus-visible:ring-3 outline-0 focus:ring-0 focus:ring-offset-0 not-disabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-error aria-invalid:focus-visible:ring-error/40 size-4 checked:bg-error checked:border-error focus-visible:ring-error/50 focus-visible:border-error peer" value="failed" disabled data-status-filter="true" data-astro-cid-mmpzio3j="true" data-slot="checkbox-input" data-astro-cid-feyd622a>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute stroke-3 p-0.5 opacity-0 transition-opacity peer-checked:opacity-100 starwind-check-icon size-4 text-error-foreground" data-astro-cid-feyd622a="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 12l5 5l10 -10" />
+              </svg>
+              <label class="font-medium peer-not-disabled:cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm" data-slot="checkbox-label" data-astro-cid-feyd622a>
+                  Failed ({{it.counts.failed}})
+              </label>
+            </div>
+          </div>
+
+          <div class="starwind-badge inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap [&#38;_svg]:pointer-events-none [&#38;_svg]:shrink-0 transition-all outline-none focus-visible:ring-3 aria-invalid:border-error aria-invalid:focus-visible:ring-error/40 bg-foreground/10 text-foreground focus-visible:ring-outline/50 px-2.5 py-0.5 [&#38;_svg:not([class*='size-'])]:size-3 cursor-pointer text-xs" data-slot="badge" data-status-filter-badge="true" data-astro-cid-mmpzio3j="true">
+            <div class="starwind-checkbox relative flex items-center space-x-2" data-astro-cid-feyd622a>
+              <input type="checkbox" class="peer border-input bg-background dark:bg-input/30 shrink-0 transform-gpu rounded-sm border transition-all focus-visible:ring-3 outline-0 focus:ring-0 focus:ring-offset-0 not-disabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-error aria-invalid:focus-visible:ring-error/40 size-4 peer" value="untested" disabled data-status-filter="true" data-astro-cid-mmpzio3j="true" data-slot="checkbox-input" data-astro-cid-feyd622a>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none absolute stroke-3 p-0.5 opacity-0 transition-opacity peer-checked:opacity-100 starwind-check-icon size-4" data-astro-cid-feyd622a="true">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 12l5 5l10 -10" />
+              </svg>
+              <label class="font-medium peer-not-disabled:cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm" data-slot="checkbox-label" data-astro-cid-feyd622a>
+                Untested (0)
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="ml-auto text-xs text-muted-foreground" data-count data-astro-cid-mmpzio3j></div>
+      </div>
+
+        <div class="page-list grid gap-4" data-page-grid data-view="list" style="--card-size: 100px;" data-astro-cid-mmpzio3j>
+          {{@each(it.pages) => page, index}}
+            <article class="page-card group overflow-hidden rounded-lg border border-border bg-card hover:bg-muted transition"
+               data-page-id="{{page.id}}" data-status="approved" data-title="{{page.title}}" data-path="{{page.path}}" data-search-id="{{page.id}}">
+              <a href="#page-{{page.id}}" aria-label="View details for {{page.title}}" data-detail-open="{{page.id}}" data-astro-cid-6qanflgv>
+                <div class="page-card__summary" data-astro-cid-6qanflgv>
+                  <div class="page-card__media block bg-muted" data-astro-cid-6qanflgv>
+                    <div class="relative w-full" style="padding-bottom: 100%" data-slot="aspect-ratio-wrapper">
+                      <div class="absolute inset-0" data-slot="aspect-ratio" data-astro-cid-6qanflgv="true">
+                        {{@if('files' in page && 'thumbnail' in page.files)}}
+                          <img src="{{page.files.thumbnail.path}}" alt="Screenshot of {{page.title}}" class="h-full w-full object-cover [object-position:center_top]" loading="lazy" data-astro-cid-6qanflgv>
+                        {{/if}}
+                      </div>
+                    </div>
+                  </div>
+                   <div class="page-card__body flex flex-col gap-3 p-3" data-astro-cid-6qanflgv>
+                    <div class="flex items-start justify-between gap-3" data-astro-cid-6qanflgv>
+                      <div class="min-w-0" data-astro-cid-6qanflgv>
+                        <h3 class="truncate text-sm font-medium" data-astro-cid-6qanflgv>
+                          {{page.title}}
+                        </h3>
+                        <p class="page-card__path truncate font-mono text-xs text-muted-foreground" data-astro-cid-6qanflgv>
+                          path: {{page.path}}
+                        </p>
+                        <p class="page-card__id truncate font-mono text-xs text-muted-foreground whitespace-pre" data-astro-cid-6qanflgv>
+                          id:   {{page.id}}
+                        </p>
+                      </div>
+                      <div class="flex shrink-0 flex-wrap items-center justify-end gap-1.5" data-astro-cid-6qanflgv>
+                        <div class="starwind-badge inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap [&#38;_svg]:pointer-events-none [&#38;_svg]:shrink-0 transition-all outline-none focus-visible:ring-3 aria-invalid:border-error aria-invalid:focus-visible:ring-error/40 bg-success text-success-foreground focus-visible:ring-success/50 px-2.5 py-0.5 text-xs [&#38;_svg:not([class*='size-'])]:size-3" data-slot="badge" data-astro-cid-6qanflgv="true">
+                          {{page.status}}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="page-card__meta mt-auto flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground" data-astro-cid-6qanflgv>
+                      <div class="page-card__profiles flex flex-wrap gap-1" data-astro-cid-6qanflgv>
+                        <span class="inline-flex items-center rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground" data-astro-cid-6qanflgv>
+                          anonymous
+                        </span>
+                      </div>
+                      <div class="flex flex-wrap items-center gap-2" data-astro-cid-6qanflgv>
+                        {{@if('results' in page && 'duration' in page.results)}}
+                         <span class="page-card__duration" data-astro-cid-6qanflgv>{{page.results.duration}} ms</span>
+                        {{/if}}
+                        {{@if('results' in page && 'startTime' in page.results)}}
+                          <time datetime="{{page.results.startTime}}" data-relative-time 
+                            title="{{page.results.startTime}}" class="shrink-0" data-astro-cid-6qanflgv>
+                            {{page.results.startTime}}
+                          </time>
+                        {{/if}}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+              <section class="page-card__detail col-span-full" data-detail-panel data-detail-id="{{page.id}}" hidden data-astro-cid-6qanflgv>
+                <div class="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 col-span-full" data-detail-tabs data-astro-cid-6qanflgv>
+                 
+                  {{@if('files' in page)}}
+                    <div class="flex flex-wrap gap-1 border-b border-border pb-2" role="tablist" data-astro-cid-6qanflgv>
+                      
+
+                      {{@if('test' in page.files && 'reference' in page.files)}}
+                        <button type="button" class="rounded px-3 py-1 text-sm data-[active=true]:bg-primary data-[active=true]:text-primary-foreground" 
+                          data-tab="side-by-side" data-active="true" role="tab" data-astro-cid-6qanflgv>
+                          Side By Side
+                        </button>
+                      {{/if}}
+
+                      {{@if('reference' in page.files)}}
+                        <button type="button" class="rounded px-3 py-1 text-sm data-[active=true]:bg-primary data-[active=true]:text-primary-foreground" 
+                          data-tab="reference" data-active="true" role="tab" data-astro-cid-6qanflgv>
+                          Reference
+                        </button>
+                      {{/if}}
+
+                      {{@if('test' in page.files)}}
+                        <button type="button" class="rounded px-3 py-1 text-sm data-[active=true]:bg-primary data-[active=true]:text-primary-foreground" 
+                          data-tab="test" data-active="true" role="tab" data-astro-cid-6qanflgv>
+                          Test
+                        </button>
+                      {{/if}}
+
+                    </div>
+
+                    <div class="page-card__detailbody">
+
+                      {{@if('test' in page.files && 'reference' in page.files)}}
+                        <div data-panel="side-by-side" class="grid grid-cols-1 md:grid-cols-2 gap-3" data-astro-cid-6qanflgv>
+                          <figure class="flex flex-col gap-1" data-astro-cid-6qanflgv>
+                            <figcaption class="text-xs uppercase tracking-wide text-muted-foreground" data-astro-cid-6qanflgv>
+                              Reference
+                            </figcaption>
+                            <img src="{{page.files.reference.path}}" alt="Reference" class="w-full rounded-md border border-border" data-astro-cid-6qanflgv>
+                          </figure>
+                          <figure class="flex flex-col gap-1" data-astro-cid-6qanflgv>
+                            <figcaption class="text-xs uppercase tracking-wide text-muted-foreground" data-astro-cid-6qanflgv>
+                              Test
+                            </figcaption>
+                            <img src="{{page.files.test.path}}" alt="Test" class="w-full rounded-md border border-border" data-astro-cid-6qanflgv>
+                          </figure>
+                        </div>
+                      {{/if}}
+
+
+                      {{@if('reference' in page.files)}}
+                        <div data-panel="reference" hidden data-astro-cid-6qanflgv>
+                          <img src="{{page.files.reference.path}}" alt="Test" class="w-full rounded-md border border-border" data-astro-cid-6qanflgv>
+                        </div>
+                      {{/if}}
+                      {{@if('test' in page.files)}}
+                        <div data-panel="test" hidden data-astro-cid-6qanflgv>
+                          <img src="{{page.files.test.path}}" alt="Test" class="w-full rounded-md border border-border" data-astro-cid-6qanflgv>
+                        </div>
+                      {{/if}}
+
+                    </div>
+                  {{/if}}
+
+                </div>
+              </section>
+            </article>
+          {{/each}}
+        </div>
+
+
+      </section>
+    </main>
+
+    <footer class="border-t border-border bg-card">
+      <div class="mx-auto py-3 text-sm text-muted-foreground">
+        Generated at: 
+        &nbsp;
+        <time datetime="{{it.generated_at.iso}}" data-local-time> {{it.generated_at.readable}}</time>
+        &nbsp;
+        <span>by InVRT v.</span>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        function syncIcons(btn) {
+          var dark = document.documentElement.classList.contains("dark");
+          var sun = btn.querySelector(".invrt-theme-toggle__sun");
+          var moon = btn.querySelector(".invrt-theme-toggle__moon");
+          if (sun) sun.classList.toggle("hidden", dark);
+          if (moon) moon.classList.toggle("hidden", !dark);
+          btn.setAttribute("aria-pressed", String(dark));
+        }
+        var buttons = document.querySelectorAll("[data-invrt-theme-toggle]");
+        buttons.forEach(function (btn) {
+          syncIcons(btn);
+          btn.addEventListener("click", function () {
+            var nowDark = !document.documentElement.classList.contains("dark");
+            document.documentElement.classList.toggle("dark", nowDark);
+            try {
+              localStorage.setItem("colorTheme", nowDark ? "dark" : "light");
+            } catch (_) {}
+            document.querySelectorAll("[data-invrt-theme-toggle]").forEach(syncIcons);
+          });
+        });
+      })();
+    </script>
+    <script>
+      (function () {
+        var root = document.querySelector("[data-page-list]");
+        if (!root) return;
+
+          var grid = root.querySelector("[data-page-grid]");
+          var filterInput = root.querySelector("[data-filter-input]");
+          var statusFilters = Array.prototype.slice.call(root.querySelectorAll("[data-status-filter]"));
+          var sizeSlider = root.querySelector("[data-size-slider]");
+          var viewButtons = Array.prototype.slice.call(root.querySelectorAll("[data-view-toggle] button"));
+          var countEl = root.querySelector("[data-count]");
+          var cards = Array.prototype.slice.call(grid.querySelectorAll(".page-card"));
+          var detailPanels = Array.prototype.slice.call(root.querySelectorAll("[data-detail-panel]"));
+          var closeButtons = Array.prototype.slice.call(root.querySelectorAll("[data-detail-close]"));
+          var openers = Array.prototype.slice.call(root.querySelectorAll("[data-detail-open]"));
+
+          function formatRelative(date) {
+            var diffMs = date.getTime() - Date.now();
+            var abs = Math.abs(diffMs);
+            var minute = 60 * 1000;
+            var hour = 60 * minute;
+            var day = 24 * hour;
+            var rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+            if (abs < minute) return rtf.format(Math.round(diffMs / 1000), "second");
+            if (abs < hour) return rtf.format(Math.round(diffMs / minute), "minute");
+            if (abs < day) return rtf.format(Math.round(diffMs / hour), "hour");
+            return rtf.format(Math.round(diffMs / day), "day");
+          }
+
+          function hydrateTimes() {
+            Array.prototype.forEach.call(document.querySelectorAll("time[data-relative-time]"), function (el) {
+              var date = new Date(el.dateTime);
+              if (Number.isNaN(date.getTime())) return;
+              el.textContent = formatRelative(date);
+              el.title = "UTC: " + date.toUTCString() + "\nLocal: " + date.toLocaleString();
+            });
+
+            Array.prototype.forEach.call(document.querySelectorAll("time[data-local-time]"), function (el) {
+              var date = new Date(el.dateTime);
+              if (Number.isNaN(date.getTime())) return;
+              el.textContent = date.toLocaleString();
+            });
+          }
+
+          function syncCardFloors() {
+            cards.forEach(function (card) {
+              var body = card.querySelector(".page-card__body");
+              if (!body) return;
+              card.style.setProperty("--card-floor", Math.max(100, Math.ceil(body.getBoundingClientRect().height)) + "px");
+            });
+          }
+
+          function applyFilters() {
+            var query = filterInput.value.trim().toLowerCase();
+            var allowed = new Set(
+              statusFilters.filter(function (input) {
+                return input.checked;
+              }).map(function (input) {
+                return input.value;
+              }),
+            );
+            var visible = 0;
+
+            cards.forEach(function (card) {
+              var title = card.dataset.title || "";
+              var path = card.dataset.path || "";
+              var id = card.dataset.searchId || "";
+              var status = card.dataset.status || "";
+              var matchesQuery = !query || title.includes(query) || path.includes(query) || id.includes(query);
+              var matchesStatus = allowed.has(status);
+              var show = matchesQuery && matchesStatus;
+              card.hidden = !show;
+              if (show) visible += 1;
+            });
+
+            countEl.textContent = visible + " / " + cards.length + " pages";
+            syncCardFloors();
+            applySize();
+          }
+
+          function applySize() {
+            var min = Number(sizeSlider.min || 100);
+            var max = Number(sizeSlider.max || 400);
+            var size = Number(sizeSlider.value || min);
+            var clamped = Math.max(min, Math.min(max, size));
+            sizeSlider.value = String(clamped);
+            grid.style.setProperty("--card-size", clamped + "px");
+          }
+
+          function applyView(view) {
+            grid.dataset.view = view;
+            viewButtons.forEach(function (button) {
+              button.dataset.active = String(button.dataset.view === view);
+                syncCardFloors();
+                applySize();
+            });
+          }
+
+          function activateTabs(scope) {
+            Array.prototype.forEach.call(scope.querySelectorAll("[data-detail-tabs]"), function (tabsRoot) {
+              var tabs = Array.prototype.slice.call(tabsRoot.querySelectorAll("[data-tab]"));
+              var panels = Array.prototype.slice.call(tabsRoot.querySelectorAll("[data-panel]"));
+
+              tabs.forEach(function (tab) {
+                tab.addEventListener("click", function () {
+                  var target = tab.dataset.tab;
+                  tabs.forEach(function (item) {
+                    item.dataset.active = String(item.dataset.tab === target);
+                  });
+                  panels.forEach(function (panel) {
+                    panel.hidden = panel.dataset.panel !== target;
+                  });
+                });
+              });
+            });
+          }
+
+          function panelForId(id) {
+            return detailPanels.find(function (panel) {
+              return panel.dataset.detailId === id;
+            });
+          }
+
+          function closeDetail(updateHash) {
+            detailPanels.forEach(function (panel) {
+              panel.hidden = true;
+            });
+
+            if (updateHash !== false && /^#page-/.test(window.location.hash)) {
+              history.replaceState(null, "", window.location.pathname + window.location.search + "#report-top");
+            }
+          }
+
+          function openDetail(id, updateHash) {
+            var panel = panelForId(id);
+
+            detailPanels.forEach(function (item) {
+              item.hidden = item !== panel;
+            });
+
+            if (updateHash !== false && window.location.hash !== "#page-" + id) {
+              history.replaceState(null, "", window.location.pathname + window.location.search + "#page-" + id);
+            }
+            panel.parentElement.scrollIntoView(true);
+          }
+
+          function toggleDetail(id) {
+            var panel = panelForId(id);
+            if (!panel) return;
+            var isHidden = panel.hidden;
+            detailPanels.forEach(function (item) {
+              item.hidden = true;
+            });
+            if (isHidden) {
+              openDetail(id);
+            }
+            else {
+              closeDetail();
+            }
+          }
+
+          function syncFromHash() {
+            var match = /^#page-(.+)$/.exec(window.location.hash);
+            if (match) {
+              openDetail(match[1], false);
+            } else {
+              closeDetail(false);
+            }
+          }
+
+          filterInput.addEventListener("input", applyFilters);
+          statusFilters.forEach(function (input) {
+            if (input.disabled) return;
+            input.addEventListener("change", applyFilters);
+            input.closest('[data-status-filter-badge]').getElementsByTagName("label")[0].addEventListener("click", function(event) {
+              event.preventDefault();
+              input.checked = !input.checked;
+              applyFilters();
+            });
+          });
+          sizeSlider.addEventListener("input", applySize);
+          viewButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+              applyView(button.dataset.view);
+            });
+          });
+          openers.forEach(function (link) {
+            link.addEventListener("click", function (event) {
+              event.preventDefault();
+              toggleDetail(link.dataset.detailOpen);
+            });
+          });
+          closeButtons.forEach(function (button) {
+            button.addEventListener("click", function (event) {
+              event.preventDefault();
+              closeDetail();
+            });
+          });
+
+          window.addEventListener("hashchange", syncFromHash);
+          window.addEventListener("resize", function () {
+            syncCardFloors();
+            applySize();
+          });
+          window.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+              closeDetail();
+            }
+          });
+
+          activateTabs(root);
+          hydrateTimes();
+          syncCardFloors();
+          applySize();
+          applyView("list");
+          applyFilters();
+          syncFromHash();
+        })();
+      </script>
+
+    <script>
+      // Apply theme as early as possible to avoid flash.
+      (function () {
+        try {
+          const colorTheme = localStorage.getItem("colorTheme");
+          if (!colorTheme) {
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.classList.toggle("dark", prefersDark);
+            localStorage.setItem("colorTheme", prefersDark ? "dark" : "light");
+          } else {
+            document.documentElement.classList.toggle("dark", colorTheme === "dark");
+          }
+        } catch (_) {
+          /* ignore */
+        }
+      })();
+    </script>
+
+  </body>
+</html>
+
