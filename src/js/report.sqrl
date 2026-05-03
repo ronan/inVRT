@@ -27,15 +27,15 @@
         overflow-y: hidden;
         border-radius: 10px;
       }
-      details > summary:first-of-type {
-        list-style-type: none;
-      }
       .thumbnail img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         object-position: top;
-    }
+      }
+      details > summary:first-of-type {
+        list-style-type: none;
+      }
     </style>
   </head>
 
@@ -56,15 +56,11 @@
 
           <h1 class="title mb-1">{{it.project.title}}</h1>
           <div class="is-pulled-right has-text-right is-size-7">
-            <div class="">
+            <div>
               Tested: 
               <time datetime="{{it.tested_at}}" data-relative-time> {{it.tested_at}}</time>
             </div>
-            <div class="">
-              Report: 
-              <time datetime="{{it.generated_at}}" data-relative-time> {{it.generated_at}}</time>
-            </div>
-            <div class="">
+            <div>
               Took: <span class="duration" data-duration="{{it.stats.duration}}">{{it.stats.duration}} ms</span>
             </div>
           </div>
@@ -109,7 +105,12 @@
         <div id="no-match" hidden>No pages matching the current filter.</div>
         <div id="pages">
           {{@each(it.pages) => page, index}}
-            <details class="card is-primary is-align-items-flex-start is-clickable">
+            <details class="card is-primary is-align-items-flex-start is-clickable"
+                _="on toggle
+                  go to '#{{page.id}}-test' then
+                  scroll to me
+                "
+              >
               <summary class="p-3 is-size-6">
                 <div class="card-content">
                   <div class="media">
@@ -144,7 +145,7 @@
               </summary>
 
               {{@if('files' in page)}}
-                <nav class="results panel pb-1">
+                <nav class="results panel pb-1" id="#{{page.id}}">
                   <div class="tabs panel-tabs is-centered is-toggle">
                     <ul>
                       {{@if('test' in page.files)}}
