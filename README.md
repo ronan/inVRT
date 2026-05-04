@@ -66,7 +66,7 @@ Primarily coded using agentic methods. For more information see [AGENTS.md](AGEN
 
 ### Dependencies
 
-PHP 8.5, Composer, Node, npm, playwrite, Taskfile.dev.
+PHP 8.3+, Composer, Node, npm, playwrite, Taskfile.dev.
 
 For more details see the [Dockerfile](./Dockerfile)
 

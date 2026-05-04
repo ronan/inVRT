@@ -4,36 +4,35 @@ WORKDIR /app
 COPY composer.json composer.lock /app/
 RUN composer install --no-dev --prefer-dist --optimize-autoloader
 
+
 # FROM debian:bookworm AS build
 
 # Shared base image
 FROM mcr.microsoft.com/playwright:v1.59.1-noble AS base
 
+WORKDIR /app
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Install PHP 8.5
+# Install PHP 8.x
 RUN apt-get update \
  && apt-get install -y \
       software-properties-common \
       curl \
- && add-apt-repository ppa:ondrej/php -y \
- && apt-get update \
- && apt-get install -y php8.5 php8.5-cli php8.5-common php8.5-curl php8.5-dom php8.5-mbstring php8.5-xml \
- WORKDIR /app
+    php-cli \
+    php-fpm \
+    php-curl \
+    php-mbstring \
+    php-xml \
+    php-zip
 
-# Xdebug
-RUN add-apt-repository ppa:ondrej/php -y \
- && apt-get update \
- && apt-get install -y php8.5-xdebug \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+
+
 FROM base AS dev
 RUN apt-get update \
  && apt-get install -y \
     fish \
     vim \
     git
-
 
 # taskfile and mise (todo: remove taskfile)
 RUN curl https://mise.run | sh
