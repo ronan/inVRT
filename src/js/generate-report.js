@@ -42,12 +42,13 @@ const run = async () => {
       passed: 0,
     }
   }
+  const root = report.config.rootDir + '/';
   
   pages.forEach((page) => {
+    page.files = {};
     report.suites[0].specs.forEach((spec) => {
       if (spec.tags && spec.tags.includes(`id-${page.id}`)){
         page.spec = spec;
-        page.files = {};
         page.test = spec.tests[0];
         page.results = page.test.results[0] ?? {};
 
@@ -58,16 +59,21 @@ const run = async () => {
 
         Object.values(spec.tests[0].results[0].attachments).forEach(
           (file) => {
-            file.path = file.path.slice(report.config.rootDir.length + 1);
+            file.path = file.path.startsWith(root) ? file.path.slice(root.length) : file.path;
             page.files[file.name] = file;
           }
         );
         page.files.reference = {path: `approved/${page.id}.png`};
-        page.files.test = page.files.screenshot ?? `approved/${page.id}.png`;
+        page.files.test = page.files.screenshot ?? page.files.reference;
         page.files.thumbnail = page.files.test;
       }
     });
+    if (!page.status) {
+      page.status = 'untested';
+      data.counts.untested++;
+    }
   });
+
 
 
   if (pages.length === 0) {

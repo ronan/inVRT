@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark"> 
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -48,10 +48,16 @@
         </figure>
       
         <div class="media-content block is-flex-direction-column flex-grow">
-          <div class="field is-pulled-right" id="dark-mode-switch">
+          <div class="field is-pulled-right" id="dark-mode-switch" _="">
             <i class="fas fa-sun"></i>
-            <input type="checkbox" class="switch is-rounded is-small" name="dark-mode" checked="true">
-            <label for class="dark-mode"><i class="fas fa-moon"></i></label>
+            <input type="checkbox" class="switch is-rounded is-small" id="dark-mode" name="dark-mode" checked="true"
+              _="on change
+              if my checked set (closest <html/>)'s @data-theme to 'dark' exit end
+              set  (closest <html/>)'s @data-theme to 'light'
+              "
+              >
+            <label for="dark-mode" class="dark-mode"><i class="fas fa-moon"></i></label>
+
           </div>
 
           <h1 class="title mb-1">{{it.project.title}}</h1>
@@ -78,23 +84,29 @@
       <nav class="panel">
         <div class="panel-block columns">
           <div class="column pl-0">
-            <ul class="tabs is-justify-content-start is-toggle is-toggle-rounded">
-              <li class="is-active"><a class="is-active">All</a></li>
-              <li class=""><a style="">Changed <span class="tag is-danger ml-2 is-rounded">{{it.counts.failed}}</span></a></li>
-              <li class=""><a class="">Approved <span class="tag is-success ml-2 is-rounded">{{it.counts.passed}}</span></a></li>
-              <li class=""><a class="">Untested <span class="tag ml-2 is-rounded">{{it.counts.untested}}</span></a></li>
+            <ul class="tabs is-justify-content-start is-toggle is-toggle-rounded" 
+               _="on click
+                  set tab to the closest <[role=tab]/> to the target
+                  if no tab exit end
+                  take @class='is-active' from <[role=tab]/> in me for tab
+                  if no (tab's @data-status) show <details/> in #pages exit end
+                  show <details/> in #pages 
+                  when its @data-status is (tab's @data-status)
+              ">
+              <li role="tab" class="is-active"><a>All</a></li>
+              <li role="tab" data-status="failed" class=""><a>Changed <span class="tag is-warning ml-2 is-rounded">{{it.counts.failed}}</span></a></li>
+              <li role="tab" data-status="passed"><a class="">Approved <span class="tag is-success ml-2 is-rounded">{{it.counts.passed}}</span></a></li>
+              <li role="tab" data-status="untested"><a class="">Untested <span class="tag ml-2 is-rounded">{{it.counts.untested}}</span></a></li>
             </ul>
           </div>
 
           <div class="control has-icons-left is-h">
             <input class="input" type="text" placeholder="Filter by title, path or id"
               _="on input
-                hide #no-match
                 show <details/> in #pages
                 when its textContent contains my value
                 ignoring case
-                show #no-match when the result is empty"
-            />
+              "/>
             <span class="icon is-left">
               <i class="fas fa-search" aria-hidden="true"></i>
             </span>
@@ -102,15 +114,16 @@
 
         </div>
 
-        <div id="no-match" hidden>No pages matching the current filter.</div>
         <div id="pages">
           {{@each(it.pages) => page, index}}
-            <details class="card is-primary is-align-items-flex-start is-clickable"
+            <details 
+                id="{{page.id}}"
+                data-status="{{page.status}}"
+                class="card is-primary is-align-items-flex-start is-clickable"
                 _="on toggle
                   go to '#{{page.id}}-test' then
                   scroll to me
-                "
-              >
+                ">
               <summary class="p-3 is-size-6">
                 <div class="card-content">
                   <div class="media">
@@ -146,49 +159,57 @@
 
               {{@if('files' in page)}}
                 <nav class="results panel pb-1" id="#{{page.id}}">
-                  <div class="tabs panel-tabs is-centered is-toggle">
+                  <div class="tabs panel-tabs is-centered is-toggle"
+                  _="on click
+                      set tab to the closest <[role=tab]/> to the target
+                      if no tab exit end
+                      take @class='is-active' from <[role=tab]/> in me for tab
+                      add @class='is-hidden' to <[role=tabpanel]/> in closest <nav/>
+                      when its @id is not (tab's @aria-controls)
+                      halt
+                      ">
                     <ul>
                       {{@if('test' in page.files)}}
-                        <li data-tab="{{page.id}}-test">
+                        <li role="tab" class="is-active" aria-controls="{{page.id}}-test">
                         <a href="#{{page.id}}-test">Test</a></li>
                       {{/if}}
 
                       {{@if('reference' in page.files)}}
-                        <li data-tab="{{page.id}}-reference">
+                        <li role="tab" aria-controls="{{page.id}}-reference">
                           <a href="#{{page.id}}-reference">Reference</a></li>
                       {{/if}}
 
                       {{@if('diff' in page.files)}}
-                        <li data-tab="{{page.id}}-iff">
+                        <li role="tab" aria-controls="{{page.id}}-iff">
                           <a href="#{{page.id}}-diff">Difference</a></li>
                       {{/if}}
 
                       {{@if('test' in page.files && 'reference' in page.files)}}
-                        <li data-tab="{{page.id}}-sidebyside"> 
+                        <li role="tab" aria-controls="{{page.id}}-sidebyside"> 
                           <a href="#{{page.id}}-sidebyside">Side By Side</a>
                         </li>
                       {{/if}}
-
-                    </ul>
+ 
+                    </li>
                   </div>
 
                   {{@if('test' in page.files)}}
-                    <div id="{{page.id}}-test" class="tab-content box">
+                    <div id="{{page.id}}-test" role="tabpanel" class="tab-content box">
                       <img src="{{page.files.test.path}}" alt="Test">
                     </div>
                   {{/if}}
                   {{@if('reference' in page.files)}}
-                    <div id="{{page.id}}-reference" class="tab-content box">
+                    <div id="{{page.id}}-reference" role="tabpanel" class="tab-content box is-hidden">
                       <img src="{{page.files.reference.path}}" alt="Reference">
                     </div>
                   {{/if}}
                   {{@if('diff' in page.files)}}
-                    <div id="{{page.id}}-diff" class="tab-content box">
+                    <div id="{{page.id}}-diff" role="tabpanel" class="tab-content box is-hidden">
                       <img src="{{page.files.diff.path}}" alt="Difference">
                     </div>
                   {{/if}}
                   {{@if('test' in page.files && 'reference' in page.files)}}
-                    <div id="{{page.id}}-sidebyside" class="tab-content box">
+                    <div id="{{page.id}}-sidebyside" role="tabpanel" class="tab-content box is-hidden">
                       <div class="columns box">
                         <figure class="column is-half">
                           <figcaption class="">Reference</figcaption>
@@ -211,7 +232,6 @@
       </nav>
     </section>
 
-
     <footer class="container my-5 py-5 is-size-7">
       Generated at: 
       &nbsp;
@@ -221,28 +241,6 @@
     </footer>
 
     <script>
-      (function () {
-        const toggleDarkMode = () => {
-          const html = document.documentElement;
-          const current = html.getAttribute('data-theme');
-          html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
-        };
-        const activateDarkModeToggle = () => {
-          var buttons = document.querySelectorAll("#dark-mode-switch");
-          buttons.forEach(function (btn) {
-            btn.addEventListener("click", function () {
-              toggleDarkMode();
-              btn.querySelectorAll('[type=checkbox]').forEach((checkbox) => {
-                checkbox.checked = !checkbox.checked;
-              });
-            });
-          });
-        };
-        activateDarkModeToggle();
-      })();
-    </script>
-    <script>
-
       (function () {
         const units = [
           { ms: 86400000, u: 'day',    s: 'd' },
@@ -292,26 +290,6 @@
 
       })();
     </script>
-
-    <script>
-// activate the right tab on load or when the hash changes
-function switchTab() {
-  const target = location.hash.slice(1);      // "panel-1" etc.
-  if (!target) return;
-
-  // tabs
-  document.querySelectorAll('.tabs li').forEach(li =>
-    li.classList.toggle('is-active', li.dataset.tab === target)
-  );
-  // panels
-  document.querySelectorAll('.tab-content').forEach(box =>
-    box.classList.toggle('is-hidden', box.id !== target)
-  );
-}
-window.addEventListener('hashchange', switchTab);
-switchTab();
-    </script>
-
   </body>
 </html>
 
