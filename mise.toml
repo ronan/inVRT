@@ -1,4 +1,5 @@
 [tools]
+jless = "latest"
 node = "latest"
 "npm:http-server" = "latest"
 oxipng = "latest"
