@@ -18,7 +18,6 @@ export default defineConfig({
     ['json', { outputFile: 'report.json' }]
   ],
   use: {
-    screenshot: 'on',
     ignoreHTTPSErrors: true,
   },
 });
