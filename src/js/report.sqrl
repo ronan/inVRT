@@ -9,9 +9,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-switch@2.0.0/dist/css/bulma-switch.min.css">
     <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/_hyperscript.min.js" crossorigin="anonymous"></script>
     <style>
-      .card {
-        --bulma-card-content-padding: 5px;
-      } 
       [data-theme=light],
       .theme-light {
         --bulma-scheme-main: #eee;
@@ -19,6 +16,9 @@
       .box {
         --bulma-box-shadow: none;
       }
+      .card {
+        --bulma-card-content-padding: 2px;
+      } 
       .panel {
         --bulma-panel-shadow: none;
         --bulma-panel-item-border: 0;
@@ -82,21 +82,30 @@
 
     <section class="container">
       <nav class="panel">
-        <div class="panel-block columns">
-          <div class="column pl-0">
+        <div class="panel-block level">
+          <div class="">
             <ul class="tabs is-justify-content-start is-toggle is-toggle-rounded" 
                _="on click
                   set tab to the closest <[role=tab]/> to the target
                   if no tab exit end
                   take @class='is-active' from <[role=tab]/> in me for tab
-                  if no (tab's @data-status) show <details/> in #pages exit end
-                  show <details/> in #pages 
+                  if no (tab's @data-status) exit end
+                  show <details/> in #pages with hidden
                   when its @data-status is (tab's @data-status)
               ">
-              <li role="tab" class="is-active"><a>All</a></li>
-              <li role="tab" data-status="failed" class=""><a>Changed <span class="tag is-warning ml-2 is-rounded">{{it.counts.failed}}</span></a></li>
-              <li role="tab" data-status="passed"><a class="">Approved <span class="tag is-success ml-2 is-rounded">{{it.counts.passed}}</span></a></li>
-              <li role="tab" data-status="untested"><a class="">Untested <span class="tag ml-2 is-rounded">{{it.counts.untested}}</span></a></li>
+              <li role="tab" class="is-active" _="on click show <details/> in #pages with hidden">
+                <a>All
+                  <span class="tag ml-2 is-rounded">{{it.counts.total}}</span>
+                </a></li>
+              <li role="tab" data-status="failed" class="">
+                <a>Changed <span class="tag is-warning ml-2 is-rounded">{{it.counts.failed}}</span></a>
+              </li>
+              <li role="tab" data-status="passed">
+                <a class="">Approved <span class="tag is-success ml-2 is-rounded">{{it.counts.passed}}</span></a>
+              </li>
+              <li role="tab" data-status="untested">
+                <a class="">Untested <span class="tag ml-2 is-rounded">{{it.counts.untested}}</span></a>
+              </li>
             </ul>
           </div>
 
@@ -112,9 +121,15 @@
             </span>
           </div>
 
+          <div class="is-size-7 has-text-grey level-item">
+            <span id="page-count" class="showing">-</span> / 
+            <span class="total">{{it.counts.total}}</span>
+          </div>
+
         </div>
 
-        <div id="pages">
+        <div id="pages" 
+            _="on mutation(attributes) put (<.card:not([hidden])/> in me).length into #page-count">
           {{@each(it.pages) => page, index}}
             <details 
                 id="{{page.id}}"
@@ -123,6 +138,7 @@
                 _="on toggle
                   go to '#{{page.id}}-test' then
                   scroll to me
+                  on mutation(hidden) exit
                 ">
               <summary class="p-3 is-size-6">
                 <div class="card-content">
@@ -136,18 +152,27 @@
                     {{/if}}
 
                     <div class="media-content">
-                      <div class="is-size-7 has-text-right is-pulled-right">
-                        {{@if('results' in page && 'duration' in page.results)}}
-                          <div class="duration" data-duration="{{page.results.duration}}">{{page.results.duration}} ms</div>
+                      <div class="block is-pulled-right">
+                        {{@if(page.status == 'passed')}}
+                          <span class="tag is-success is-rounded">approved</span>
+                        {{#elif(page.status == 'failed')}}
+                          <span class="tag is-warning is-rounded">changed</span>
+                        {{#else}}
+                          <span class="tag is-rounded">{{page.status}}</span>
                         {{/if}}
-                        {{@if('results' in page && 'startTime' in page.results)}}
-                          <time datetime="{{page.results.startTime}}" title="{{page.results.startTime}}" data-relative-time>
-                            {{page.results.startTime}}
-                          </time>
-                        {{/if}}
+                        <div class="is-size-7 has-text-right mt-1">
+                          {{@if('results' in page && 'duration' in page.results)}}
+                            <div class="duration" data-duration="{{page.results.duration}}">{{page.results.duration}} ms</div>
+                          {{/if}}
+                          {{@if('results' in page && 'startTime' in page.results)}}
+                            <time datetime="{{page.results.startTime}}" title="{{page.results.startTime}}" data-relative-time>
+                              {{page.results.startTime}}
+                            </time>
+                          {{/if}}
+                        </div>
                       </div>
 
-                      <h2 class="">{{page.title}}</h2>
+                      <h2>{{page.title}}</h2>
                       <div class="is-family-monospace">
                         <div class="is-size-7">path: {{page.path}}</div>
                         <div class="is-size-7">id: {{page.id}}</div>
@@ -180,7 +205,7 @@
                       {{/if}}
 
                       {{@if('diff' in page.files)}}
-                        <li role="tab" aria-controls="{{page.id}}-iff">
+                        <li role="tab" aria-controls="{{page.id}}-diff">
                           <a href="#{{page.id}}-diff">Difference</a></li>
                       {{/if}}
 
@@ -209,16 +234,18 @@
                     </div>
                   {{/if}}
                   {{@if('test' in page.files && 'reference' in page.files)}}
-                    <div id="{{page.id}}-sidebyside" role="tabpanel" class="tab-content box is-hidden">
-                      <div class="columns box">
-                        <figure class="column is-half">
-                          <figcaption class="">Reference</figcaption>
-                          <img src="{{page.files.reference.path}}" alt="Reference">
-                        </figure>
+                    <div id="{{page.id}}-sidebyside" role="tabpanel" class="">
+                      <div class="box">
+                      <div class="columns is-1">
                         <figure class="column is-half">
                           <figcaption class="">Test</figcaption>
                           <img src="{{page.files.test.path}}" alt="Test">
                         </figure>
+                        <figure class="column is-half">
+                          <figcaption class="">Reference</figcaption>
+                          <img src="{{page.files.reference.path}}" alt="Reference">
+                        </figure>
+                      </div>
                       </div>
                     </div>
                   {{/if}}

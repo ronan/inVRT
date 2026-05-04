@@ -40,6 +40,7 @@ const run = async () => {
       failed: 0,
       changed: 0,
       passed: 0,
+      total: pages.length
     }
   }
   const root = report.config.rootDir + '/';
@@ -59,13 +60,14 @@ const run = async () => {
 
         Object.values(spec.tests[0].results[0].attachments).forEach(
           (file) => {
+            file.name = file.name.replace(/[a-z]+\-(.+)\.png$/, "$1")
             file.path = file.path.startsWith(root) ? file.path.slice(root.length) : file.path;
             page.files[file.name] = file;
           }
         );
-        page.files.reference = {path: `approved/${page.id}.png`};
-        page.files.test = page.files.screenshot ?? page.files.reference;
-        page.files.thumbnail = page.files.test;
+        page.files.reference = page.files.expected ?? {path: `approved/${page.id}.png`};
+        page.files.test = page.files.actual ?? page.files.reference;
+        page.files.thumbnail = page.files.reference;
       }
     });
     if (!page.status) {
