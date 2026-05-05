@@ -33,13 +33,65 @@
         object-fit: cover;
         object-position: top;
       }
+      details summary {
+        position: relative;
+        margin-bottom: 0;
+        border-start-end-radius: var(--bulma-card-radius);
+        border-start-start-radius: var(--bulma-card-radius);
+      }
+      details summary .level {
+        display: none;
+      }
+      details[open] summary .level {
+        display: block;
+        margin-top: 10px;
+        margin-bottom: -30px;
+        padding-top: 0;
+        background-color: transparent;
+        @container scroll-state(stuck: top) {
+          margin-bottom: -20px;
+          .tabs {
+            font-size: 12px;
+          }
+        }
+      }
+      details .tabs.is-toggle li a {
+        background-color: var(--bulma-content-blockquote-background-color);
+      } 
       details > summary:first-of-type {
         list-style-type: none;
+      }
+      .content details > summary h2 {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      .content h1:not(:first-child),
+      .content h2:not(:first-child)
+      {
+        margin-bottom: 0;
+        margin-top: 0;
+      }
+      .results {
+        margin-top: 10px;
+      }
+      figcaption {
+        text-align: center;
+        font-size: 15px;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+      .is-sticky {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        container-type: scroll-state;
+        .level {
+        }
       }
     </style>
   </head>
 
-  <body>
+  <body class="content">
     <header class="is-flex-direction-row container mt-5 mb-0 box">
 
       <div class="media">
@@ -60,7 +112,7 @@
 
           </div>
 
-          <h1 class="title mb-1">{{it.project.title}}</h1>
+          <h1 class="title mb-1 has-text-weight-normal is-size-4">{{it.project.title}}</h1>
           <div class="is-pulled-right has-text-right is-size-7">
             <div>
               Tested: 
@@ -134,13 +186,13 @@
             <details 
                 id="{{page.id}}"
                 data-status="{{page.status}}"
-                class="card is-primary is-align-items-flex-start is-clickable"
+                class="card is-primary is-align-items-flex-start is-clickable p-0 has-background-black-ter"
                 _="on toggle
                   go to '#{{page.id}}-test' then
                   scroll to me
                   on mutation(hidden) exit
                 ">
-              <summary class="p-3 is-size-6">
+              <summary class="is-sticky p-3 is-size-6 has-background-black-ter">
                 <div class="card-content">
                   <div class="media">
                     {{@if('files' in page && 'thumbnail' in page.files)}}
@@ -172,7 +224,7 @@
                         </div>
                       </div>
 
-                      <h2>{{page.title}}</h2>
+                      <h2 class="has-text-weight-normal is-size-5">{{page.title}}</h2>
                       <div class="is-family-monospace">
                         <div class="is-size-7">path: {{page.path}}</div>
                         <div class="is-size-7">id: {{page.id}}</div>
@@ -180,10 +232,9 @@
                     </div>
                   </div>
                 </div>
-              </summary>
 
               {{@if('files' in page)}}
-                <nav class="results panel pb-1" id="#{{page.id}}">
+                <div class="level">
                   <div class="tabs panel-tabs is-centered is-toggle"
                   _="on click
                       set tab to the closest <[role=tab]/> to the target
@@ -217,20 +268,30 @@
  
                     </li>
                   </div>
+                </div>
+                </summary>
 
+
+                <nav class="results container pb-1 has-background-black-ter" id="#{{page.id}}">
                   {{@if('test' in page.files)}}
-                    <div id="{{page.id}}-test" role="tabpanel" class="tab-content box">
+                    <div id="{{page.id}}-test" role="tabpanel" class="tab-content">
+                      <div class="box">
                       <img src="{{page.files.test.path}}" alt="Test">
+                      </div>
                     </div>
                   {{/if}}
                   {{@if('reference' in page.files)}}
                     <div id="{{page.id}}-reference" role="tabpanel" class="tab-content box is-hidden">
+                      <div class="box">
                       <img src="{{page.files.reference.path}}" alt="Reference">
+                      </div>
                     </div>
                   {{/if}}
                   {{@if('diff' in page.files)}}
                     <div id="{{page.id}}-diff" role="tabpanel" class="tab-content box is-hidden">
+                      <div class="box">
                       <img src="{{page.files.diff.path}}" alt="Difference">
+                      </div>
                     </div>
                   {{/if}}
                   {{@if('test' in page.files && 'reference' in page.files)}}
