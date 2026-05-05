@@ -76,8 +76,6 @@ const run = async () => {
     }
   });
 
-
-
   if (pages.length === 0) {
     log.error('No testable page paths found in ${}. Trspec.tests[0].results[0].attachments)y running `invrt crawl`.');
     process.exit(1);
