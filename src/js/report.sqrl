@@ -236,28 +236,29 @@
               {{@if('files' in page)}}
                 <div class="level">
                   <div class="tabs panel-tabs is-centered is-toggle"
-                  _="on click
+                  _="
+                    on click
                       set tab to the closest <[role=tab]/> to the target
                       if no tab exit end
                       take @class='is-active' from <[role=tab]/> in me for tab
-                      add @class='is-hidden' to <[role=tabpanel]/> in closest <nav/>
+                      add @hidden to <[role=tabpanel]/> in closest <nav/>
                       when its @id is not (tab's @aria-controls)
                       halt
                       ">
                     <ul>
+                      {{@if('diff' in page.files)}}
+                        <li role="tab" class="is-active" aria-controls="{{page.id}}-diff">
+                          <a href="#{{page.id}}-diff">Difference</a></li>
+                      {{/if}}
+
                       {{@if('test' in page.files)}}
-                        <li role="tab" class="is-active" aria-controls="{{page.id}}-test">
+                        <li role="tab" aria-controls="{{page.id}}-test">
                         <a href="#{{page.id}}-test">Test</a></li>
                       {{/if}}
 
                       {{@if('reference' in page.files)}}
                         <li role="tab" aria-controls="{{page.id}}-reference">
                           <a href="#{{page.id}}-reference">Reference</a></li>
-                      {{/if}}
-
-                      {{@if('diff' in page.files)}}
-                        <li role="tab" aria-controls="{{page.id}}-diff">
-                          <a href="#{{page.id}}-diff">Difference</a></li>
                       {{/if}}
 
                       {{@if('test' in page.files && 'reference' in page.files)}}
@@ -273,40 +274,44 @@
 
 
                 <nav class="results container pb-1 has-background-black-ter" id="#{{page.id}}">
-                  {{@if('test' in page.files)}}
-                    <div id="{{page.id}}-test" role="tabpanel" class="tab-content">
-                      <div class="box">
-                      <img src="{{page.files.test.path}}" alt="Test">
-                      </div>
-                    </div>
-                  {{/if}}
-                  {{@if('reference' in page.files)}}
-                    <div id="{{page.id}}-reference" role="tabpanel" class="tab-content box is-hidden">
-                      <div class="box">
-                      <img src="{{page.files.reference.path}}" alt="Reference">
-                      </div>
-                    </div>
-                  {{/if}}
+
                   {{@if('diff' in page.files)}}
-                    <div id="{{page.id}}-diff" role="tabpanel" class="tab-content box is-hidden">
+                    <div id="{{page.id}}-diff" role="tabpanel" class="tab-content">
                       <div class="box">
                       <img src="{{page.files.diff.path}}" alt="Difference">
                       </div>
                     </div>
                   {{/if}}
-                  {{@if('test' in page.files && 'reference' in page.files)}}
-                    <div id="{{page.id}}-sidebyside" role="tabpanel" class="">
+
+                  {{@if('test' in page.files)}}
+                    <div id="{{page.id}}-test" role="tabpanel" class="tab-content" hidden>
                       <div class="box">
-                      <div class="columns is-1">
-                        <figure class="column is-half">
-                          <figcaption class="">Test</figcaption>
-                          <img src="{{page.files.test.path}}" alt="Test">
-                        </figure>
-                        <figure class="column is-half">
-                          <figcaption class="">Reference</figcaption>
-                          <img src="{{page.files.reference.path}}" alt="Reference">
-                        </figure>
+                      <img src="{{page.files.test.path}}" alt="Test">
                       </div>
+                    </div>
+                  {{/if}}
+
+                  {{@if('reference' in page.files)}}
+                    <div id="{{page.id}}-reference" role="tabpanel" class="tab-content" hidden>
+                      <div class="box">
+                      <img src="{{page.files.reference.path}}" alt="Reference">
+                      </div>
+                    </div>
+                  {{/if}}
+
+                  {{@if('test' in page.files && 'reference' in page.files)}}
+                    <div id="{{page.id}}-sidebyside" role="tabpanel" hidden>
+                      <div class="box">
+                        <div class="columns is-1">
+                          <figure class="column is-half">
+                            <figcaption class="">Test</figcaption>
+                            <img src="{{page.files.test.path}}" alt="Test">
+                          </figure>
+                          <figure class="column is-half">
+                            <figcaption class="">Reference</figcaption>
+                            <img src="{{page.files.reference.path}}" alt="Reference">
+                          </figure>
+                        </div>
                       </div>
                     </div>
                   {{/if}}

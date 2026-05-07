@@ -6,4 +6,7 @@ oxipng = "latest"
 task = "latest"
 wrangler = "latest"
 
+[shell_alias] 
+invrt = "{{config_root}}/bin/invrt"
+
 [tasks]
