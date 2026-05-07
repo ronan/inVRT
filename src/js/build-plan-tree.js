@@ -36,7 +36,7 @@ const deriveProjectSeed = () => {
   return parseInt(crypto.createHash('sha1').update(INVRT_ID).digest('hex').slice(0, 4), 16) & 0xFFFF;
 };
 
-const isChildKey = (k) => k === '' || k === '/' || k.startsWith('/') || k.startsWith('?');
+const isChildKey = (k) => k === '.' || k === '' || k === '/' || k.startsWith('/') || k.startsWith('?');
 
 const ensureObjectNode = (value) => {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
@@ -87,7 +87,7 @@ const insertPathIntoTree = (pages, urlPath, profile, projectSeed, title) => {
     return;
   }
 
-  const parsed = new URL(urlPath, 'http://invrt.local');
+  const parsed = new URL(urlPath);
   const pathname = parsed.pathname || '/';
   const search = parsed.search || '';
   const trailingSlash = pathname.endsWith('/');

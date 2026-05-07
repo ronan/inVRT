@@ -49,7 +49,7 @@ $app = new Application('
 ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░❚   ░██░██    ░██    ░██      ░██
 ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░❚    ░███     ░██     ░██     ░██
                     ❚
-                  ◀ █ ▶', '0.4.2');
+                  ◀ █ ▶', '0.4.3');
 
 $app->addCommand($container->get(InfoCommand::class));
 $app->addCommand($container->get(InitCommand::class));

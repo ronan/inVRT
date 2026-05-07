@@ -33,4 +33,4 @@ else
 fi
 
 # 3. Exec into fish
-docker exec -it "$NAME" fish
+docker exec -it "$NAME" ${1:-fish}

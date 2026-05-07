@@ -1,6 +1,6 @@
 {
   "name": "invrt",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "An auth-enabled VRT for Drupal and Backdrop web sites and apps",
   "bin": {
     "invrt": "./bin/invrt"
@@ -39,6 +39,8 @@
     "js-yaml": "^4.1.1",
     "pino": "^10.3.1",
     "playwright": "^1.59.1",
+    "pretty-bytes": "^7.1.0",
+    "sharp": "^0.34.5",
     "squirrelly": "^9.1.0",
     "tailwind-merge": "^3.5.0",
     "tailwind-variants": "^3.2.2",

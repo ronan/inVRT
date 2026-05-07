@@ -29,11 +29,11 @@ class PlaywrightRunner
         if ($configFile !== '') {
             $cmd .= ' --config=' . escapeshellarg($configFile);
         }
-        // if ($specFile !== '') {
-        //     $cmd .= ' ' . escapeshellarg($specFile);
-        // }
         if ($mode === 'reference') {
             $cmd .= ' --update-snapshots';
+        }
+        if ($specFile !== '') {
+            $cmd .= ' ' . escapeshellarg($specFile);
         }
 
         $this->logger->debug('Running Playwright command: ' . $cmd);
