@@ -96,7 +96,7 @@
 
       <div class="media">
         <figure class="image thumbnail is-128x128 media-left">
-          <img src="approved/{{it.pages[0].id}}.png"/>
+          <img loading="lazy" src="approved/{{it.pages[0].id}}.png"/>
         </figure>
       
         <div class="media-content block is-flex-direction-column flex-grow">
@@ -198,7 +198,7 @@
                     {{@if('files' in page && 'thumbnail' in page.files)}}
                       <div class="media-left">
                         <figure class="image thumbnail is-96x96">
-                          <img src="{{page.files.thumbnail.path}}" alt="Screenshot of {{page.title}}" loading="lazy">
+                          <img loading="lazy" src="{{page.files.thumbnail.path}}" alt="Screenshot of {{page.title}}" loading="lazy">
                         </figure>
                       </div>
                     {{/if}}
@@ -278,7 +278,7 @@
                   {{@if('diff' in page.files)}}
                     <div id="{{page.id}}-diff" role="tabpanel" class="tab-content">
                       <div class="box">
-                      <img src="{{page.files.diff.path}}" alt="Difference">
+                      <img loading="lazy" src="{{page.files.diff.path}}" alt="Difference">
                       </div>
                     </div>
                   {{/if}}
@@ -286,7 +286,7 @@
                   {{@if('test' in page.files)}}
                     <div id="{{page.id}}-test" role="tabpanel" class="tab-content" hidden>
                       <div class="box">
-                      <img src="{{page.files.test.path}}" alt="Test">
+                      <img loading="lazy" src="{{page.files.test.path}}" alt="Test">
                       </div>
                     </div>
                   {{/if}}
@@ -294,7 +294,7 @@
                   {{@if('reference' in page.files)}}
                     <div id="{{page.id}}-reference" role="tabpanel" class="tab-content" hidden>
                       <div class="box">
-                      <img src="{{page.files.reference.path}}" alt="Reference">
+                      <img loading="lazy" src="{{page.files.reference.path}}" alt="Reference">
                       </div>
                     </div>
                   {{/if}}
@@ -305,11 +305,11 @@
                         <div class="columns is-1">
                           <figure class="column is-half">
                             <figcaption class="">Test</figcaption>
-                            <img src="{{page.files.test.path}}" alt="Test">
+                            <img loading="lazy" src="{{page.files.test.path}}" alt="Test">
                           </figure>
                           <figure class="column is-half">
                             <figcaption class="">Reference</figcaption>
-                            <img src="{{page.files.reference.path}}" alt="Reference">
+                            <img loading="lazy" src="{{page.files.reference.path}}" alt="Reference">
                           </figure>
                         </div>
                       </div>

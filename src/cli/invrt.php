@@ -38,6 +38,9 @@ $container->autowire(InitCommand::class)->setPublic(true);
 
 $container->compile();
 
+putenv("INVRT_VERSION=0.4.4");
+$INVRT_VERSION = getenv('INVRT_VERSION');
+
 $app = new Application('
                   ◀ █ ▶
                     ❚
@@ -49,7 +52,7 @@ $app = new Application('
 ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░❚   ░██░██    ░██    ░██      ░██
 ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░❚    ░███     ░██     ░██     ░██
                     ❚
-                  ◀ █ ▶', '0.4.3');
+                  ◀ █ ▶', $INVRT_VERSION);
 
 $app->addCommand($container->get(InfoCommand::class));
 $app->addCommand($container->get(InitCommand::class));
