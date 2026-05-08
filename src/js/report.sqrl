@@ -330,7 +330,9 @@
       &nbsp;
       <time datetime="{{it.generated_at}}" data-local-time> {{it.generated_at}}</time>
       &nbsp;
-      <span>by InVRT v.</span>
+      {{@if(it.invrt_version)}}
+      <span>by InVRT v.{{it.invrt_version}}</span>
+      {{/if}}
     </footer>
 
     <script>

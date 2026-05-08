@@ -16,6 +16,7 @@ const run = async () => {
     INVRT_REPORT_DIR,
     INVRT_CAPTURE_DIR,
     INVRT_ID,
+    INVRT_VERSION
   } = process.env;
 
   const planfile = fs.readFileSync(INVRT_PLAN_FILE);
@@ -29,6 +30,7 @@ const run = async () => {
   const generated_at = new Date().toISOString();
 
   const data = {
+    invrt_version: INVRT_VERSION,
     generated_at,
     tested_at,
     project,
