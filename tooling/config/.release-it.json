@@ -23,11 +23,6 @@
       "in": "package.json",
       "out": [
         "VERSION.txt",
-        "composer.json",
-        {
-          "file": "src/cli/invrt.php",
-          "type": "text/php"
-        },
         {
           "file": "README.md",
           "type": "text/markdown"

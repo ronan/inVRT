@@ -25,13 +25,11 @@ tasks:
   install:dev:
     desc: Install development dependencies
     cmds:
-      - sudo composer install
       - npm install
 
   install:dist:
     desc: Install production dependencies
     cmds:
-      - composer install --no-dev --prefer-dist --optimize-autoloader
       - npm install --omit=dev
 
   start:playwright:
@@ -46,7 +44,10 @@ tasks:
 
   test:
     desc: Run all tests and qualty checks
-    deps: [test:bats]
+    cmds:
+      - npm run typecheck
+      - npm run build:cli
+      - task test:bats
 
   livecode:
     desc: Run the live coding session
@@ -57,11 +58,11 @@ tasks:
   watch:
     desc: Watch for file changes and rerun tasks
     watch: true
-    deps: [fix:lint, test:bats, build:templates]
+    deps: [test:bats, build:templates]
  
   fix:
     desc: Run all code fixes (lint)
-    deps: [fix:lint]
+    deps: [fix:repo]
 
   build:
     desc: Build the project
@@ -88,7 +89,8 @@ tasks:
     sources:
       - 'src/js/**/*'
     cmds:
-      - node /app/src/js/generate-report.js
+      - npm run build:runtime
+      - node /app/dist/runtime/generate-report.js
 
   publish:
     desc: Publish Docker image and ddev addon for current version
@@ -153,24 +155,9 @@ tasks:
       - docker build --target test -t invrt:test .
       - docker run --rm -v {{.TASKFILE_DIR}}/scratch/tests:/scratch/tests invrt:test
 
-  test:lint:
-    desc: Check code style with PHP CS Fixer
-    cmds:
-      - php ./vendor/bin/php-cs-fixer check --diff --config=tooling/config/.php-cs-fixer.php
-
-  fix:lint:
-    desc: Auto-fix code style with PHP CS Fixer
-    aliases: [lint]
-    sources:
-      - 'src/core/**/*.php'
-      - 'src/cli/**/*.php'
-    cmds:
-      - php ./vendor/bin/php-cs-fixer fix --config=tooling/config/.php-cs-fixer.php
-
   test:security:
     desc: Check for security vulnerabilities in dependencies
     cmds:
-      - composer audit
       - npm audit
 
   test:schema:

@@ -138,6 +138,12 @@ Completed tasks moved from TODO.md.
 
 ## Tech Debt
 
+- [x] Port the PHP/Symfony CLI to TypeScript.
+  - Replaced the PHP/Symfony bootstrap, config resolution, and runner layer with a TypeScript Commander CLI under `src/ts/`.
+  - Added Chalk-based logging, Zod-backed option/config validation, Execa subprocess runners, and a small Conf-backed last-run store.
+  - Replaced PHP usage in Bats helpers with Node scripts, swapped the fixture server from `php -S` to a Node static server, and kept `task test` green.
+  - Deleted PHP source files, Composer metadata, the vendor directory, and remaining PHP-only tooling/templates.
+
 - [x] reduce unnecessary code from php to make test run steps more self contained
 
 - [x] move file generation to js/ts

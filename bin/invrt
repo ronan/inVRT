@@ -1,1 +1,13 @@
-../src/cli/invrt.php
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+export INVRT_APP_ROOT="${APP_ROOT}"
+
+if [ ! -f "${APP_ROOT}/dist/cli/cli.js" ]; then
+  npm --prefix "${APP_ROOT}" run --silent build:cli >/dev/null
+fi
+
+exec node "${APP_ROOT}/dist/cli/cli.js" "$@"

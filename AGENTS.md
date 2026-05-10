@@ -2,13 +2,13 @@
 
 ## What This Project Is
 
-inVRT is a **Symfony Console CLI application** (not Laravel) for running Visual Regression Testing (VRT) against cms-driven websites (Drupal, Backdrop, and Wordpress). The tool is able to capture the authenticated and unauthenticated user experience on multiple web environments (local, stage, live), and can simulate different devices (desktop/mobile) by setting the viewport size for screenshots.
+inVRT is a **TypeScript CLI application** built on Commander for running Visual Regression Testing (VRT) against cms-driven websites (Drupal, Backdrop, and Wordpress). The tool is able to capture the authenticated and unauthenticated user experience on multiple web environments (local, stage, live), and can simulate different devices (desktop/mobile) by setting the viewport size for screenshots.
 
-PHP orchestrates configuration and runs the cli; bash scripts handle crawling (wget); Node.js tools (Playwright) handle browser automation and screenshot comparison.
+TypeScript orchestrates configuration and runs the CLI; Node.js tools (Playwright) handle crawling, browser automation, screenshot comparison, and report generation.
 
 The tool is built of composable parts and uses environment variables internally to make configuration passing easy between processes and to allow flexibility with the individual parts.
 
-The codebase is somewhat language agnostic. Use the right language for job at hand. We favor using PHP since the target testable platforms are PHP-based CMSs, but we also use bash and Node.js where appropriate.
+The codebase is somewhat language agnostic. Use the right language for job at hand. We favor TypeScript/Node.js for CLI and orchestration work, but also use bash where appropriate.
 
 ## Required documentation:
 
@@ -50,7 +50,7 @@ Write clean, maintainable and modern code. Favor terse and readable code.
 
 Use well regarded third party libraries where it can reduce lines of code.
 
-Use modern PHP features and Symfony Console code style conventions.
+Use modern TypeScript and Commander code style conventions.
 
 Use convenience features such as maps, shorthand lambda functions and the spread operator to maintain code readability.
 
@@ -62,9 +62,9 @@ Write clear, concise comments where needed to explain non-obvious code.
 
 Code should pass tests and linting: `task test`
 
-### PHP/Console Specifics
+### CLI Specifics
 
-Add a verbosity level for all calls to $logger
+Add a verbosity level for all logger output.
 
 ## Testing
 
@@ -99,22 +99,17 @@ Document new features in the usage docs before building them. Explain all inputs
 ## Architecture
 
 ```
-Symfony Console Commands (src/cli/Commands/)
+Commander CLI (src/ts/cli.ts)
          ↓
-  InVRT\Core\Runner (src/core/Runner.php)
+  Runner + Configuration (src/ts/)
          ↓
-  InVRT\Core\Configuration (src/core/Configuration.php)
-  InVRT\Core\Service\LoginService
-         ↓
-  Node.js (src/js/*.js, Playwright)
+  Node.js helpers (src/js/*.js, Playwright)
 ```
 
 The codebase is split into two layers:
 
-- **`src/core/`** (`InVRT\Core\`) — framework-independent business logic. `Configuration` loads, merges, and exports config. `Runner` orchestrates crawl, reference, test, init, and config operations. `Service\LoginService` is a utility service. Core accepts a PSR-3 `LoggerInterface` for output.
-- **`src/cli/`** (`App\`) — thin Symfony Console wiring. Commands extend `BaseCommand`, call `$this->boot($opts, $io)`, then delegate to `$this->runner`.
-
-`BaseCommand::boot()` creates a `Configuration` from resolved env vars + options, exports it to the process environment, creates a `ConsoleLogger` wrapping the Symfony output, and builds a `Runner`. Commands call `$this->runner->crawl()` etc. and return the exit code.
+- **`src/ts/`** — CLI/runtime orchestration. `cli.ts` registers commands with Commander, `configuration.ts` resolves/export config, and `runner.ts` orchestrates init/check/crawl/reference/test/report flows.
+- **`src/js/`** — focused Node helpers used by the TypeScript runner for crawl, check, Playwright spec generation, login, and report generation.
 
 **Configuration merging** in `Configuration::resolve()` processes sources in this order — earlier sources win (highest precedence first):
 
@@ -122,34 +117,25 @@ The codebase is split into two layers:
 2. `devices.<name>` block from YAML
 3. `profiles.<name>` block from YAML
 4. `environments.<name>` block from YAML
-5. `settings` block from YAML
+5. `project` block from YAML
 6. Hard-coded defaults (`ConfigSchema::DEFAULTS`)
 
-Resolved values are exported as `putenv()` environment variables so Node scripts can read them.
+Resolved values are exported as `INVRT_*` process environment variables so Node scripts can read them.
 
 Refer to [The configuration documentation](docs/user/en/configuration.md) for details on how configuration works.
 
 ## Key Conventions
 
-### Namespaces & File Layout
-- `App\Commands\` → `src/cli/Commands/`
-- `App\Input\` → `src/cli/Input/`
-- `InVRT\Core\` → `src/core/`
-- `InVRT\Core\Service\` → `src/core/Service/`
+### File Layout
+- `src/ts/` → Commander CLI, config resolution, orchestration, process runners
+- `src/js/` → Playwright/crawl/report helper scripts
 
 ### Adding a New Command
-1. Use Symfony's attribute-based command registration with `#[AsCommand(name: '...', description: '...', help: '...')]`
-2. Prefer an invokable command class with `public function __invoke(SymfonyStyle $io, #[MapInput] InvrtInput $opts): int`
-3. Extend `BaseCommand` — it handles config loading, env export, runner creation, and optional login
-4. Inside `__invoke()`, call `$result = $this->boot($opts, $io)`, return if not `Command::SUCCESS`, then call `$this->runner->methodName()`
-5. Add business logic to `InVRT\Core\Runner` as a new method, using `$this->logger` for output
-6. Register the new command in `src/cli/invrt.php` via `$container->autowire(NewCommand::class)->setPublic(true)` and add it to the app loop
-7. Use `InvrtInput` with `#[MapInput]` for the shared `--profile`, `--device`, and `--environment` options instead of defining those options per command
-8. Return Symfony `Command::SUCCESS` or `Command::FAILURE` codes explicitly
-9. Use `$this->requiresLogin = false` in the command class if login should be skipped; pass `requiresConfig: false` to `boot()` if the config file need not exist
-
-### Static Service Classes
-`LoginService` (in `InVRT\Core\Service\` → `src/core/Service/`) is entirely static — no instantiation. Keep new utility-style services static unless state is required.
+1. Register the command in `src/ts/cli.ts` with Commander.
+2. Reuse the shared `--profile`, `--device`, and `--environment` options.
+3. Route config loading, env export, and optional login through the shared boot helpers.
+4. Add orchestration behavior to `src/ts/runner.ts`.
+5. Add or reuse focused helper scripts in `src/js/` only when the behavior belongs outside the CLI layer.
 
 ### Tests
 
@@ -158,5 +144,5 @@ Refer to [The configuration documentation](docs/user/en/configuration.md) for de
 - Use `tests/bats/test_helper.bash` for shared setup, command runners, YAML helpers, and webserver lifecycle helpers.
 - Each test cleans its own artifact directory at setup time and preserves outputs afterward for inspection.
 - Prefer `/scratch/tests/` for artifacts; the helper falls back to `scratch/tests/` when `/scratch/tests/` is unavailable on the host.
-- Workflow tests should use the real PHP built-in server against `tests/fixtures/website/`.
+- Workflow tests should use the Node static fixture server against `tests/fixtures/website/`.
 - Interactive CLI flows should be exercised through a pseudo-TTY (`script`), not by mocking Symfony input classes.

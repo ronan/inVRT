@@ -1,6 +1,6 @@
 # inVRT Application Summary
 
-inVRT is a Symfony Console CLI for visual regression testing of CMS-driven sites. It can initialize a project, check site reachability, crawl pages with `wget`, log in with Playwright when credentials are configured, capture reference screenshots with Playwright, run visual comparisons, and approve a new baseline.
+inVRT is a TypeScript Commander CLI for visual regression testing of CMS-driven sites. It initializes a project, resolves configuration from `plan.yaml` plus `INVRT_*` overrides, checks site reachability, crawls pages with Playwright, logs in with Playwright when credentials are configured, captures reference screenshots, runs visual comparisons, and approves a new baseline.
 
 ---
 

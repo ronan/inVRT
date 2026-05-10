@@ -66,7 +66,7 @@ Primarily coded using agentic methods. For more information see [AGENTS.md](AGEN
 
 ### Dependencies
 
-PHP 8.3+, Composer, Node, npm, playwrite, Taskfile.dev.
+Node, npm, Playwright, Task, and Docker.
 
 For more details see the [Dockerfile](./Dockerfile)
 
@@ -98,4 +98,3 @@ export DOCKERHUB_USERNAME=your-user
 export DOCKERHUB_TOKEN=your-token
 export GITHUB_TOKEN=your-github-token
 ```
-

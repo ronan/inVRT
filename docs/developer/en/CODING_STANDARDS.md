@@ -1,9 +1,9 @@
-# inVRT PHP Coding Standards
+# inVRT Coding Standards
 
 Standards enforced in this project:
 
-- **PSR-12** — auto-enforced by PHP CS Fixer (`.php-cs-fixer.dist.php`)
-- **Security** — Composer/npm Audit
+- **Type safety** — keep the TypeScript CLI passing `npm run typecheck`
+- **Security** — npm Audit
 
 For all task commands, see `AGENTS.md`.
 

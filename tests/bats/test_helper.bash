@@ -157,27 +157,7 @@ assert_file_not_contains() {
 }
 
 yaml_get() {
-  php -r '
-    require $argv[1] . "/vendor/autoload.php";
-    $data = Symfony\Component\Yaml\Yaml::parseFile($argv[2]);
-    $value = $data;
-    foreach (explode(".", $argv[3]) as $segment) {
-        if (!is_array($value) || !array_key_exists($segment, $value)) {
-            fwrite(STDERR, "Missing key: " . $argv[3] . PHP_EOL);
-            exit(1);
-        }
-        $value = $value[$segment];
-    }
-    if (is_bool($value)) {
-        echo $value ? "true" : "false";
-        exit(0);
-    }
-    if (is_array($value)) {
-        echo json_encode($value);
-        exit(0);
-    }
-    echo (string) $value;
-  ' "$APP_ROOT" "$1" "$2"
+  node "$APP_ROOT/tooling/scripts/yaml-get.mjs" "$1" "$2"
 }
 
 assert_yaml_equals() {
@@ -229,9 +209,9 @@ start_fixture_server() {
 
   export SERVER_PORT="$(pick_free_port)"
   export SERVER_URL="http://127.0.0.1:$SERVER_PORT"
-  export SERVER_LOG="$TEST_LOG_DIR/php-server.log"
+  export SERVER_LOG="$TEST_LOG_DIR/static-server.log"
 
-  php -S "127.0.0.1:$SERVER_PORT" -t "$website_dir" >"$SERVER_LOG" 2>&1 &
+  node "$APP_ROOT/tooling/scripts/static-server.mjs" "$website_dir" "$SERVER_PORT" >"$SERVER_LOG" 2>&1 &
   export SERVER_PID=$!
 
   printf '%s\n' "$SERVER_PID" >"$TEST_ROOT/server.pid"

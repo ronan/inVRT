@@ -38,4 +38,3 @@ function buildTemplate(schema, templatePath, outPath) {
   console.log(`Generated ${outPath}`);
 }
 buildTemplate(schema, resolve(root, 'tooling/templates/app.tpl.js'), resolve(root, 'scratch/app.js'));
-buildTemplate(schema, resolve(root, 'tooling/templates/ConfigSchema.tpl.php'), resolve(root, 'src/core/ConfigSchema.php'));
