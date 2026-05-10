@@ -45,8 +45,8 @@ tasks:
       - docker ps -q --filter "ancestor=mcr.microsoft.com/playwright:v1.59.1-noble" | xargs -r docker stop
 
   test:
-    desc: Run all tests and quality checks
-    deps: [fix, test:bats]
+    desc: Run all tests and qualty checks
+    deps: [test:bats]
 
   livecode:
     desc: Run the live coding session

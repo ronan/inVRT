@@ -1,4 +1,5 @@
 [tools]
+bats = "latest"
 jless = "latest"
 node = "latest"
 "npm:http-server" = "latest"

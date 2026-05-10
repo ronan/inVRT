@@ -5,9 +5,9 @@ APP_BIN="$APP_ROOT/bin/invrt"
 FALLBACK_TEST_ROOT="$APP_ROOT/scratch/tests"
 
 slugify() {
-  printf '%s' "$1" \
-    | tr '[:upper:]' '[:lower:]' \
-    | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
+  printf '%s' "$1" |
+    tr '[:upper:]' '[:lower:]' |
+    sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
 }
 
 choose_test_root() {
@@ -30,9 +30,9 @@ clear_invrt_runtime_env() {
 
   while IFS='=' read -r name _; do
     case "$name" in
-      INVRT_CWD|INVRT_DIRECTORY|INVRT_PLAN_FILE|INVRT_URL|INVRT_ENVIRONMENT|INVRT_PROFILE|INVRT_DEVICE|INVRT_*)
-        unset "$name"
-        ;;
+    INVRT_CWD | INVRT_DIRECTORY | INVRT_PLAN_FILE | INVRT_URL | INVRT_ENVIRONMENT | INVRT_PROFILE | INVRT_DEVICE | INVRT_*)
+      unset "$name"
+      ;;
     esac
   done < <(env)
 }
@@ -53,8 +53,8 @@ setup_invrt_test() {
 
   export INVRT_CWD="$TEST_DIR"
 
-  printf '%s\n' "$BATS_TEST_NAME" > "$TEST_ROOT/test-name.txt"
-  printf '%s\n' "$TEST_ROOT_BASE" > "$TEST_ROOT/test-root-base.txt"
+  printf '%s\n' "$BATS_TEST_NAME" >"$TEST_ROOT/test-name.txt"
+  printf '%s\n' "$TEST_ROOT_BASE" >"$TEST_ROOT/test-root-base.txt"
 }
 
 teardown_invrt_test() {
@@ -71,7 +71,7 @@ write_runner_script() {
     printf 'exec '
     printf '%q ' "$@"
     printf '\n'
-  } > "$runner"
+  } >"$runner"
 
   chmod +x "$runner"
 }
@@ -83,9 +83,9 @@ record_run() {
   prefix="$(printf '%s/%02d' "$TEST_LOG_DIR" "$RUN_INDEX")"
   export LAST_RUN_PREFIX="$prefix"
 
-  printf '%s\n' "${RUN_COMMAND:-}" > "${prefix}.cmd"
-  printf '%s\n' "$status" > "${prefix}.status"
-  printf '%s' "$output" > "${prefix}.out"
+  printf '%s\n' "${RUN_COMMAND:-}" >"${prefix}.cmd"
+  printf '%s\n' "$status" >"${prefix}.status"
+  printf '%s' "$output" >"${prefix}.out"
 }
 
 run_invrt() {
@@ -105,7 +105,7 @@ run_invrt_with_stdin() {
   local stdin_file="$TEST_LOG_DIR/stdin-$((RUN_INDEX + 1)).txt"
   local runner="$TEST_LOG_DIR/run-$((RUN_INDEX + 1)).sh"
 
-  printf '%s' "$input" > "$stdin_file"
+  printf '%s' "$input" >"$stdin_file"
   write_runner_script "$runner" "$APP_BIN" "$@"
   export RUN_COMMAND="$runner < $stdin_file"
 
@@ -120,7 +120,7 @@ run_invrt_in_tty_with_stdin() {
   local stdin_file="$TEST_LOG_DIR/stdin-$((RUN_INDEX + 1)).txt"
   local runner="$TEST_LOG_DIR/run-$((RUN_INDEX + 1)).sh"
 
-  printf '%s' "$input" > "$stdin_file"
+  printf '%s' "$input" >"$stdin_file"
   write_runner_script "$runner" "$APP_BIN" "$@"
   export RUN_COMMAND="script -qec $runner /dev/null < $stdin_file"
 
@@ -200,7 +200,7 @@ pick_free_port() {
   local port
 
   while true; do
-    port="$(shuf -i 41000-48999 -n 1)"
+    port="44000"
 
     if ! bash -lc "exec 3<>/dev/tcp/127.0.0.1/$port" >/dev/null 2>&1; then
       printf '%s' "$port"
@@ -231,12 +231,12 @@ start_fixture_server() {
   export SERVER_URL="http://127.0.0.1:$SERVER_PORT"
   export SERVER_LOG="$TEST_LOG_DIR/php-server.log"
 
-  php -S "127.0.0.1:$SERVER_PORT" -t "$website_dir" > "$SERVER_LOG" 2>&1 &
+  php -S "127.0.0.1:$SERVER_PORT" -t "$website_dir" >"$SERVER_LOG" 2>&1 &
   export SERVER_PID=$!
 
-  printf '%s\n' "$SERVER_PID" > "$TEST_ROOT/server.pid"
-  printf '%s\n' "$SERVER_PORT" > "$TEST_ROOT/server.port"
-  printf '%s\n' "$SERVER_URL" > "$TEST_ROOT/server.url"
+  printf '%s\n' "$SERVER_PID" >"$TEST_ROOT/server.pid"
+  printf '%s\n' "$SERVER_PORT" >"$TEST_ROOT/server.port"
+  printf '%s\n' "$SERVER_URL" >"$TEST_ROOT/server.url"
 
   if ! wait_for_http "$SERVER_URL/"; then
     cat "$SERVER_LOG" >&2
@@ -261,7 +261,7 @@ seed_basic_config() {
 
   mkdir -p "$TEST_DIR/.invrt"
 
-  cat > "$TEST_DIR/.invrt/plan.yaml" <<EOF
+  cat >"$TEST_DIR/.invrt/plan.yaml" <<EOF
 project:
   name: Test Project
 environments:
@@ -283,21 +283,21 @@ seed_crawled_urls() {
 
   local plan_file="$TEST_DIR/.invrt/plan.yaml"
   if [ ! -f "$plan_file" ]; then
-    printf 'project: {}\n' > "$plan_file"
+    printf 'project: {}\n' >"$plan_file"
   fi
 
   if [ "$#" -eq 0 ]; then
-    : > "$crawl_dir/crawled-paths.text"
-    printf 'pages: {}\n' >> "$plan_file"
+    : >"$crawl_dir/crawled-paths.text"
+    printf 'pages: {}\n' >>"$plan_file"
     return
   fi
 
-  printf '%s\n' "$@" > "$crawl_dir/crawled-paths.text"
+  printf '%s\n' "$@" >"$crawl_dir/crawled-paths.text"
 
   {
     printf 'pages:\n'
     for p in "$@"; do
       printf '  %s: {}\n' "$p"
     done
-  } >> "$plan_file"
+  } >>"$plan_file"
 }
